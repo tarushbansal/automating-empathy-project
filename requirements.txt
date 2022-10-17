@@ -1,0 +1,6 @@
+ftfy==6.0.3
+numpy==1.19.5
+pytorch_lightning==1.5.10
+spacy==3.4.1
+torch==1.10.2
+tqdm==4.64.1

@@ -16,7 +16,9 @@ class MultiHeadAttention(nn.Module):
         self.heads = heads
         self.head_dim = self.embed_size // self.heads
 
-        assert self.head_dim * self.heads == self.embed_size
+        if self.head_dim * self.heads != self.embed_size:
+            raise ValueError(
+                f"embed_size {embed_size} not divisible by number of heads {heads}")
 
         self.values = nn.Linear(self.embed_size, self.embed_size, bias=False)
         self.keys = nn.Linear(self.embed_size, self.embed_size, bias=False)
@@ -105,13 +107,22 @@ class Decoder(nn.Module):
         dropout: float, 
         forward_expansion: int,
         max_seq_len: int,
-        num_of_emo_labels: int
+        num_of_emo_labels: int,
+        pretrained_embed: torch.Tensor = None
     ) -> None:
 
         super().__init__()
 
-        self.word_embeddings = nn.Embedding(
-            vocab_size, embed_size, padding_idx=padding_idx)
+        if pretrained_embed is not None:
+            if pretrained_embed.size() != (vocab_size, embed_size):
+                raise ValueError(
+                    f"Specified model hyperparameters (vocab_size, embed_size)={(vocab_size,embed_size)} "
+                    + f"not compatible with pretrained embedding matrix of size {tuple(pretrained_embed.size())}"
+                )
+            self.word_embeddings = nn.Embedding.from_pretrained(pretrained_embed)
+        else:
+            self.word_embeddings = nn.Embedding(
+                vocab_size, embed_size, padding_idx=padding_idx)
         self.pos_embeddings = nn.Embedding(max_seq_len, embed_size)
         self.ds_embeddings = nn.Embedding(3, embed_size, padding_idx=padding_idx)
         self.emotion_embedding = nn.Embedding(num_of_emo_labels, embed_size)
@@ -160,10 +171,11 @@ class GenerativeTransformer(nn.Module):
         max_seq_len: int,
         padding_idx: int,
         num_layers: int = 6,
-        embed_size: int = 512,
-        heads: int = 8,
+        embed_size: int = 300,
+        heads: int = 10,
         dropout: float = 0.5, 
-        forward_expansion: int = 4
+        forward_expansion: int = 4,
+        pretrained_embed: torch.Tensor = None
     ) -> None:
 
         super().__init__()
@@ -178,7 +190,8 @@ class GenerativeTransformer(nn.Module):
             dropout, 
             forward_expansion, 
             max_seq_len,
-            num_of_emo_labels
+            num_of_emo_labels,
+            pretrained_embed
         )
 
     def create_padding_mask(self, batch_seq):

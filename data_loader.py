@@ -10,7 +10,7 @@ import torch.utils.data as data
 import pytorch_lightning as pl
 
 # User-defined Modules
-from token_indexer import TokenIndexer
+from tokenizer import Tokenizer
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -19,14 +19,14 @@ class Dataset(data.Dataset):
         self, 
         data: Tuple[Iterable, Iterable, Iterable],
         data_type: str, 
-        token_indexer: TokenIndexer
+        tokenizer: Tokenizer
     ) -> None:
 
         if data_type not in ["train", "test", "val"]:
             raise ValueError("Data type must be one of 'train', 'test' or 'val'!")
 
         self.data_type = data_type
-        self.token_indexer = token_indexer
+        self.tokenizer = tokenizer
         self.contexts, self.targets, self.emotions = data
     
     def __len__(self) -> int:
@@ -37,34 +37,33 @@ class Dataset(data.Dataset):
         item = {}
 
         # Map emotion label to token
-        item['emotion'] = self.token_indexer.emo_map[self.emotions[idx]]
+        item['emotion'] = self.tokenizer.emo_map[self.emotions[idx]]
 
         dialogue = []
         dialogue_state = []
 
-        # Create list of utterances tokenized and encoded to indices
-        # using spaCY and Byte-Pair Encoding (BPE)
+        # Create list of utterances tokenized and encoded to indices using nltk
         # rtype -> [[token1, token2, ...], [token1, token2, ...], ...]
-        encoded_context = self.token_indexer.encode_text(self.contexts[idx])
+        encoded_context = self.tokenizer.encode_text(self.contexts[idx])
         
         for i, enc in enumerate(encoded_context):
             # Add SOS and EOS token to every utterance
-            dialogue += ([self.token_indexer.SOS_IDX] + 
-                         enc + [self.token_indexer.EOS_IDX])
-            ds = (self.token_indexer.DS_SPEAKER_IDX if i % 2 == 0 else
-                  self.token_indexer.DS_LISTENER_IDX)
+            dialogue += ([self.tokenizer.SOS_IDX] + 
+                         enc + [self.tokenizer.EOS_IDX])
+            ds = (self.tokenizer.DS_SPEAKER_IDX if i % 2 == 0 else
+                  self.tokenizer.DS_LISTENER_IDX)
             # Add dialogue state to every token in utterance
             dialogue_state += [ds for _ in range(len(enc) + 2)] 
 
         # Tokenize and encode response utterance
-        encoded_target = self.token_indexer.encode_text([self.targets[idx]])[0]
+        encoded_target = self.tokenizer.encode_text([self.targets[idx]])[0]
         # Add SOS and EOS token to target utterance
-        target = ([self.token_indexer.SOS_IDX] + 
-                    encoded_target + [self.token_indexer.EOS_IDX])
+        target = ([self.tokenizer.SOS_IDX] + 
+                    encoded_target + [self.tokenizer.EOS_IDX])
         # Determine response dialogue state
-        ds = (self.token_indexer.DS_SPEAKER_IDX
+        ds = (self.tokenizer.DS_SPEAKER_IDX
               if len(encoded_context) % 2 == 0 
-              else self.token_indexer.DS_LISTENER_IDX)
+              else self.tokenizer.DS_LISTENER_IDX)
 
         if self.data_type == "test":
             item['target'] = target
@@ -116,14 +115,14 @@ class DataModule(pl.LightningDataModule):
         self,
         dataset_dir: str, 
         batch_size: int,
-        token_indexer: TokenIndexer,
+        tokenizer: Tokenizer,
         num_workers: int
     ) -> None:
 
         super().__init__()
         self.dataset_dir = dataset_dir
         self.batch_size = batch_size
-        self.token_indexer = token_indexer
+        self.tokenizer = tokenizer
         self.num_workers = num_workers
     
     def load_data(self, stage: str):
@@ -152,18 +151,18 @@ class DataModule(pl.LightningDataModule):
                 targets[split_index:], 
                 emotions[split_index:]
             )
-            self.train_dataset = Dataset(train_data, "train", self.token_indexer,)
-            self.val_dataset = Dataset(val_data, "val", self.token_indexer)
+            self.train_dataset = Dataset(train_data, "train", self.tokenizer,)
+            self.val_dataset = Dataset(val_data, "val", self.tokenizer)
         if stage == "test":
             test_data = self.load_data("test")
-            self.test_dataset = Dataset(test_data, "test", self.token_indexer)
+            self.test_dataset = Dataset(test_data, "test", self.tokenizer)
 
     def train_dataloader(self) -> data.DataLoader:
         return data.DataLoader(
             self.train_dataset,
             batch_size=self.batch_size, 
             shuffle=True,
-            collate_fn= lambda x: collate_batch(x, self.token_indexer.PAD_IDX),
+            collate_fn= lambda x: collate_batch(x, self.tokenizer.PAD_IDX),
             num_workers=self.num_workers
         )
 
@@ -171,7 +170,7 @@ class DataModule(pl.LightningDataModule):
         return data.DataLoader(
             self.val_dataset,
             batch_size=self.batch_size,
-            collate_fn= lambda x: collate_batch(x, self.token_indexer.PAD_IDX),
+            collate_fn= lambda x: collate_batch(x, self.tokenizer.PAD_IDX),
             num_workers=self.num_workers
         )
 
@@ -179,7 +178,7 @@ class DataModule(pl.LightningDataModule):
         return data.DataLoader(
             self.test_dataset,
             batch_size=self.batch_size,
-            collate_fn= lambda x: collate_batch(x, self.token_indexer.PAD_IDX),
+            collate_fn= lambda x: collate_batch(x, self.tokenizer.PAD_IDX),
             num_workers=self.num_workers
         )
 

@@ -3,6 +3,7 @@
 # System Modules
 import os
 import argparse
+import numpy as np
 from typing import Optional
 
 import torch
@@ -13,7 +14,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 # User-defined Modules
 from model_supervisor import ModelSupervisor
 from data_loader import DataModule
-from token_indexer import TokenIndexer
+from tokenizer import Tokenizer
 from utils import load_val_ckpt_path
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -26,8 +27,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--num_nodes", type=int, default=1)
     parser.add_argument("--max_epochs", type=int, default=5)
     parser.add_argument("--batch_size", type=int, default=8)
-    parser.add_argument("--initial_lr", type=float, default=0.001)
-    parser.add_argument("--max_seq_len", type=int, default=2000)
+    parser.add_argument("--initial_lr", type=float, default=0.0001)
+    parser.add_argument("--max_seq_len", type=int, default=1000)
     parser.add_argument("--trained_model_dir", type=str, default=None)
 
     cli_args = parser.parse_args()
@@ -60,19 +61,27 @@ def main():
         raise ValueError(f"Specified dataset directory does not exist!")
 
     # Initialise token indexer
-    token_indexer = TokenIndexer()
+    tokenizer = Tokenizer(cli_args.dataset_dir)
 
     # Set up model supervisor
+    pretrained_embed = None
+    glove_fpath = os.path.join(cli_args.dataset_dir, "glove_embeddings.npy")
+    
+    if os.path.isfile(glove_fpath):
+        pretrained_embed = torch.Tensor(np.load(glove_fpath))
+        print("Loading pretrained embedding matrix for vocabulary")
+    
     model_supervisor = ModelSupervisor(
         max_seq_len=cli_args.max_seq_len,
-        token_indexer=token_indexer,
-        initial_lr=cli_args.initial_lr
+        tokenizer=tokenizer,
+        initial_lr=cli_args.initial_lr,
+        pretrained_embed=pretrained_embed
     )
 
     # Set up data module
     data_module = DataModule(dataset_dir=cli_args.dataset_dir,
                              batch_size=cli_args.batch_size,
-                             token_indexer=token_indexer,
+                             tokenizer=tokenizer,
                              num_workers=os.cpu_count())
 
     # Set up model checkpointing and logging

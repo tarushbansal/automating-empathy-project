@@ -1,7 +1,6 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
-import numpy as np
 from typing import Dict, List
 
 import torch
@@ -10,7 +9,7 @@ import pytorch_lightning as pl
 
 # User-defined Modules
 from model import GenerativeTransformer
-from token_indexer import TokenIndexer
+from tokenizer import Tokenizer
 from utils import beam_search
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -19,24 +18,29 @@ class ModelSupervisor(pl.LightningModule):
     def __init__(
         self, 
         max_seq_len: int,
-        token_indexer: TokenIndexer,
+        tokenizer: Tokenizer,
         initial_lr: float,
-        beam_width: int = 2
+        beam_width: int = 2,
+        pretrained_embed: torch.Tensor = None
     ) -> None:
 
         super().__init__()
-        self.save_hyperparameters(ignore="token_indexer")
-        self.model = GenerativeTransformer(
-            vocab_size=token_indexer.vocab_size, 
-            num_of_emo_labels=len(token_indexer.emo_map),
-            max_seq_len=max_seq_len,
-            padding_idx=token_indexer.PAD_IDX
-        )
+        self.save_hyperparameters(ignore=["tokenizer", "pretrained_embed"])
+
         self.initial_lr = initial_lr
-        self.token_indexer = token_indexer
+        self.tokenizer = tokenizer
         self.max_seq_len = max_seq_len
-        self.vocab_size = token_indexer.vocab_size
+        self.vocab_size = tokenizer.vocab_size
         self.beam_width = beam_width
+
+        self.model = GenerativeTransformer(
+            vocab_size=tokenizer.vocab_size, 
+            num_of_emo_labels=len(tokenizer.emo_map),
+            max_seq_len=max_seq_len,
+            padding_idx=tokenizer.PAD_IDX,
+            pretrained_embed=pretrained_embed
+        )
+
 
     def forward(self, batch: Dict) -> torch.Tensor:
         out = self.model(
@@ -47,11 +51,12 @@ class ModelSupervisor(pl.LightningModule):
         return out
     
     def forward_and_compute_loss(self, batch: Dict):
-        logits = self.forward(batch)[:, :-1, :].permute(0, 2, 1)
+        logits = self.forward(batch)[:, :-1, :]
+        print(torch.topk(F.softmax(logits, dim=-1), 3, dim=-1)[1][0, :10], batch["dialogue"][0, 1:11])
         loss = F.cross_entropy(
-            logits, 
+            logits.permute(0, 2, 1), 
             batch["dialogue"][:, 1:],
-            ignore_index=self.token_indexer.PAD_IDX
+            ignore_index=self.tokenizer.PAD_IDX
         )
         return loss
 
@@ -97,8 +102,8 @@ class ModelSupervisor(pl.LightningModule):
             beam_width=self.beam_width,
             min_seq_len=batch["target"].size(dim=1) - 1,
             max_seq_len=self.max_seq_len,
-            sos_token=self.token_indexer.SOS_IDX,
-            eos_token=self.token_indexer.EOS_IDX
+            sos_token=self.tokenizer.SOS_IDX,
+            eos_token=self.tokenizer.EOS_IDX
         )
         test_loss = -float(torch.log(prob).mean())
         self.log(

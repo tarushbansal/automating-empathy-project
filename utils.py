@@ -2,7 +2,7 @@
 
 # System Modules
 import os
-from typing import Optional, Dict
+from typing import Optional, Dict, Tuple
 
 import torch
 import torch.nn as nn
@@ -36,9 +36,9 @@ def beam_search(
     max_seq_len: int,
     sos_token: int,
     eos_token: int
-) -> torch.Tensor:
+) -> Tuple[torch.Tensor, torch.Tensor]:
     
-    # Set model in evaluation mode (Important to turn off dropout layers)
+    # Set model in evaluation mode (Important to turn off dropout layers!!)
     model.eval()
 
     # Objective is to determine the most probable output sequence from the model
@@ -47,7 +47,7 @@ def beam_search(
     batch_beam_prob = torch.ones(N, beam_width)
     eos_detected = torch.zeros(N, beam_width, dtype=torch.bool)
 
-    # Loop until END token detected for all beams in batch
+    # Loop until EOS token detected for all beams in batch
     while (seq_len < min_seq_len or not torch.all(eos_detected)) and (seq_len < max_seq_len):
 
         sequences = torch.empty(N, beam_width ** 2, seq_len + 1, dtype=torch.long)
@@ -78,7 +78,7 @@ def beam_search(
         top_indices = top_indices.unsqueeze(2).expand(N, beam_width, seq_len + 1)
         batch_beam = torch.gather(sequences, 1, top_indices)
 
-        # Check which beams in batch have reached the END token
+        # Check which beams in batch have reached the EOS token
         for i in range(N):
             for j in range(beam_width):
                 if int(batch_beam[i, j, -1]) == eos_token:

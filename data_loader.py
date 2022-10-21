@@ -3,29 +3,24 @@
 # System Modules
 import random
 import numpy as np
-from typing import Tuple, List, Dict, Iterable
+from typing import Tuple, Dict, Iterable
 
 import torch
 import torch.utils.data as data
 import pytorch_lightning as pl
 
 # User-defined Modules
-from tokenizer import Tokenizer
+from data_tokenizers import TokenizerBase
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
 class Dataset(data.Dataset):
     def __init__(
         self, 
-        data: Tuple[Iterable, Iterable, Iterable],
-        data_type: str, 
-        tokenizer: Tokenizer
+        data: Tuple[Iterable],
+        tokenizer: TokenizerBase
     ) -> None:
 
-        if data_type not in ["train", "test", "val"]:
-            raise ValueError("Data type must be one of 'train', 'test' or 'val'!")
-
-        self.data_type = data_type
         self.tokenizer = tokenizer
         self.contexts, self.targets, self.emotions = data
     
@@ -39,8 +34,8 @@ class Dataset(data.Dataset):
         # Map emotion label to token
         item['emotion'] = self.tokenizer.emo_map[self.emotions[idx]]
 
-        dialogue = []
-        dialogue_state = []
+        context = []
+        context_dialogue_state = []
 
         # Create list of utterances tokenized and encoded to indices using nltk
         # rtype -> [[token1, token2, ...], [token1, token2, ...], ...]
@@ -48,12 +43,15 @@ class Dataset(data.Dataset):
         
         for i, enc in enumerate(encoded_context):
             # Add SOS and EOS token to every utterance
-            dialogue += ([self.tokenizer.SOS_IDX] + 
+            context += ([self.tokenizer.SOS_IDX] + 
                          enc + [self.tokenizer.EOS_IDX])
             ds = (self.tokenizer.DS_SPEAKER_IDX if i % 2 == 0 else
                   self.tokenizer.DS_LISTENER_IDX)
             # Add dialogue state to every token in utterance
-            dialogue_state += [ds for _ in range(len(enc) + 2)] 
+            context_dialogue_state += [ds for _ in range(len(enc) + 2)] 
+
+        item["context"] = context
+        item["context_dialogue_state"] = context_dialogue_state
 
         # Tokenize and encode response utterance
         encoded_target = self.tokenizer.encode_text([self.targets[idx]])[0]
@@ -65,18 +63,11 @@ class Dataset(data.Dataset):
               if len(encoded_context) % 2 == 0 
               else self.tokenizer.DS_LISTENER_IDX)
 
-        if self.data_type == "test":
-            item['target'] = target
-            item['target_dialogue_state'] = [ds]
-        
-        else:
-            dialogue += target
-            dialogue_state += [ds for _ in range(len(target))]
-        
-        item["dialogue"] = dialogue
-        item["dialogue_state"] = dialogue_state
+        item['target'] = target
+        item['target_dialogue_state'] = [ds for _ in range(len(target))]
         
         return item
+
 
 def collate_batch(batch, padding_idx):
     """
@@ -88,34 +79,36 @@ def collate_batch(batch, padding_idx):
                      for seq in sequences]
         return torch.LongTensor(sequences)
     
-    dialogue = [item["dialogue"] for item in batch]
-    dialogue_state = [item["dialogue_state"] for item in batch]
-    target = [item.get("target", []) for item in batch]
-    target_dialogue_state = [item.get("target_dialogue_state", []) for item in batch]
+    context = [item["context"] for item in batch]
+    context_dialogue_state = [item["context_dialogue_state"] for item in batch]
+    target = [item["target"] for item in batch]
+    target_dialogue_state = [item["target_dialogue_state"]for item in batch]
     emotion = [item["emotion"] for item in batch]
 
-    max_len_dialog_seq = max([len(seq) for seq in dialogue])
+    max_len_context_seq = max([len(seq) for seq in context])
     max_len_target_seq = max([len(seq) for seq in target])
 
     collated_batch = {
-        "dialogue": pad_and_convert_to_tensor(
-            dialogue, max_len_dialog_seq, padding_idx=padding_idx),
-        "dialogue_state":  pad_and_convert_to_tensor(
-            dialogue_state, max_len_dialog_seq, padding_idx=padding_idx),
+        "context": pad_and_convert_to_tensor(
+            context, max_len_context_seq, padding_idx=padding_idx),
+        "context_dialogue_state":  pad_and_convert_to_tensor(
+            context_dialogue_state, max_len_context_seq, padding_idx=padding_idx),
         "target": pad_and_convert_to_tensor(
             target, max_len_target_seq, padding_idx=padding_idx),
-        "target_dialogue_state": torch.LongTensor(target_dialogue_state),
+        "target_dialogue_state": pad_and_convert_to_tensor(
+            target_dialogue_state, max_len_target_seq, padding_idx=padding_idx),
         "emotion":  torch.LongTensor(emotion),
     }
 
     return collated_batch
+
 
 class DataModule(pl.LightningDataModule):
     def __init__(
         self,
         dataset_dir: str, 
         batch_size: int,
-        tokenizer: Tokenizer,
+        tokenizer: TokenizerBase,
         num_workers: int
     ) -> None:
 
@@ -151,11 +144,11 @@ class DataModule(pl.LightningDataModule):
                 targets[split_index:], 
                 emotions[split_index:]
             )
-            self.train_dataset = Dataset(train_data, "train", self.tokenizer,)
-            self.val_dataset = Dataset(val_data, "val", self.tokenizer)
+            self.train_dataset = Dataset(train_data, self.tokenizer)
+            self.val_dataset = Dataset(val_data, self.tokenizer)
         if stage == "test":
             test_data = self.load_data("test")
-            self.test_dataset = Dataset(test_data, "test", self.tokenizer)
+            self.test_dataset = Dataset(test_data, self.tokenizer)
 
     def train_dataloader(self) -> data.DataLoader:
         return data.DataLoader(

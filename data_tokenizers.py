@@ -1,22 +1,22 @@
 # ------------------------- IMPORT MODULES ----------------------------------------
 
 # System Modules
-import os
 import json
 from typing import List
 
-import torch
 from nltk import word_tokenize
+from pytorch_pretrained_bert import BertTokenizer as BT
+
+# User-Defined Modules
+from base_classes import TokenizerBase
 
 # ------------------------- IMPLEMENTATION ----------------------------------------
 
-class Tokenizer:
-    def __init__(self, dataset_dir: str) -> None:
-        """
-        Including word tokens, special tokens, dialogue states, and emotion indices
-        """
-        dataset_path = os.path.abspath(dataset_dir)
-        with open(f"{dataset_path}/vocab.json") as f:
+class NltkTokenizer(TokenizerBase):
+    def __init__(self, vocab_fpath: str) -> None:
+        super().__init__()
+
+        with open(vocab_fpath) as f:
             self.vocab = json.load(f)
         
         self.decoder = {v : k for k, v in self.vocab.items()}
@@ -29,22 +29,6 @@ class Tokenizer:
         
         # Size of vocabulary and special tokens 
         self.vocab_size = len(self.vocab)
-        
-        # Dialog state indices
-        self.DS_SPEAKER_IDX = 1
-        self.DS_LISTENER_IDX = 2
-        
-        # Emotion label map
-        self.emo_map = {
-            'surprised': 0, 'excited': 1, 'annoyed': 2, 'proud': 3, 'angry': 4, 
-            'sad': 5, 'grateful': 6, 'lonely': 7, 'impressed': 8, 'afraid': 9,
-            'disgusted': 10, 'confident': 11, 'terrified': 12, 'hopeful': 13,
-            'anxious': 14, 'disappointed': 15, 'joyful': 16, 'prepared': 17, 
-            'guilty': 18, 'furious': 19, 'nostalgic': 20, 'jealous': 21,
-            'anticipating': 22, 'embarrassed': 23, 'content': 24, 'devastated': 25, 
-            'sentimental': 26, 'caring': 27, 'trusting': 28, 'ashamed': 29,
-            'apprehensive': 30, 'faithful': 31
-        }
 
         self.word_pairs = {
             "it's": "it is", "don't": "do not", "doesn't": "does not", 
@@ -71,10 +55,35 @@ class Tokenizer:
             encoded_sequences.append(encoded_sequence)
         return encoded_sequences
 
-    def decode_to_text(self, seq: torch.Tensor) -> str:
+    def decode_to_text(self, sequence: List[int]) -> str:
         decoded_text = ""
-        for token_idx in seq:
-            decoded_text += self.decoder[int(token_idx)]
+        for token_idx in sequence:
+            decoded_text += self.decoder[token_idx]
         return decoded_text
+
+class BertTokenizer(TokenizerBase):
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.tokenizer = BT.from_pretrained("bert-base-uncased")
+        
+        # Special tokens (Start / End of continguous dialogue sentence, Padding)
+        special_token_ids = self.tokenizer.convert_tokens_to_ids(
+            self.tokenizer.tokenize("[PAD] [UNK] [CLS] [SEP]"))
+        self.PAD_IDX, self.UNK_IDX, self.SOS_IDX, self.EOS_IDX = special_token_ids
+        
+        # Size of vocabulary and special tokens 
+        self.vocab_size = len(self.tokenizer.vocab)
+    
+    def encode_text(self, sequences: List[List[str]]) -> List[List[int]]:
+        token_ids = []
+        for seq in sequences:
+            tokens = self.tokenizer.tokenize(seq)
+            token_ids.append(self.tokenizer.convert_tokens_to_ids(tokens))
+        return token_ids
+    
+    def decode_to_text(self, sequence: List[int]) -> str:
+        return " ".join(self.tokenizer.convert_ids_to_tokens(sequence))
+        
 
 # ---------------------------------------------------------------------------------

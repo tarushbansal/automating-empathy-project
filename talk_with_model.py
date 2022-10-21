@@ -1,39 +1,42 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
-import os
-import sys
 import argparse
-from typing import Dict
 
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 
 # User-defined Modules
 from model_supervisor import ModelSupervisor
-from tokenizer import Tokenizer
-from utils import load_val_ckpt_path, beam_search
+from utils import load_val_ckpt_path, load_config
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--vocab_dir", type=str, default=None, required=True)
     parser.add_argument("--trained_model_dir", type=str, default=None, required=True)
-    parser.add_argument("--predict_beam_width", type=int, default=2)
-    cli_args = parser.parse_args()
+    parser.add_argument("--beam_width", type=int, default=1)
+    parser.add_argument("--max_pred_seq_len", type=int, default=100)
+    cli_args, _ = parser.parse_known_args()
 
     # Load checkpoint file path from trained model directory
     ckpt_path = load_val_ckpt_path(cli_args.trained_model_dir)
 
     # Initialise token indexer
-    tokenizer = Tokenizer(cli_args.vocab_dir)
+    config = load_config(cli_args.trained_model_dir)
+    tokenizer_cls = getattr(__import__("data_tokenizers"), config["tokenizer"]["cls"])
+    tokenizer = tokenizer_cls(**config["tokenizer"]["kwargs"])
 
     # Load model supervisor from checkpoint file
+    model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
+    model = model_cls(**config["model"]["kwargs"])
     model_supervisor = ModelSupervisor.load_from_checkpoint(
-        ckpt_path, tokenizer=tokenizer)
+        ckpt_path, 
+        tokenizer=tokenizer, 
+        model=model, 
+        beam_width=cli_args.beam_width, 
+        max_pred_seq_len=cli_args.max_pred_seq_len
+    )
 
     # Generate response from model using stdin
     while True:
@@ -44,8 +47,8 @@ def main():
 
     batch = {}
 
-    dialogue = [[]]
-    dialogue_state = [[]]
+    context = [[]]
+    context_dialogue_state = [[]]
     batch["emotion"] = torch.LongTensor([tokenizer.emo_map[emotion_label]])
     batch["target_dialogue_state"] = torch.LongTensor([[tokenizer.DS_LISTENER_IDX]])
 
@@ -53,34 +56,30 @@ def main():
         speaker_utterance = input(f"[{emotion_label}] Speaker: ")
         if speaker_utterance.strip() == "<quit>":
             break
-        speaker_utterance = tokenizer.encode_text([speaker_utterance])[0]
-        dialogue[0].extend(speaker_utterance)
-        dialogue_state[0].extend([
+        speaker_utterance = (
+            [tokenizer.SOS_IDX] + \
+            tokenizer.encode_text([speaker_utterance])[0] + \
+            [tokenizer.EOS_IDX]
+        )
+        context[0].extend(speaker_utterance)
+        context_dialogue_state[0].extend([
             tokenizer.DS_SPEAKER_IDX for _ in range(len(speaker_utterance))])
 
-        batch["dialogue"] = torch.LongTensor(dialogue)
-        batch["dialogue_state"] = torch.LongTensor(dialogue_state)
-        
-        response, prob = beam_search(
-            model=model_supervisor.model,
-            batch=batch,
-            beam_width=cli_args.predict_beam_width,
-            min_seq_len=3,
-            max_seq_len=10,
-            sos_token=tokenizer.SOS_IDX,
-            eos_token=tokenizer.EOS_IDX
-        )
+        batch["context"] = torch.LongTensor(context)
+        batch["context_dialogue_state"] = torch.LongTensor(context_dialogue_state)
 
-        decoded_reponse = "".join(tokenizer.decode_to_text(list(response[0])))
-        print(f"[{emotion_label}] Empathetic model: {decoded_reponse} [Response probability: {prob[0]:.3f}]")
+        response, prob = model_supervisor.predict_step(batch)
+
+        response = response[0].tolist()
+        decoded_reponse = tokenizer.decode_to_text(
+            response[1:response.index(tokenizer.EOS_IDX)])
+        print(f"[{emotion_label}] Empathetic model: {decoded_reponse}")
+        print(f"[{emotion_label}] Response probability: {prob[0]:.3f}")
         print("")
 
-        dialogue[0].extend(response[0])
-        dialogue_state[0].extend([
-            tokenizer.DS_LISTENER_IDX for _ in range(len(response[0]))])
-
-
-
+        context[0].extend(response)
+        context_dialogue_state[0].extend([
+            tokenizer.DS_LISTENER_IDX for _ in range(len(response))])
 
 if __name__ == "__main__":
     main()

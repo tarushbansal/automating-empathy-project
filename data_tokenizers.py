@@ -6,6 +6,8 @@ from typing import List
 
 from nltk import word_tokenize
 from pytorch_pretrained_bert import BertTokenizer as BT
+from transformers import GPT2Tokenizer as GT
+from transformers import AutoTokenizer
 
 # User-Defined Modules
 from base_classes import TokenizerBase
@@ -61,6 +63,33 @@ class NltkTokenizer(TokenizerBase):
             decoded_text += self.decoder[token_idx]
         return decoded_text
 
+
+class HuggingFaceAutoTokenizer(TokenizerBase):
+    def __init__(self, model_name: str) -> None:
+        super().__init__()
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        special_tokens_dict = {
+            'bos_token': '<BOS>', 
+            'eos_token': '<EOS>', 
+            'pad_token': '<PAD>'
+        }
+        self.tokenizer.add_special_tokens(special_tokens_dict)
+        self.PAD_IDX = self.tokenizer.pad_token_id
+        self.SOS_IDX = self.tokenizer.bos_token_id
+        self.EOS_IDX = self.tokenizer.eos_token_id
+        self.vocab_size = len(self.tokenizer)
+    
+    def encode_text(self, sequences: List[List[str]]) -> List[List[int]]:
+        token_ids = []
+        for seq in sequences:
+            token_ids.append(self.tokenizer(seq)["input_ids"])
+        return token_ids
+    
+    def decode_to_text(self, sequence: List[int]) -> str:
+        decoded_text = self.tokenizer.decode(sequence)
+        return decoded_text
+
+
 class BertTokenizer(TokenizerBase):
     def __init__(self) -> None:
         super().__init__()
@@ -69,8 +98,8 @@ class BertTokenizer(TokenizerBase):
         
         # Special tokens (Start / End of continguous dialogue sentence, Padding)
         special_token_ids = self.tokenizer.convert_tokens_to_ids(
-            self.tokenizer.tokenize("[PAD] [UNK] [CLS] [SEP]"))
-        self.PAD_IDX, self.UNK_IDX, self.SOS_IDX, self.EOS_IDX = special_token_ids
+            self.tokenizer.tokenize("[PAD] [CLS] [SEP]"))
+        self.PAD_IDX, self.SOS_IDX, self.EOS_IDX = special_token_ids
         
         # Size of vocabulary and special tokens 
         self.vocab_size = len(self.tokenizer.vocab)
@@ -83,7 +112,8 @@ class BertTokenizer(TokenizerBase):
         return token_ids
     
     def decode_to_text(self, sequence: List[int]) -> str:
-        return " ".join(self.tokenizer.convert_ids_to_tokens(sequence))
+        decoded_text = " ".join(self.tokenizer.convert_ids_to_tokens(sequence))
+        return decoded_text
         
 
 # ---------------------------------------------------------------------------------

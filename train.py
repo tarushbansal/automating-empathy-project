@@ -16,6 +16,7 @@ from data_loader import DataModule
 from model_supervisor import ModelSupervisor
 from base_classes import DialogueModelBase, TokenizerBase
 from utils import load_val_ckpt_path, SaveConfigCallback
+from dialogue_models import BertEncodedTransformer
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -83,6 +84,11 @@ def main():
                 f"Configuration not found for dialogue model {cli_args.dialogue_model}!")
         model_config = configs[cli_args.dialogue_model]
 
+    # Additional check for pretrained GPT2 model
+    if (cli_args.dialogue_model == "GPT2") and (
+        model_config["model_kwargs"]["size"] != model_config["tokenizer_kwargs"]["size"]):
+        raise ValueError("Pretrained GPT2 tokenizer and model sizes don't match!")
+
     # Get tokenizer class and kwargs, then instantiate tokenizer
     tokenizer_cls = getattr(__import__("data_tokenizers"), model_config["tokenizer_cls"])
     if not issubclass(tokenizer_cls, TokenizerBase):
@@ -144,7 +150,7 @@ def main():
         accelerator="auto", 
         devices=-1 if torch.cuda.is_available() else 1,
         num_nodes=cli_args.num_nodes,
-        strategy="ddp_find_unused_parameters_false",
+        strategy="ddp" if isinstance(model, BertEncodedTransformer) else "ddp_find_unused_parameters_false",
         max_epochs=cli_args.max_epochs, 
         logger=logger, 
         callbacks=callbacks

@@ -152,7 +152,7 @@ class Decoder(nn.Module):
              for _ in range(num_layers)]
         )
 
-        self.emotion_embedding = nn.Embedding(num_emo_labels, embed_size)
+        self.emo_embeddings = nn.Embedding(num_emo_labels, embed_size)
         self.dropout = nn.Dropout(dropout)
         self.fc_out = nn.Linear(embed_size, vocab_size)
 
@@ -170,10 +170,10 @@ class Decoder(nn.Module):
         for layer in self.layers:
             out = layer(encoder_out, encoder_out, out, target_mask, source_mask)
         
-        emotion_embedding = self.emotion_embedding(
+        emo_embeddings = self.emo_embeddings(
             emotion_label).unsqueeze(1).expand(out.size())
         
-        out = self.fc_out(out + emotion_embedding)
+        out = self.fc_out(out + emo_embeddings)
 
         return out
 

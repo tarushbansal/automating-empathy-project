@@ -85,7 +85,7 @@ class ModelSupervisor(pl.LightningModule):
         self.logger.experiment.add_scalars(
             'loss', {'avg_val': avg_val_loss}, self.global_step) 
 
-    def predict_step(self, batch: Dict, batch_idx: int = 0) -> Tuple[torch.Tensor]:
+    def predict_step(self, batch: Dict, batch_idx: int = 0) -> torch.Tensor:
         ## BEAM SEARCH: Objective is to determine the most probable output sequence from the model
         
         # Set model in evaluation mode (Important to turn off dropout layers!!)
@@ -133,8 +133,8 @@ class ModelSupervisor(pl.LightningModule):
             # Increment target sequence length
             seq_len += 1
 
-        # Return most probable sequence and its probability for each beam in batch
-        return batch_beam[:, 0, :], batch_beam_prob[:, 0] 
+        # Return most probable sequence for each beam in batch
+        return batch_beam[:, 0, :]
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = torch.optim.AdamW(

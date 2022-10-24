@@ -92,11 +92,11 @@ def collate_batch(batch, padding_idx):
         "context": pad_and_convert_to_tensor(
             context, max_len_context_seq, padding_idx=padding_idx),
         "context_dialogue_state":  pad_and_convert_to_tensor(
-            context_dialogue_state, max_len_context_seq, padding_idx=padding_idx),
+            context_dialogue_state, max_len_context_seq, padding_idx=0),
         "target": pad_and_convert_to_tensor(
             target, max_len_target_seq, padding_idx=padding_idx),
         "target_dialogue_state": pad_and_convert_to_tensor(
-            target_dialogue_state, max_len_target_seq, padding_idx=padding_idx),
+            target_dialogue_state, max_len_target_seq, padding_idx=0),
         "emotion":  torch.LongTensor(emotion),
     }
 

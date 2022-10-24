@@ -68,13 +68,11 @@ def main():
         batch["context"] = torch.LongTensor(context)
         batch["context_dialogue_state"] = torch.LongTensor(context_dialogue_state)
 
-        response, prob = model_supervisor.predict_step(batch)
+        response = model_supervisor.predict_step(batch)
 
         response = response[0].tolist()
-        decoded_reponse = tokenizer.decode_to_text(
-            response[1:response.index(tokenizer.EOS_IDX)])
+        decoded_reponse = tokenizer.decode_to_text(response)
         print(f"[{emotion_label}] Empathetic model: {decoded_reponse}")
-        print(f"[{emotion_label}] Response probability: {prob[0]:.3f}")
         print("")
 
         context[0].extend(response)

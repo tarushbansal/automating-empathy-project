@@ -7,7 +7,7 @@ from pytorch_pretrained_bert.modeling import BertModel
 from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM
 
 # User-Defined Modules
-from transformer_modules import Decoder
+from components import Decoder
 from base_classes import EncoderDecoderModel, DecoderModel
 
 # ------------------------- IMPLEMENTATION ------------------------------------
@@ -31,7 +31,7 @@ class HuggingFaceEncoderDecoderModel(EncoderDecoderModel):
         target_seq: torch.Tensor, 
         source_dialogue_state: torch.Tensor, 
         target_dialogue_state: torch.Tensor, 
-        emotion_label: torch.Tensor
+        emotion_label: torch.Tensor = None
     ) -> torch.Tensor:
 
         out = self.model(
@@ -60,9 +60,8 @@ class HuggingFaceDecoderModel(DecoderModel):
         self, 
         input_seq: torch.Tensor, 
         input_dialogue_state: torch.Tensor, 
-        emotion_label: torch.Tensor
+        emotion_label: torch.Tensor = None
     ) -> torch.Tensor:
-        
         out = self.model(
             input_ids=input_seq,
             attention_mask=(input_seq!=self.padding_idx),

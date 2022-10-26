@@ -11,10 +11,7 @@ import pytorch_lightning as pl
 
 class SaveConfigCallback(pl.Callback):
     """Saves a config file to the log_dir when training starts."""
-    def __init__(
-        self,
-        config: dict,
-    ) -> None:
+    def __init__(self, config: dict,) -> None:
         self.config = config
 
     def setup(
@@ -35,6 +32,25 @@ class SaveConfigCallback(pl.Callback):
                 os.makedirs(trainer.log_dir)
             with open(output_fpath, "w") as f:
                 json.dump(self.config, f)
+
+
+class SaveTestMetricsCallback(pl.Callback):
+    """Saves evaluation metrics when testing ends"""
+    def __init__(self, model_dir: str):
+        super().__init__()
+        self.model_dir = model_dir
+    
+    def on_test_end(
+        self, 
+        trainer: pl.Trainer, 
+        pl_module: pl.LightningModule
+    ) -> None:
+
+        # Save the file on rank 0 (to avoid race conditions)
+        if trainer.is_global_zero:
+            dir = os.path.abspath(self.model_dir)
+            with open(f"{dir}/evaluation_metrics.json", "w") as f:
+                json.dump(pl_module.test_metrics, f)
 
 
 def load_config(trained_model_dir: str) -> dict:

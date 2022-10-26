@@ -18,7 +18,8 @@ from base_classes import DialogueModelBase, TokenizerBase
 from utils import (
     load_val_ckpt_path, 
     load_config, 
-    SaveConfigCallback
+    SaveConfigCallback,
+    SaveTestMetricsCallback
 )
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -47,7 +48,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--initial_lr", type=float, default=0.0001)
     parser.add_argument("--pred_beam_width", type=int, default=1)
-    parser.add_argument("--max_pred_seq_len", type=int, default=1000)
+    parser.add_argument("--max_pred_seq_len", type=int, default=200)
     parser.add_argument("--bleu_n_grams", type=int, default=4)
     parser.add_argument("--pretrained_model_dir", type=str, default=None)
 
@@ -154,20 +155,20 @@ def main():
     callbacks = []
     if checkpoint_callback is not None:
         callbacks.extend(checkpoint_callback)
-    callbacks.append(
-        SaveConfigCallback(
-            config={
-                "model": {
-                    "cls": model_cls.__name__,
-                    "kwargs": model_kwargs
-                },
-                "tokenizer": {
-                    "cls": tokenizer_cls.__name__,
-                    "kwargs": tokenizer_kwargs,
-                }
-            }
-        )
-    )
+    config = {
+        "model": {
+            "cls": model_cls.__name__,
+            "kwargs": model_kwargs
+        },
+        "tokenizer": {
+            "cls": tokenizer_cls.__name__,
+            "kwargs": tokenizer_kwargs,
+        }
+    }
+    callbacks.extend([
+        SaveConfigCallback(config=config), 
+        SaveTestMetricsCallback(logger.log_dir)
+    ])
 
     # Set up trainer
     trainer = pl.Trainer(

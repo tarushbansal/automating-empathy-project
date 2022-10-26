@@ -10,18 +10,23 @@ import pytorch_lightning as pl
 # User-defined Modules
 from data_loader import DataModule
 from model_supervisor import ModelSupervisor
-from utils import load_val_ckpt_path, load_config
+from utils import load_val_ckpt_path, load_config, SaveTestMetricsCallback
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
 def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser()
+    parser.add_argument("--dataset_dir", type=str, default=None, required=True)
     parser.add_argument("--pretrained_model_dir", type=str, default=None, required=True)
+    parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--pred_beam_width", type=int, default=1)
-    parser.add_argument("--max_pred_seq_len", type=int, default=1000)
+    parser.add_argument("--max_pred_seq_len", type=int, default=200)
     parser.add_argument("--bleu_n_grams", type=int, default=4)
     cli_args, _ = parser.parse_known_args()
+
+    if not os.path.isdir(cli_args.dataset_dir):
+        raise ValueError(f"Specified dataset directory does not exist!")
 
     # Load checkpoint file path from trained model directory
     ckpt_path = load_val_ckpt_path(cli_args.pretrained_model_dir)
@@ -52,16 +57,16 @@ def main():
     trainer = pl.Trainer(
         accelerator="auto", 
         devices=-1 if torch.cuda.is_available() else 1,
+        logger=None,
+        callbacks=[SaveTestMetricsCallback(cli_args.pretrained_model_dir)]
     )
 
     # Test the model
-    test_metrics = trainer.test(
+    trainer.test(
         model_supervisor, 
         data_module, 
         ckpt_path=load_val_ckpt_path(cli_args.pretrained_model_dir)    
     )
-
-    print(test_metrics)
 
 if __name__ == "__main__":
     main()

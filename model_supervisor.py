@@ -1,6 +1,7 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
+import math
 from typing import Dict, List, Tuple
 
 import torch
@@ -63,10 +64,11 @@ class ModelSupervisor(pl.LightningModule):
         return logits, target
     
     def forward_and_log_metrics(self, batch: Dict, stage: str):
+        _, len = batch["target"].size()
         logits, target = self.forward(batch)
         loss = F.cross_entropy(
-            logits[:, :-1, :].permute(0, 2, 1), 
-            target,
+            logits[:, -len:-1, :].permute(0, 2, 1), 
+            batch["target"][:, 1:],
             ignore_index=self.tokenizer.PAD_IDX
         )
         self.log(f"{stage}_loss", loss, prog_bar=True)
@@ -88,17 +90,22 @@ class ModelSupervisor(pl.LightningModule):
         self.logger.experiment.add_scalars(
             'loss', {'avg_val': avg_val_loss}, self.global_step) 
 
-    def on_test_start(self) -> None:
+    def on_test_epoch_start(self) -> None:
         self.targets, self.responses = [], []
+        self.sum_log_prob = 0
 
     def test_step(self, batch: Dict, _) -> None:
         self.targets.extend(batch["target"].tolist())
-        self.responses.extend(self.beam_search(batch))
+        response, prob = self.beam_search(batch)
+        self.responses.extend(response)
+        self.sum_log_prob += sum(prob)
     
-    def on_test_end(self) -> Dict:
-        targets = [[self.tokenizer.decode_to_text(target).split(" ")] for target in self.targets]
+    def on_test_epoch_end(self) -> None:
+        targets = [[self.tokenizer.decode_to_text(target).split(" ")]
+                    for target in self.targets]
         responses = []
 
+        # Compute all evaluation metrics
         n_unigrams, n_bigrams = 0, 0
         unique_unigrams, unique_bigrams = set(), set()
 
@@ -110,15 +117,22 @@ class ModelSupervisor(pl.LightningModule):
             n_bigrams += len(decoded) - 1
             responses.append(decoded)
 
+        dist1 = len(unique_unigrams) / n_unigrams
+        dist2 = len(unique_bigrams) / n_bigrams
         bleu = corpus_bleu(targets, responses, weights=[1/self.bleu_n_grams]*self.bleu_n_grams)
+        total_token_count = sum([len(seq) for seq in self.responses])
+        ppl = 1 / math.exp(self.sum_log_prob / total_token_count)
 
-        return {
+        self.test_metrics = {
             "bleu": bleu,
-            "dist-1": len(unique_unigrams)/n_unigrams,
-            "dist-2": len(unique_bigrams)/n_bigrams,
+            "dist-1": dist1,
+            "dist-2": dist2,
+            "ppl": ppl
         }
 
-    def beam_search(self, batch: Dict) -> List[List[int]]:
+        self.log_dict(self.test_metrics)
+
+    def beam_search(self, batch: Dict) -> Tuple[List[List[int]]]:
         ## BEAM SEARCH: Objective is to determine the most probable output sequence from the model
         
         # Set model in evaluation mode (Important to turn off dropout layers!!)
@@ -129,14 +143,15 @@ class ModelSupervisor(pl.LightningModule):
         ds = batch["target_dialogue_state"][:, 0:1]
         batch_beam = torch.empty(N, 1, 1, dtype=torch.long, device=device)
         batch_beam = batch_beam.fill_(self.tokenizer.SOS_IDX)
-        batch_beam_prob = torch.ones(N, 1, device=device)
+        batch_beam_prob = torch.zeros(N, 1, device=device)
         eos_detected = torch.zeros(N, self.pred_beam_width, dtype=torch.bool, device=device)
 
         # Loop until EOS token detected for all beams in batch
         while (not torch.all(eos_detected)) and (seq_len < self.max_pred_seq_len):
-
-            sequences = torch.empty(N, self.pred_beam_width ** 2, seq_len + 1, dtype=torch.long, device=device)
-            prob_sequences = torch.zeros(N, self.pred_beam_width ** 2, device=device)
+            sequences = torch.empty(
+                N, self.pred_beam_width ** 2, seq_len + 1, dtype=torch.long, device=device)
+            prob_sequences = torch.empty(
+                N, self.pred_beam_width ** 2, device=device).fill_(float("-inf"))
 
             # Determine all possible output sequences and probabilities for current beam 
             for i in range(self.pred_beam_width if seq_len > 1 else 1):
@@ -144,18 +159,19 @@ class ModelSupervisor(pl.LightningModule):
                 batch["target_dialogue_state"] = ds.expand(batch["target"].size())
                 logits, _ = self.forward(batch)
                 conditional_p, top_responses = torch.topk(
-                    F.softmax(logits[:, -1, :], dim=-1), self.pred_beam_width, dim=-1)
-                conditional_p = conditional_p.masked_fill(eos_detected[:, i:i+1], 1)
+                    F.log_softmax(logits[:, -1, :], dim=-1), self.pred_beam_width, dim=-1)
+                conditional_p = conditional_p.masked_fill(eos_detected[:, i:i+1], 0)
                 for j in range(self.pred_beam_width if seq_len > 1 else 1):
                     prob_sequences[:, i * self.pred_beam_width + j] = (
-                        batch_beam_prob[:, i] * conditional_p[:, j])
+                        batch_beam_prob[:, i] + conditional_p[:, j])
                     sequences[:, i * self.pred_beam_width + j, :] = torch.cat(
                             (batch_beam[:, i, :], top_responses[:, j:j+1]), dim=-1)
 
             # Choose {self.pred_beam_width} number of sequences with highest probabilities
             batch_beam_prob, top_indices = torch.topk(
                 prob_sequences, self.pred_beam_width, dim=-1)
-            top_indices = top_indices.unsqueeze(2).expand(N, self.pred_beam_width, seq_len + 1)
+            top_indices = top_indices.unsqueeze(2).expand(
+                N, self.pred_beam_width, seq_len + 1)
             batch_beam = torch.gather(sequences, 1, top_indices)
 
             # Check which beams in batch have reached the EOS token
@@ -167,11 +183,16 @@ class ModelSupervisor(pl.LightningModule):
             # Increment target sequence length
             seq_len += 1
 
-        # Return most probable sequence for each beam in batch
-        responses = [response[:response.index(self.tokenizer.EOS_IDX)+1]
-                     for response in batch_beam[:, 0, :].tolist()]
+        # Return most probable sequence and its log probability for each beam in batch
+        responses = []
+        for response in batch_beam[:, 0, :].tolist():
+            for i in range(len(response)):
+                if response[i] == self.tokenizer.EOS_IDX:
+                    i += 1
+                    break
+            responses.append(response[:i])
 
-        return responses
+        return responses, batch_beam_prob[:, 0].tolist()
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = torch.optim.AdamW(

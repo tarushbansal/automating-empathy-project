@@ -15,8 +15,11 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from data_loader import DataModule
 from model_supervisor import ModelSupervisor
 from base_classes import DialogueModelBase, TokenizerBase
-from utils import load_val_ckpt_path, SaveConfigCallback
-from dialogue_models import BertEncodedTransformer
+from utils import (
+    load_val_ckpt_path, 
+    load_config, 
+    SaveConfigCallback
+)
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -36,14 +39,17 @@ def parse_args() -> argparse.Namespace:
     
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--dialogue_model", type=str, default=None, required=True)
     parser.add_argument("--dataset_dir", type=str, default=None, required=True)
     parser.add_argument("--output_dir", type=str, default=None, required=True)
+    parser.add_argument("--dialogue_model", type=str, default=None)
     parser.add_argument("--num_nodes", type=int, default=1)
     parser.add_argument("--max_epochs", type=int, default=5)
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--initial_lr", type=float, default=0.0001)
-    parser.add_argument("--trained_model_dir", type=str, default=None)
+    parser.add_argument("--pred_beam_width", type=int, default=1)
+    parser.add_argument("--max_pred_seq_len", type=int, default=1000)
+    parser.add_argument("--bleu_n_grams", type=int, default=4)
+    parser.add_argument("--pretrained_model_dir", type=str, default=None)
 
     cli_args = parser.parse_args()
 
@@ -69,48 +75,66 @@ def get_model_checkpoints(ckpt_dir: str) -> Optional[List[ModelCheckpoint]]:
 
 def main():
     # Parse command line arguments
-    model_cls = get_model_cls()
     cli_args = parse_args()
 
     if not os.path.isdir(cli_args.dataset_dir):
         raise ValueError(f"Specified dataset directory does not exist!")
     
-    # Read model config
-    dirname = os.path.dirname(os.path.abspath(__file__))
-    with open(f"{dirname}/configs.json") as f:
-        configs = json.load(f)
-        if cli_args.dialogue_model not in configs:
+    if cli_args.pretrained_model_dir is not None:
+        # Initialise model and tokenizer from config file
+        config = load_config(cli_args.pretrained_model_dir)
+        tokenizer_cls = getattr(__import__("data_tokenizers"), config["tokenizer"]["cls"])
+        tokenizer_kwargs = config["tokenizer"]["kwargs"]
+        tokenizer = tokenizer_cls(**tokenizer_kwargs)
+
+        model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
+        model_kwargs = config["model"]["kwargs"]
+        model = model_cls(**model_kwargs)
+
+    else:
+        if cli_args.dialogue_model is None:
             raise ValueError(
-                f"Configuration not found for dialogue model {cli_args.dialogue_model}!")
-        model_config = configs[cli_args.dialogue_model]
+                "Either a new or pretrained dialogue model must be specified!")
 
-    # Additional check for pretrained GPT2 model
-    if (cli_args.dialogue_model == "GPT2") and (
-        model_config["model_kwargs"]["size"] != model_config["tokenizer_kwargs"]["size"]):
-        raise ValueError("Pretrained GPT2 tokenizer and model sizes don't match!")
+        # Read model config
+        dirname = os.path.dirname(os.path.abspath(__file__))
+        with open(f"{dirname}/configs.json") as f:
+            configs = json.load(f)
+            if cli_args.dialogue_model not in configs:
+                raise ValueError(
+                    f"Configuration not found for dialogue model {cli_args.dialogue_model}!")
+            model_config = configs[cli_args.dialogue_model]
 
-    # Get tokenizer class and kwargs, then instantiate tokenizer
-    tokenizer_cls = getattr(__import__("data_tokenizers"), model_config["tokenizer_cls"])
-    if not issubclass(tokenizer_cls, TokenizerBase):
-        raise ValueError("Tokenizer must be derived from base class 'TokenizerBase'!")
-    tokenizer_kwargs = model_config["tokenizer_kwargs"]
-    tokenizer = tokenizer_cls(**tokenizer_kwargs)
+        # Additional check for Hugging Face models
+        if (cli_args.dialogue_model in ["HuggingFaceEncoderDecoderModel", "HuggingFaceDecoderModel"]) and (
+            model_config["model_kwargs"]["model_name"] != model_config["tokenizer_kwargs"]["model_name"]):
+            raise ValueError("Pretrained model names supplied to tokenizer and model don't match!")
 
-    # Set up model kwargs and instantiate
-    model_kwargs = {
-        "vocab_size": tokenizer.vocab_size,
-        "num_emo_labels": tokenizer.num_emo_labels,
-        "padding_idx": tokenizer.PAD_IDX,
-        **model_config["model_kwargs"]
-    }
-    
-    model = model_cls(**model_kwargs)
+        # Get tokenizer class and kwargs, then instantiate tokenizer
+        tokenizer_cls = getattr(__import__("data_tokenizers"), model_config["tokenizer_cls"])
+        if not issubclass(tokenizer_cls, TokenizerBase):
+            raise ValueError("Tokenizer must be derived from base class 'TokenizerBase'!")
+        tokenizer_kwargs = model_config["tokenizer_kwargs"]
+        tokenizer = tokenizer_cls(**tokenizer_kwargs)
+
+        # Set up model kwargs and instantiate
+        model_kwargs = {
+            "vocab_size": tokenizer.vocab_size,
+            "num_emo_labels": tokenizer.num_emo_labels,
+            "padding_idx": tokenizer.PAD_IDX,
+            **model_config["model_kwargs"]
+        }
+        model_cls = get_model_cls()
+        model = model_cls(**model_kwargs)
     
     # Set up model supervisor
     model_supervisor = ModelSupervisor(
         tokenizer=tokenizer,
         model=model,
-        initial_lr=cli_args.initial_lr
+        initial_lr=cli_args.initial_lr,
+        pred_beam_width=cli_args.pred_beam_width,
+        max_pred_seq_len=cli_args.max_pred_seq_len,
+        bleu_n_grams=cli_args.bleu_n_grams
     )
 
     # Set up data module
@@ -150,18 +174,22 @@ def main():
         accelerator="auto", 
         devices=-1 if torch.cuda.is_available() else 1,
         num_nodes=cli_args.num_nodes,
-        strategy="ddp" if isinstance(model, BertEncodedTransformer) else "ddp_find_unused_parameters_false",
+        strategy="ddp_find_unused_parameters_false",
         max_epochs=cli_args.max_epochs, 
         logger=logger, 
-        callbacks=callbacks
+        callbacks=callbacks,
     )
 
     # Train / Validate the model
     trainer.fit(
         model_supervisor, 
         data_module, 
-        ckpt_path=load_val_ckpt_path(cli_args.trained_model_dir)
+        ckpt_path=load_val_ckpt_path(cli_args.pretrained_model_dir)
     )
+
+    # Test the model
+    test_metrics = trainer.test(model_supervisor, data_module)
+    print(test_metrics)
 
 
 if __name__ == "__main__":

@@ -86,7 +86,10 @@ class HuggingFaceAutoTokenizer(TokenizerBase):
         return token_ids
     
     def decode_to_text(self, sequence: List[int]) -> str:
-        decoded_text = self.tokenizer.decode(sequence)
+        decoded_text = self.tokenizer.decode(
+            sequence, 
+            skip_special_tokens=True
+        )
         return decoded_text
 
 

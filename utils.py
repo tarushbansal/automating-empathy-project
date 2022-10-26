@@ -25,7 +25,8 @@ class SaveConfigCallback(pl.Callback):
     ) -> None:
 
         if trainer.log_dir is None:
-            raise ValueError("No log directory specified to save config file!")
+            raise ValueError(
+                "No log directory specified to save config file!")
         output_fpath = f"{trainer.log_dir}/config.json"
 
         # Save the file on rank 0 (to avoid race conditions)
@@ -44,6 +45,7 @@ def load_config(trained_model_dir: str) -> dict:
             config = json.load(f)
     else:
         raise ValueError("Specified directory doesn't have a config.json file!")
+    
     return config
 
 

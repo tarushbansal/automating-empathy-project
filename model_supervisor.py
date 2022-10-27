@@ -191,8 +191,9 @@ class ModelSupervisor(pl.LightningModule):
                     i += 1
                     break
             responses.append(response[:i])
+        log_prob = batch_beam_prob[:, 0].tolist()
 
-        return responses, batch_beam_prob[:, 0].tolist()
+        return responses, log_prob
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = torch.optim.AdamW(

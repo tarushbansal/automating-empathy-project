@@ -189,8 +189,7 @@ def main():
     )
 
     # Test the model
-    test_metrics = trainer.test(model_supervisor, data_module)
-    print(test_metrics)
+    trainer.test(model_supervisor, data_module)
 
 
 if __name__ == "__main__":

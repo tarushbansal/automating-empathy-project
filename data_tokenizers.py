@@ -5,8 +5,6 @@ import json
 from typing import List
 
 from nltk import word_tokenize
-from pytorch_pretrained_bert import BertTokenizer as BT
-from transformers import GPT2Tokenizer as GT
 from transformers import AutoTokenizer
 
 # User-Defined Modules
@@ -90,33 +88,6 @@ class HuggingFaceAutoTokenizer(TokenizerBase):
             sequence, 
             skip_special_tokens=True
         )
-        return decoded_text
-
-
-class BertTokenizer(TokenizerBase):
-    def __init__(self) -> None:
-        super().__init__()
-
-        self.tokenizer = BT.from_pretrained("bert-base-uncased")
-        
-        # Special tokens (Start / End of continguous dialogue sentence, Padding)
-        special_token_ids = self.tokenizer.convert_tokens_to_ids(
-            self.tokenizer.tokenize("[PAD] [CLS] [SEP]"))
-        self.PAD_IDX, self.SOS_IDX, self.EOS_IDX = special_token_ids
-        
-        # Size of vocabulary and special tokens 
-        self.vocab_size = len(self.tokenizer.vocab)
-    
-    def encode_text(self, sequences: List[List[str]]) -> List[List[int]]:
-        token_ids = []
-        for seq in sequences:
-            tokens = self.tokenizer.tokenize(seq)
-            token_ids.append(self.tokenizer.convert_tokens_to_ids(tokens))
-        return token_ids
-    
-    def decode_to_text(self, sequence: List[int]) -> str:
-        decoded_text = " ".join(self.tokenizer.convert_ids_to_tokens(sequence))
-        return decoded_text
-        
+        return decoded_text        
 
 # ---------------------------------------------------------------------------------

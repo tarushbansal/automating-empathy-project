@@ -3,8 +3,11 @@
 # System Modules
 import torch
 
-from pytorch_pretrained_bert.modeling import BertModel
-from transformers import AutoModelForCausalLM, AutoModelForSeq2SeqLM
+from transformers import (
+    AutoModelForCausalLM, 
+    AutoModelForSeq2SeqLM, 
+    BertModel
+)
 
 # User-Defined Modules
 from components import Decoder

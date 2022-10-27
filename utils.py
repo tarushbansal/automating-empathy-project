@@ -6,6 +6,7 @@ import json
 from typing import Optional
 
 import pytorch_lightning as pl
+from pytorch_lightning.utilities.distributed import rank_zero_only
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -14,7 +15,8 @@ class SaveConfigCallback(pl.Callback):
     def __init__(self, config: dict,) -> None:
         self.config = config
 
-    def setup(
+    @rank_zero_only
+    def on_train_start(
         self, 
         trainer: pl.Trainer, 
         pl_module: pl.LightningModule, 
@@ -22,35 +24,37 @@ class SaveConfigCallback(pl.Callback):
     ) -> None:
 
         if trainer.log_dir is None:
-            raise ValueError(
-                "No log directory specified to save config file!")
+            raise ValueError("No log directory specified to save config file!")
+        
+        if not os.path.isdir(trainer.log_dir):
+            print("WARNING: Log directory doesn't exist! Aborting model config save!")
+            return
+        
         output_fpath = f"{trainer.log_dir}/config.json"
-
-        # Save the file on rank 0 (to avoid race conditions)
-        if trainer.is_global_zero:
-            if not os.path.isdir(trainer.log_dir):
-                os.makedirs(trainer.log_dir)
-            with open(output_fpath, "w") as f:
-                json.dump(self.config, f)
+        with open(output_fpath, "w") as f:
+            json.dump(self.config, f)
 
 
 class SaveTestMetricsCallback(pl.Callback):
     """Saves evaluation metrics when testing ends"""
-    def __init__(self, model_dir: str):
+    def __init__(self, log_dir: str):
         super().__init__()
-        self.model_dir = model_dir
+        self.log_dir = log_dir
     
+    @rank_zero_only
     def on_test_end(
         self, 
         trainer: pl.Trainer, 
         pl_module: pl.LightningModule
     ) -> None:
 
-        # Save the file on rank 0 (to avoid race conditions)
-        if trainer.is_global_zero:
-            dir = os.path.abspath(self.model_dir)
-            with open(f"{dir}/evaluation_metrics.json", "w") as f:
-                json.dump(pl_module.test_metrics, f)
+        if not os.path.isdir(self.log_dir):
+            print("WARNING: Log directory doesn't exist! Aborting test metric save!")
+            return
+
+        dir = os.path.abspath(self.log_dir)
+        with open(f"{dir}/evaluation_metrics.json", "w") as f:
+            json.dump(pl_module.test_metrics, f)
 
 
 def load_config(trained_model_dir: str) -> dict:

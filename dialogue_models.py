@@ -2,6 +2,7 @@
 
 # System Modules
 import torch
+import torch.nn as nn
 
 from transformers import (
     AutoModelForCausalLM, 
@@ -71,6 +72,41 @@ class HuggingFaceDecoderModel(DecoderModel):
         )
         return out.logits
 
+
+class AffectiveDecodingModel(DecoderModel):
+    def __init__(
+        self, 
+        vocab_size: int, 
+        num_emo_labels: int, 
+        padding_idx: int,
+        model_name: str,
+        emo_embed_dim: int = 512,
+        dropout: float = 0
+    ) -> None:
+
+        super().__init__(vocab_size, num_emo_labels, padding_idx)
+        self.model = AutoModelForCausalLM.from_pretrained(model_name)
+        self.model.resize_token_embeddings(vocab_size)
+        self.dropout = nn.Dropout(dropout)
+        self.emo_embeddings = nn.Embedding(num_emo_labels, emo_embed_dim)
+        self.fc_layer = nn.Linear(emo_embed_dim, vocab_size)
+    
+    def forward(
+        self, 
+        input_seq: torch.Tensor, 
+        input_dialogue_state: torch.Tensor, 
+        emotion_label: torch.Tensor = None
+    ) -> torch.Tensor:
+        out = self.model(
+            input_ids=input_seq,
+            attention_mask=(input_seq!=self.padding_idx),
+        )
+        out = out.logits
+        emo_embedding = self.emo_embeddings(emotion_label)
+        emo_embedding = emo_embedding.unsqueeze(1).expand(-1, out.size(dim=1), -1)
+        out += + self.fc_layer(emo_embedding)
+        
+        return out
 
 class BertEncodedTransformer(EncoderDecoderModel):
     def __init__(

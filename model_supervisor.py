@@ -51,7 +51,7 @@ class ModelSupervisor(pl.LightningModule):
                 input_dialogue_state=input_dialogue_state,
                 emotion_label=batch["emotion"]
             )
-            target = input_seq[:, 1:]
+            target = input_seq
         elif issubclass(type(self.model), EncoderDecoderModel):
             logits = self.model(
                 source_seq=batch["context"],
@@ -60,15 +60,14 @@ class ModelSupervisor(pl.LightningModule):
                 target_dialogue_state=batch["target_dialogue_state"],
                 emotion_label=batch["emotion"]
             )
-            target = batch["target"][:, 1:] 
+            target = batch["target"] 
         return logits, target
     
     def forward_and_log_metrics(self, batch: Dict, stage: str):
-        _, len = batch["target"].size()
         logits, target = self.forward(batch)
         loss = F.cross_entropy(
-            logits[:, -len:-1, :].permute(0, 2, 1), 
-            batch["target"][:, 1:],
+            logits[:, :-1, :].permute(0, 2, 1), 
+            target[:, 1:],
             ignore_index=self.tokenizer.PAD_IDX
         )
         self.log(f"{stage}_loss", loss, prog_bar=True)

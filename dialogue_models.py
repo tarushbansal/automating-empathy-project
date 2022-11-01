@@ -29,6 +29,10 @@ class HuggingFaceEncoderDecoderModel(EncoderDecoderModel):
         self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
         self.model.resize_token_embeddings(vocab_size)
     
+    @property
+    def word_embeddings(self):
+        return self.model.get_input_embeddings()
+
     def forward(
         self, 
         source_seq: torch.Tensor, 
@@ -60,6 +64,10 @@ class HuggingFaceDecoderModel(DecoderModel):
         self.model = AutoModelForCausalLM.from_pretrained(model_name)
         self.model.resize_token_embeddings(vocab_size)
     
+    @property
+    def word_embeddings(self):
+        return self.model.get_input_embeddings()
+
     def forward(
         self, 
         input_seq: torch.Tensor, 
@@ -87,10 +95,15 @@ class AffectiveDecodingModel(DecoderModel):
         super().__init__(vocab_size, num_emo_labels, padding_idx)
         self.model = AutoModelForCausalLM.from_pretrained(model_name)
         self.model.resize_token_embeddings(vocab_size)
+
         self.dropout = nn.Dropout(dropout)
         self.emo_embeddings = nn.Embedding(num_emo_labels, emo_embed_dim)
         self.fc_layer = nn.Linear(emo_embed_dim, vocab_size)
     
+    @property
+    def word_embeddings(self):
+        return self.model.get_input_embeddings()
+
     def forward(
         self, 
         input_seq: torch.Tensor, 
@@ -125,7 +138,7 @@ class BertEncodedTransformer(EncoderDecoderModel):
         if freeze_bert:
             for param in self.bert.parameters():
                 param.requires_grad = False
-        self.embeddings = self.bert.embeddings
+        self.word_embeddings = self.bert.embeddings
         embed_size = self.bert.config.hidden_size
         heads = self.bert.config.num_attention_heads
         self.decoder = Decoder(
@@ -138,6 +151,10 @@ class BertEncodedTransformer(EncoderDecoderModel):
             num_emo_labels
         )
     
+    @property
+    def word_embeddings(self):
+        return self.model.word_embeddings
+
     def forward(
         self,
         source_seq: torch.Tensor,
@@ -155,7 +172,7 @@ class BertEncodedTransformer(EncoderDecoderModel):
             self.create_padding_mask(target_seq)
         )
 
-        embedded_target = self.embeddings(target_seq)
+        embedded_target = self.word_embeddings(target_seq)
         out = self.decoder(
             embedded_target, 
             encoder_out, 

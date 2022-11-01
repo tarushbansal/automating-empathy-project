@@ -18,8 +18,7 @@ from base_classes import DialogueModelBase, TokenizerBase
 from utils import (
     load_val_ckpt_path, 
     load_config, 
-    SaveConfigCallback,
-    SaveTestMetricsCallback
+    SaveConfigCallback
 )
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -49,7 +48,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--initial_lr", type=float, default=0.0001)
     parser.add_argument("--pred_beam_width", type=int, default=1)
     parser.add_argument("--max_pred_seq_len", type=int, default=200)
-    parser.add_argument("--bleu_n_grams", type=int, default=4)
+    parser.add_argument("--pred_n_grams", type=int, default=4)
     parser.add_argument("--pretrained_model_dir", type=str, default=None)
 
     cli_args = parser.parse_args()
@@ -81,8 +80,14 @@ def main():
     if not os.path.isdir(cli_args.dataset_dir):
         raise ValueError(f"Specified dataset directory does not exist!")
     
+    # Set up tensorboard logger
+    logger = TensorBoardLogger(
+        save_dir=cli_args.output_dir,
+        name="tensorboard_logs"
+    )
+
+    # Initialise model and tokenizer from config
     if cli_args.pretrained_model_dir is not None:
-        # Initialise model and tokenizer from config file
         config = load_config(cli_args.pretrained_model_dir)
         tokenizer_cls = getattr(__import__("data_tokenizers"), config["tokenizer"]["cls"])
         tokenizer_kwargs = config["tokenizer"]["kwargs"]
@@ -97,7 +102,6 @@ def main():
             raise ValueError(
                 "Either a new or pretrained dialogue model must be specified!")
 
-        # Read model config
         dirname = os.path.dirname(os.path.abspath(__file__))
         with open(f"{dirname}/configs.json") as f:
             configs = json.load(f)
@@ -111,14 +115,12 @@ def main():
             model_config["model_kwargs"]["model_name"] != model_config["tokenizer_kwargs"]["model_name"]):
             raise ValueError("Pretrained model names supplied to tokenizer and model don't match!")
 
-        # Get tokenizer class and kwargs, then instantiate tokenizer
         tokenizer_cls = getattr(__import__("data_tokenizers"), model_config["tokenizer_cls"])
         if not issubclass(tokenizer_cls, TokenizerBase):
             raise ValueError("Tokenizer must be derived from base class 'TokenizerBase'!")
         tokenizer_kwargs = model_config["tokenizer_kwargs"]
         tokenizer = tokenizer_cls(**tokenizer_kwargs)
 
-        # Set up model kwargs and instantiate
         model_kwargs = {
             "vocab_size": tokenizer.vocab_size,
             "num_emo_labels": tokenizer.num_emo_labels,
@@ -133,9 +135,10 @@ def main():
         tokenizer=tokenizer,
         model=model,
         initial_lr=cli_args.initial_lr,
+        test_output_dir=logger.log_dir,
         pred_beam_width=cli_args.pred_beam_width,
         max_pred_seq_len=cli_args.max_pred_seq_len,
-        bleu_n_grams=cli_args.bleu_n_grams
+        pred_n_grams=cli_args.pred_n_grams
     )
 
     # Set up data module
@@ -144,12 +147,7 @@ def main():
                              tokenizer=tokenizer,
                              num_workers=max(1, os.cpu_count() // 4))
 
-    # Set up model checkpointing and logging
-    logger = TensorBoardLogger(
-        save_dir=cli_args.output_dir,
-        name="tensorboard_logs"
-    )
-    
+    # Set up model checkpointing
     ckpt_dir = f"{logger.log_dir}/checkpoints"
     checkpoint_callback = get_model_checkpoints(ckpt_dir)
     callbacks = []
@@ -165,10 +163,7 @@ def main():
             "kwargs": tokenizer_kwargs,
         }
     }
-    callbacks.extend([
-        SaveConfigCallback(config=config), 
-        SaveTestMetricsCallback(logger.log_dir)
-    ])
+    callbacks.append(SaveConfigCallback(config=config))
 
     # Set up trainer
     trainer = pl.Trainer(

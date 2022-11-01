@@ -2,13 +2,17 @@
 
 # System Modules
 import math
+import json
 from typing import Dict, List, Tuple
 
 import torch
 import torch.nn.functional as F
 import pytorch_lightning as pl
+from pytorch_lightning.utilities.distributed import rank_zero_only
 
+from torchmetrics.functional import pairwise_cosine_similarity
 from nltk.translate.bleu_score import corpus_bleu
+from nltk.translate.nist_score import corpus_nist
 
 # User-defined Modules
 from base_classes import (
@@ -26,20 +30,22 @@ class ModelSupervisor(pl.LightningModule):
         model: DialogueModelBase,
         tokenizer: TokenizerBase,
         initial_lr: float,
+        test_output_dir: str = None,
         pred_beam_width: int = 1,
         max_pred_seq_len: int = 100,
-        bleu_n_grams: int = 4
+        pred_n_grams: int = 4,
     ) -> None:
 
         super().__init__()
-        self.save_hyperparameters(ignore=["tokenizer", "model"])
+        self.save_hyperparameters(ignore=["tokenizer", "model", "test_output_dir"])
 
         self.model = model
         self.tokenizer = tokenizer
         self.initial_lr = initial_lr
+        self.test_output_dir = test_output_dir
         self.pred_beam_width = pred_beam_width
         self.max_pred_seq_len = max_pred_seq_len
-        self.bleu_n_grams = bleu_n_grams
+        self.pred_n_grams = pred_n_grams
 
     def forward(self, batch: Dict) -> Tuple[torch.Tensor]:
         if issubclass(type(self.model), DecoderModel):
@@ -89,47 +95,96 @@ class ModelSupervisor(pl.LightningModule):
         self.logger.experiment.add_scalars(
             'loss', {'avg_val': avg_val_loss}, self.global_step) 
 
-    def on_test_epoch_start(self) -> None:
-        self.targets, self.responses = [], []
-        self.sum_log_prob = 0
+    def test_step(self, batch: Dict, _) -> Tuple[List]:
+        targets = [self.tokenizer.decode_to_text(target).split(" ")
+                   for target in batch["target"].tolist()]
+        predictions, log_probs = self.beam_search(batch)
+        log_probs = [log_probs[i] / len(predictions[i]) for i in range(len(log_probs))]
+        predictions = [self.tokenizer.decode_to_text(prediction).split(" ")
+                       for prediction in predictions]
+        return targets, predictions, log_probs
 
-    def test_step(self, batch: Dict, _) -> None:
-        self.targets.extend(batch["target"].tolist())
-        response, prob = self.beam_search(batch)
-        self.responses.extend(response)
-        self.sum_log_prob += sum(prob)
+    @rank_zero_only
+    def test_epoch_end(self, test_data: List[Tuple]) -> None:
+        batch_targets, batch_predictions, batch_log_probs = zip(*test_data)
+        targets = [[target] for batch in batch_targets for target in batch]
+        predictions = [pred for batch in batch_predictions for pred in batch]
+        log_probs = [prob for batch in batch_log_probs for prob in batch]
+        test_metrics = self.compute_test_metrics(targets, predictions, log_probs)
+        self.log_dict(test_metrics)
+        
+        if self.test_output_dir is not None:
+            with open(f"{self.test_output_dir}/test_metrics.json", "w") as f:
+                json.dump(test_metrics, f)
     
-    def on_test_epoch_end(self) -> None:
-        targets = [[self.tokenizer.decode_to_text(target).split(" ")]
-                    for target in self.targets]
-        responses = []
+    def compute_test_metrics(
+        self, 
+        targets: List[List[List[str]]], 
+        predictions: List[List[str]], 
+        log_probs: List[float]
+    ) -> Dict[str, float]:
 
-        # Compute all evaluation metrics
         n_unigrams, n_bigrams = 0, 0
         unique_unigrams, unique_bigrams = set(), set()
+        avg_bow, extrema_bow, greedy_bow = [], [], []
 
-        for response in self.responses:
-            decoded = self.tokenizer.decode_to_text(response).split(" ")
-            unique_unigrams.update([tuple(decoded[i:i+1]) for i in range(len(decoded))])
-            unique_bigrams.update([tuple(decoded[i:i+2]) for i in range(len(decoded) - 1)])
-            n_unigrams += len(decoded)
-            n_bigrams += len(decoded) - 1
-            responses.append(decoded)
+        for i in range(len(targets)):
+            # DIST - unigrams and bigrams
+            unique_unigrams.update([tuple(predictions[i][j:j+1]) for j in range(len(predictions[i]))])
+            unique_bigrams.update([tuple(predictions[i][j:j+2]) for j in range(len(predictions[i]) - 1)])
+            n_unigrams += len(predictions[i])
+            n_bigrams += len(predictions[i]) - 1
+            
+            # Encode and embed both targets and predictions
+            encoded_targets = " ".join(targets[i][0])
+            encoded_predictions = " ".join(predictions[i])
+            device = self.model.word_embeddings.weight.device
+            target_embeddings = self.model.word_embeddings(
+                torch.LongTensor(self.tokenizer.encode_text([encoded_targets])).to(device))
+            pred_embeddings = self.model.word_embeddings(
+                torch.LongTensor(self.tokenizer.encode_text([encoded_predictions])).to(device))
+
+            # Average BOW
+            avg_target_embed = target_embeddings.mean(dim=1)
+            avg_pred_embed = pred_embeddings.mean(dim=1)
+            avg_bow.append(float(F.cosine_similarity(avg_target_embed, avg_pred_embed)))
+
+            # Extrema BOW
+            max_target, _ = torch.max(target_embeddings, dim=1)
+            min_target, _ = torch.min(target_embeddings, dim=1)
+            mask_target = (torch.abs(max_target) >= torch.abs(min_target)) 
+            extrema_target_embed = torch.where(mask_target, max_target, min_target)
+            max_pred, _ = torch.max(pred_embeddings, dim=1)
+            min_pred, _ = torch.min(pred_embeddings, dim=1)
+            mask_pred = (torch.abs(max_pred) >= torch.abs(min_pred)) 
+            extrema_pred_embed = torch.where(mask_pred, max_pred, min_pred)
+            extrema_bow.append(float(F.cosine_similarity(extrema_target_embed, extrema_pred_embed)))
+
+            # Greedy BOW
+            sim = pairwise_cosine_similarity(target_embeddings.squeeze(), pred_embeddings.squeeze())
+            greedy_bow.append(float(sim.max(dim=0)[0].mean() + sim.max(dim=1)[0].mean() / 2))
 
         dist1 = len(unique_unigrams) / n_unigrams
         dist2 = len(unique_bigrams) / n_bigrams
-        bleu = corpus_bleu(targets, responses, weights=[1/self.bleu_n_grams]*self.bleu_n_grams)
-        total_token_count = sum([len(seq) for seq in self.responses])
-        ppl = 1 / math.exp(self.sum_log_prob / total_token_count)
+        bleu = corpus_bleu(targets, predictions, weights=[1/self.pred_n_grams]*self.pred_n_grams)
+        nist = corpus_nist(targets, predictions, n=self.pred_n_grams)
+        ppl = 1 / math.exp(sum(log_probs) / len(log_probs))
+        avg_bow = sum(avg_bow) / len(avg_bow)
+        extrema_bow = sum(extrema_bow) / len(extrema_bow)
+        greedy_bow = sum(greedy_bow) / len(greedy_bow)
 
-        self.test_metrics = {
+        test_metrics = {
             "bleu": bleu,
+            "nist": nist,
             "dist-1": dist1,
             "dist-2": dist2,
-            "ppl": ppl
+            "ppl": ppl,
+            "avg_bow": avg_bow,
+            "extrema_bow": extrema_bow,
+            "greedy_bow": greedy_bow
         }
 
-        self.log_dict(self.test_metrics)
+        return test_metrics
 
     def beam_search(self, batch: Dict) -> Tuple[List[List[int]]]:
         ## BEAM SEARCH: Objective is to determine the most probable output sequence from the model
@@ -183,16 +238,16 @@ class ModelSupervisor(pl.LightningModule):
             seq_len += 1
 
         # Return most probable sequence and its log probability for each beam in batch
-        responses = []
-        for response in batch_beam[:, 0, :].tolist():
-            for i in range(len(response)):
-                if response[i] == self.tokenizer.EOS_IDX:
+        predictions = []
+        for pred in batch_beam[:, 0, :].tolist():
+            for i in range(len(pred)):
+                if pred[i] == self.tokenizer.EOS_IDX:
                     i += 1
                     break
-            responses.append(response[:i])
+            predictions.append(pred[:i])
         log_prob = batch_beam_prob[:, 0].tolist()
 
-        return responses, log_prob
+        return predictions, log_prob
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = torch.optim.AdamW(

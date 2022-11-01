@@ -10,7 +10,7 @@ import pytorch_lightning as pl
 # User-defined Modules
 from data_loader import DataModule
 from model_supervisor import ModelSupervisor
-from utils import load_val_ckpt_path, load_config, SaveTestMetricsCallback
+from utils import load_val_ckpt_path, load_config
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -22,7 +22,7 @@ def main():
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--pred_beam_width", type=int, default=1)
     parser.add_argument("--max_pred_seq_len", type=int, default=200)
-    parser.add_argument("--bleu_n_grams", type=int, default=4)
+    parser.add_argument("--pred_n_grams", type=int, default=4)
     cli_args, _ = parser.parse_known_args()
 
     if not os.path.isdir(cli_args.dataset_dir):
@@ -41,10 +41,11 @@ def main():
     model_supervisor = ModelSupervisor.load_from_checkpoint(
         ckpt_path, 
         tokenizer=tokenizer, 
-        model=model, 
+        model=model,
+        test_output_dir=os.path.abspath(cli_args.pretrained_model_dir), 
         pred_beam_width=cli_args.pred_beam_width,
         max_pred_seq_len=cli_args.max_pred_seq_len,
-        bleu_n_grams=cli_args.bleu_n_grams
+        pred_n_grams=cli_args.pred_n_grams
     )
 
     # Set up data module
@@ -57,8 +58,7 @@ def main():
     trainer = pl.Trainer(
         accelerator="auto", 
         devices=-1 if torch.cuda.is_available() else 1,
-        logger=None,
-        callbacks=[SaveTestMetricsCallback(cli_args.pretrained_model_dir)]
+        logger=None
     )
 
     # Test the model

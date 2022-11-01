@@ -35,28 +35,6 @@ class SaveConfigCallback(pl.Callback):
             json.dump(self.config, f)
 
 
-class SaveTestMetricsCallback(pl.Callback):
-    """Saves evaluation metrics when testing ends"""
-    def __init__(self, log_dir: str):
-        super().__init__()
-        self.log_dir = log_dir
-    
-    @rank_zero_only
-    def on_test_end(
-        self, 
-        trainer: pl.Trainer, 
-        pl_module: pl.LightningModule
-    ) -> None:
-
-        if not os.path.isdir(self.log_dir):
-            print("WARNING: Log directory doesn't exist! Aborting test metric save!")
-            return
-
-        dir = os.path.abspath(self.log_dir)
-        with open(f"{dir}/evaluation_metrics.json", "w") as f:
-            json.dump(pl_module.test_metrics, f)
-
-
 def load_config(trained_model_dir: str) -> dict:
     config = None
     config_fpath = os.path.join(trained_model_dir, "config.json")

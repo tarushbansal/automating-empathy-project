@@ -87,10 +87,10 @@ def main():
         batch["context"] = torch.LongTensor(context)
         batch["context_dialogue_state"] = torch.LongTensor(context_dialogue_state)
 
-        response, prob = model_supervisor.beam_search(batch)
+        response, log_prob = model_supervisor.beam_search(batch)
 
         decoded_reponse = tokenizer.decode_to_text(response[0])
-        print(f"Dialogue Model: {decoded_reponse} (Prob: {math.exp(prob[0]):.6f})")
+        print(f"Dialogue Model: {decoded_reponse} (Prob: {math.exp(log_prob[0]):.6f})")
         print("")
 
         context[0].extend(response[0])

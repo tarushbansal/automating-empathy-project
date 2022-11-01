@@ -37,9 +37,9 @@ class TokenizerBase:
 class DialogueModelBase(nn.Module):
     def __init__(
         self,
-        vocab_size, 
-        num_emo_labels,
-        padding_idx
+        vocab_size: int, 
+        num_emo_labels: int,
+        padding_idx: int,
     ) -> None:
 
         super().__init__()
@@ -61,9 +61,9 @@ class DialogueModelBase(nn.Module):
 class EncoderDecoderModel(DialogueModelBase):
     def __init__(
         self, 
-        vocab_size, 
-        num_emo_labels, 
-        padding_idx
+        vocab_size: int, 
+        num_emo_labels: int,
+        padding_idx: int,
     ) -> None:
 
         super().__init__(vocab_size, num_emo_labels, padding_idx)
@@ -82,9 +82,9 @@ class EncoderDecoderModel(DialogueModelBase):
 class DecoderModel(DialogueModelBase):
     def __init__(
         self, 
-        vocab_size, 
-        num_emo_labels,
-        padding_idx
+        vocab_size: int, 
+        num_emo_labels: int,
+        padding_idx: int,
     ) -> None:
 
         super().__init__(vocab_size, num_emo_labels, padding_idx)

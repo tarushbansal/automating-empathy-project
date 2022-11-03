@@ -16,10 +16,10 @@ from base_classes import EncoderDecoderModel, DecoderModel, TokenizerBase
 
 # ------------------------- IMPLEMENTATION ------------------------------------
 
-class HuggingFaceEncoderDecoderModel(EncoderDecoderModel):
-    def __init__(self, tokenizer: TokenizerBase, model_name: str) -> None:
+class GODEL(EncoderDecoderModel):
+    def __init__(self, tokenizer: TokenizerBase) -> None:
         super().__init__(tokenizer)
-        self.model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
+        self.model = AutoModelForSeq2SeqLM.from_pretrained("microsoft/GODEL-v1_1-base-seq2seq")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
     
     @property
@@ -30,9 +30,7 @@ class HuggingFaceEncoderDecoderModel(EncoderDecoderModel):
         self, 
         source_seq: torch.Tensor, 
         target_seq: torch.Tensor, 
-        source_dialogue_state: torch.Tensor, 
-        target_dialogue_state: torch.Tensor, 
-        emotion_label: torch.Tensor = None
+        **_
     ) -> torch.Tensor:
 
         source_seq, source_mask = self.create_padding_mask(source_seq)
@@ -44,14 +42,16 @@ class HuggingFaceEncoderDecoderModel(EncoderDecoderModel):
             decoder_input_ids=target_seq,
             decoder_attention_mask=target_mask
         )
+
         return out.logits
 
 
-class HuggingFaceDecoderModel(DecoderModel):
-    def __init__(self, tokenizer: TokenizerBase, model_name: str) -> None:
+class GPT2(DecoderModel):
+    def __init__(self, tokenizer: TokenizerBase) -> None:
         super().__init__(tokenizer)
-        self.model = AutoModelForCausalLM.from_pretrained(model_name)
+        self.model = AutoModelForCausalLM.from_pretrained("gpt2")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
+        self.ds_embeddings = nn.Embedding(2, self.model.config.hidden_size)
     
     @property
     def word_embeddings(self):
@@ -61,56 +61,22 @@ class HuggingFaceDecoderModel(DecoderModel):
         self, 
         input_seq: torch.Tensor, 
         input_dialogue_state: torch.Tensor, 
-        emotion_label: torch.Tensor = None
+        **_
     ) -> torch.Tensor:
 
         input_seq, input_mask = self.create_padding_mask(input_seq)
-        out = self.model(
-            input_ids=input_seq,
-            attention_mask=input_mask,
-        )
-        return out.logits
-
-
-class AffectiveDecodingModel(DecoderModel):
-    def __init__(
-        self, 
-        tokenizer: TokenizerBase,
-        model_name: str,
-        emo_embed_dim: int = 512,
-        dropout: float = 0
-    ) -> None:
-
-        super().__init__(tokenizer)
-        self.model = AutoModelForCausalLM.from_pretrained(model_name)
-        self.model.resize_token_embeddings(tokenizer.vocab_size)
-
-        self.dropout = nn.Dropout(dropout)
-        self.emo_embeddings = nn.Embedding(tokenizer.num_emo_labels, emo_embed_dim)
-        self.fc_layer = nn.Linear(emo_embed_dim, tokenizer.vocab_size)
-    
-    @property
-    def word_embeddings(self):
-        return self.model.get_input_embeddings()
-
-    def forward(
-        self, 
-        input_seq: torch.Tensor, 
-        input_dialogue_state: torch.Tensor, 
-        emotion_label: torch.Tensor = None
-    ) -> torch.Tensor:
-
-        input_seq, input_mask = self.create_padding_mask(input_seq)
-        out = self.model(
-            input_ids=input_seq,
-            attention_mask=input_mask,
-        )
-        out = out.logits
-        emo_embedding = self.emo_embeddings(emotion_label)
-        emo_embedding = emo_embedding.unsqueeze(1).expand(-1, out.size(dim=1), -1)
-        out += self.fc_layer(emo_embedding)
+        input_dialogue_state, _ = self.create_padding_mask(input_dialogue_state)
+        word_embeds = self.word_embeddings(input_seq)
+        ds_embeds = self.ds_embeddings(input_dialogue_state)
+        input_embeds = word_embeds + ds_embeds
         
-        return out
+        out = self.model(
+            inputs_embeds=input_embeds,
+            attention_mask=input_mask,
+        )
+
+        return out.logits
+
 
 class BertEncodedTransformer(EncoderDecoderModel):
     def __init__(

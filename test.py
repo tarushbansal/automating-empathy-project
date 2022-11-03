@@ -19,7 +19,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset_dir", type=str, default=None, required=True)
     parser.add_argument("--pretrained_model_dir", type=str, default=None, required=True)
-    parser.add_argument("--batch_size", type=int, default=8)
+    parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--pred_beam_width", type=int, default=1)
     parser.add_argument("--max_pred_seq_len", type=int, default=200)
     parser.add_argument("--pred_n_grams", type=int, default=4)

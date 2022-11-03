@@ -49,9 +49,12 @@ class ModelSupervisor(pl.LightningModule):
             )
             target_seq = batch["target"][:, 1:]
         else:
-            input_seq = torch.cat((batch["context"], batch["target"][:, 1:]), dim=1)
-            input_dialogue_state = torch.cat(
-                (batch["context_dialogue_state"], batch["target_dialogue_state"]), dim=1)
+            input_seq = torch.cat((batch["context"], batch["target"]), dim=1)
+            input_dialogue_state = None
+            if self.tokenizer.supports_dialogue_states:
+                input_dialogue_state = torch.cat(
+                    (batch["context_dialogue_state"], 
+                     batch["target_dialogue_state"]), dim=1)
             logits = self.model(
                 input_seq=input_seq,
                 input_dialogue_state=input_dialogue_state,
@@ -140,11 +143,18 @@ class ModelSupervisor(pl.LightningModule):
         # Set model in evaluation mode (Important to turn off dropout layers!!)
         self.model.eval()
 
-        N, seq_len = batch["context"].size(dim=0), 1
+        N, seq_len = batch["context"].size(dim=0), 0
         device = batch["context"].device
-        batch_beam = torch.empty(
-            N, 1, seq_len, dtype=torch.long, device=device).fill_(self.tokenizer.SOS_IDX)
+
+        if self.tokenizer.supports_dialogue_states:
+            ds = batch["target_dialogue_state"][:, 0:1]
+
         batch_beam_prob = torch.zeros(N, 1, device=device)
+        batch_beam = torch.empty(N, 1, 0, dtype=torch.long, device=device)
+        if self.tokenizer.SOS_IDX is not None:
+            seq_len += 1
+            sos_tensor = torch.empty(N, 1, 1, dtype=torch.long, device=device).fill_(self.tokenizer.SOS_IDX)
+            batch_beam = torch.cat((batch_beam, sos_tensor), dim=-1)
         eos_detected = torch.zeros(N, self.pred_beam_width, dtype=torch.bool, device=device)
 
         # Loop until EOS token detected for all beams in batch
@@ -155,13 +165,15 @@ class ModelSupervisor(pl.LightningModule):
                 N, self.pred_beam_width ** 2, device=device).fill_(float("-inf"))
 
             # Determine all possible output sequences and probabilities for current beam 
-            for i in range(1 if seq_len == 0 else self.pred_beam_width):
+            for i in range(1 if seq_len == 1 else self.pred_beam_width):
                 batch["target"] = batch_beam[:, i, :]
+                if self.tokenizer.supports_dialogue_states:
+                    batch["target_dialogue_state"] = ds.expand(batch["target"].size())
                 logits, _ = self.forward(batch)
                 conditional_p, top_responses = torch.topk(
                     F.log_softmax(logits[:, -1, :], dim=-1), self.pred_beam_width, dim=-1)
                 conditional_p = conditional_p.masked_fill(eos_detected[:, i:i+1], 0)
-                for j in range(1 if seq_len == 0 else self.pred_beam_width):
+                for j in range(1 if seq_len == 1 else self.pred_beam_width):
                     prob_sequences[:, i * self.pred_beam_width + j] = (
                         batch_beam_prob[:, i] + conditional_p[:, j])
                     sequences[:, i * self.pred_beam_width + j, :] = torch.cat(

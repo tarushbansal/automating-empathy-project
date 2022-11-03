@@ -4,7 +4,7 @@
 import torch
 import torch.nn as nn
 
-from typing import List, Tuple
+from typing import List, Tuple, Union, Optional
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -15,8 +15,8 @@ class TokenizerBase:
         self.PAD_IDX = -100
 
         # Dialog state indices
-        self.DS_SPEAKER_IDX = 1
-        self.DS_LISTENER_IDX = 2
+        self.DS_SPEAKER_IDX = 0
+        self.DS_LISTENER_IDX = 1
         
         # Emotion label map
         self.emo_map = {
@@ -31,7 +31,15 @@ class TokenizerBase:
         }
         self.num_emo_labels = len(self.emo_map)
 
-    def encode_text(self, sequences: List[List[str]]) -> List[List[int]]:
+    @property
+    def supports_dialogue_states(self) -> bool:
+        return False
+
+    def encode_text(
+        self, 
+        text: Union[str, List[str]], 
+        text_type: str
+    ) -> Tuple[List[int], List[int]]:
         pass
 
     def decode_to_text(self, sequence: List[int]) -> str:

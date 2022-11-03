@@ -34,33 +34,19 @@ class Dataset(data.Dataset):
         # Map emotion label to token
         item['emotion'] = self.tokenizer.emo_map[self.emotions[idx]]
 
-        context = []
-        context_dialogue_state = []
-
-        # Create list of utterances tokenized and encoded to indices using nltk
-        # rtype -> [[token1, token2, ...], [token1, token2, ...], ...]
-        encoded_context = self.tokenizer.encode_text(self.contexts[idx])
-        
-        for i, enc in enumerate(encoded_context):
-            ds = (self.tokenizer.DS_SPEAKER_IDX 
-                  if i % 2 == 0
-                  else self.tokenizer.DS_LISTENER_IDX)
-            context += enc + [self.tokenizer.EOS_IDX] 
-            context_dialogue_state += [ds for _ in range(len(enc) + 1)] 
-            
+        # Tokenize dialogue history / context
+        context, context_ds = self.tokenizer.encode_text(
+            self.contexts[idx], "context"
+        )     
         item["context"] = context
-        item["context_dialogue_state"] = context_dialogue_state
+        item["context_dialogue_state"] = context_ds
 
-        # Tokenize and encode response utterance
-        encoded_target = self.tokenizer.encode_text([self.targets[idx]])[0]
-        target = [self.tokenizer.SOS_IDX] + encoded_target + [self.tokenizer.EOS_IDX]
-
-        ds = (self.tokenizer.DS_SPEAKER_IDX
-              if len(encoded_context) % 2 == 0 
-              else self.tokenizer.DS_LISTENER_IDX)
-
+        # Tokenize response utterance
+        target, target_ds = self.tokenizer.encode_text(
+            self.targets[idx], "target"
+        )
         item['target'] = target
-        item['target_dialogue_state'] = [ds for _ in range(len(target))]
+        item['target_dialogue_state'] = target_ds
         
         return item
 
@@ -76,25 +62,28 @@ def collate_batch(batch, padding_idx):
         return torch.LongTensor(sequences)
     
     context = [item["context"] for item in batch]
-    context_dialogue_state = [item["context_dialogue_state"] for item in batch]
     target = [item["target"] for item in batch]
-    target_dialogue_state = [item["target_dialogue_state"]for item in batch]
     emotion = [item["emotion"] for item in batch]
-
     max_len_context_seq = max([len(seq) for seq in context])
     max_len_target_seq = max([len(seq) for seq in target])
 
     collated_batch = {
         "context": pad_and_convert_to_tensor(
             context, max_len_context_seq, padding_idx=padding_idx),
-        "context_dialogue_state":  pad_and_convert_to_tensor(
-            context_dialogue_state, max_len_context_seq, padding_idx=padding_idx),
         "target": pad_and_convert_to_tensor(
             target, max_len_target_seq, padding_idx=padding_idx),
-        "target_dialogue_state": pad_and_convert_to_tensor(
-            target_dialogue_state, max_len_target_seq, padding_idx=padding_idx),
         "emotion":  torch.LongTensor(emotion),
+        "context_dialogue_state": None,
+        "target_dialogue_state": None
     }
+
+    if batch[0]["context_dialogue_state"] is not None:
+        context_dialogue_state = [item["context_dialogue_state"] for item in batch]
+        target_dialogue_state = [item["target_dialogue_state"]for item in batch]
+        collated_batch["context_dialogue_state"] = pad_and_convert_to_tensor(
+            context_dialogue_state, max_len_context_seq, padding_idx=0)
+        collated_batch["target_dialogue_state"] = pad_and_convert_to_tensor(
+            target_dialogue_state, max_len_target_seq, padding_idx=0)
 
     return collated_batch
 

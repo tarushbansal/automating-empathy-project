@@ -60,11 +60,11 @@ def main():
 
     batch = {}
 
-    context = [[]]
-    context_dialogue_state = [[]]
-    batch["emotion"] = None
-    # batch["emotion"] = torch.LongTensor([tokenizer.emo_map[emotion_label]])
-    batch["target_dialogue_state"] = torch.LongTensor([[tokenizer.DS_LISTENER_IDX]])
+    context = []
+    batch["emotion"] = torch.LongTensor([tokenizer.emo_map["excited"]])
+    batch["target_dialogue_state"] = None
+    if tokenizer.supports_dialogue_states:
+        batch["target_dialogue_state"] = torch.LongTensor([[tokenizer.DS_LISTENER_IDX]])
 
     while True:
         speaker_utterance = input(f"Speaker: ")
@@ -72,30 +72,22 @@ def main():
             os.system("clear")
             break
         if speaker_utterance.strip() == "<clear>":
-            context, context_dialogue_state = [[]], [[]]
+            context = []
             initialise_interface()
             continue
-        speaker_utterance = (
-            [tokenizer.SOS_IDX] + \
-            tokenizer.encode_text([speaker_utterance])[0] + \
-            [tokenizer.EOS_IDX]
-        )
-        context[0].extend(speaker_utterance)
-        context_dialogue_state[0].extend([
-            tokenizer.DS_SPEAKER_IDX for _ in range(len(speaker_utterance))])
-
-        batch["context"] = torch.LongTensor(context)
-        batch["context_dialogue_state"] = torch.LongTensor(context_dialogue_state)
+        
+        context.append(speaker_utterance)
+        enc_context, context_ds = tokenizer.encode_text(context)
+        batch["context"] = torch.LongTensor([enc_context])
+        batch["context_dialogue_state"] = None
+        if tokenizer.supports_dialogue_states:
+            batch["context_dialogue_state"] = torch.LongTensor([context_ds])
 
         response, log_prob = model_supervisor.beam_search(batch)
 
         decoded_reponse = tokenizer.decode_to_text(response[0])
         print(f"Dialogue Model: {decoded_reponse} (Prob: {math.exp(log_prob[0]):.6f})")
         print("")
-
-        context[0].extend(response[0])
-        context_dialogue_state[0].extend([
-            tokenizer.DS_LISTENER_IDX for _ in range(len(response[0]))])
 
 if __name__ == "__main__":
     main()

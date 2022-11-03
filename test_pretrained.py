@@ -31,7 +31,7 @@ def main():
     parser.add_argument("--output_dir", type=str, default=None, required=True)
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--pred_beam_width", type=int, default=1)
-    parser.add_argument("--max_pred_seq_len", type=int, default=1000)
+    parser.add_argument("--max_pred_seq_len", type=int, default=200)
     parser.add_argument("--pred_n_grams", type=int, default=4)
     cli_args, _ = parser.parse_known_args()
 
@@ -58,7 +58,8 @@ def main():
     tokenizer = AutoTokenizer.from_pretrained(cli_args.model_name)
     model_generation = generate_map[cli_args.model_name](
         model, 
-        tokenizer, 
+        tokenizer,
+        device, 
         cli_args.pred_beam_width, 
         cli_args.max_pred_seq_len
     )
@@ -80,26 +81,25 @@ def main():
         def __len__(self) -> int:
             return len(self.context)
         def __getitem__(self, idx: int) -> list:
-            return " ".join(self.context[idx])
+            return self.context[idx]
 
     test_dataloader = torch.utils.data.DataLoader(
         TestDataset(context_data),
         batch_size=cli_args.batch_size,
-        num_workers=max(1, os.cpu_count() // 4)
+        num_workers=max(1, os.cpu_count() // 4),
+        collate_fn=lambda x: x
     )
 
     targets = [[seq.split(" ")] for seq in target_data]
-    enc_targets = [tokenizer(seq) for seq in target_data]
+    enc_targets = [tokenizer(seq).input_ids for seq in target_data]
     predictions, enc_predictions = [], []
 
     print("Generating predictions from model...")
     for batch in tqdm(test_dataloader):
-        input_ids = tokenizer(batch, return_tensors="pt", padding=True).input_ids
-        input_ids = input_ids.to(device)
-        outputs = model_generation.generate(input_ids)
-        enc_predictions.extend(outputs.tolist())
+        outputs = model_generation.generate(batch)
+        enc_predictions.extend(outputs)
         predictions.extend([tokenizer.decode(enc, skip_special_tokens=True).split(" ")
-                            for enc in outputs.tolist()])
+                            for enc in outputs])
     print("Done.")
 
     print("Computing test metrics")

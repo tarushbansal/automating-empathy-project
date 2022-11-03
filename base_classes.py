@@ -4,12 +4,16 @@
 import torch
 import torch.nn as nn
 
-from typing import List
+from typing import List, Tuple
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
 class TokenizerBase:
     def __init__(self) -> None:
+        # Value of PAD_IDX does not matter due to the paddding mask created in the model
+        # However, it should not conflict with any token id in the vocab!!
+        self.PAD_IDX = -100
+
         # Dialog state indices
         self.DS_SPEAKER_IDX = 1
         self.DS_LISTENER_IDX = 2
@@ -35,23 +39,16 @@ class TokenizerBase:
 
 
 class DialogueModelBase(nn.Module):
-    def __init__(
-        self,
-        vocab_size: int, 
-        num_emo_labels: int,
-        padding_idx: int,
-    ) -> None:
-
+    def __init__(self, tokenizer: TokenizerBase) -> None:
         super().__init__()
-        self.vocab_size = vocab_size
-        self.num_emo_labels = num_emo_labels
-        self.padding_idx = padding_idx
+        self.tokenizer = tokenizer
     
-    def create_padding_mask(self, batch_seq):
-        padding_mask = (batch_seq != self.padding_idx).unsqueeze(1).unsqueeze(2)
-        return padding_mask
+    def create_padding_mask(self, batch_seq) -> Tuple[torch.Tensor]:
+        padding_mask = (batch_seq != self.tokenizer.PAD_IDX)
+        batch_seq = batch_seq.masked_fill(padding_mask == 0, 0)
+        return batch_seq, padding_mask
     
-    def create_lookahead_mask(self, batch_seq):
+    def create_lookahead_mask(self, batch_seq) -> torch.Tensor:
         N, seq_len = batch_seq.shape
         lookahead_mask = torch.tril(torch.ones(
             N, 1, seq_len, seq_len, device=batch_seq.device))
@@ -59,15 +56,14 @@ class DialogueModelBase(nn.Module):
 
 
 class EncoderDecoderModel(DialogueModelBase):
-    def __init__(
-        self, 
-        vocab_size: int, 
-        num_emo_labels: int,
-        padding_idx: int,
-    ) -> None:
-
-        super().__init__(vocab_size, num_emo_labels, padding_idx)
+    def __init__(self, tokenizer: TokenizerBase) -> None:
+        super().__init__(tokenizer)
     
+    @property
+    def has_encoder(self) -> bool:
+        # DO NOT OVERWRITE THIS PROPERTY
+        return True
+
     def forward(
         self,
         source_seq: torch.Tensor,
@@ -80,15 +76,14 @@ class EncoderDecoderModel(DialogueModelBase):
 
 
 class DecoderModel(DialogueModelBase):
-    def __init__(
-        self, 
-        vocab_size: int, 
-        num_emo_labels: int,
-        padding_idx: int,
-    ) -> None:
-
-        super().__init__(vocab_size, num_emo_labels, padding_idx)
+    def __init__(self, tokenizer: TokenizerBase) -> None:
+        super().__init__(tokenizer)
     
+    @property
+    def has_encoder(self) -> bool:
+        # DO NOT OVERWRITE THIS PROPERTY
+        return False
+
     def forward(
         self,
         input_seq: torch.Tensor,

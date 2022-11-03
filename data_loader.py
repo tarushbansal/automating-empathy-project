@@ -42,23 +42,19 @@ class Dataset(data.Dataset):
         encoded_context = self.tokenizer.encode_text(self.contexts[idx])
         
         for i, enc in enumerate(encoded_context):
-            # Add SOS and EOS token to every utterance
-            context += ([self.tokenizer.SOS_IDX] + 
-                         enc + [self.tokenizer.EOS_IDX])
-            ds = (self.tokenizer.DS_SPEAKER_IDX if i % 2 == 0 else
-                  self.tokenizer.DS_LISTENER_IDX)
-            # Add dialogue state to every token in utterance
-            context_dialogue_state += [ds for _ in range(len(enc) + 2)] 
-
+            ds = (self.tokenizer.DS_SPEAKER_IDX 
+                  if i % 2 == 0
+                  else self.tokenizer.DS_LISTENER_IDX)
+            context += enc + [self.tokenizer.EOS_IDX] 
+            context_dialogue_state += [ds for _ in range(len(enc) + 1)] 
+            
         item["context"] = context
         item["context_dialogue_state"] = context_dialogue_state
 
         # Tokenize and encode response utterance
         encoded_target = self.tokenizer.encode_text([self.targets[idx]])[0]
-        # Add SOS and EOS token to target utterance
-        target = ([self.tokenizer.SOS_IDX] + 
-                    encoded_target + [self.tokenizer.EOS_IDX])
-        # Determine response dialogue state
+        target = [self.tokenizer.SOS_IDX] + encoded_target + [self.tokenizer.EOS_IDX]
+
         ds = (self.tokenizer.DS_SPEAKER_IDX
               if len(encoded_context) % 2 == 0 
               else self.tokenizer.DS_LISTENER_IDX)
@@ -92,11 +88,11 @@ def collate_batch(batch, padding_idx):
         "context": pad_and_convert_to_tensor(
             context, max_len_context_seq, padding_idx=padding_idx),
         "context_dialogue_state":  pad_and_convert_to_tensor(
-            context_dialogue_state, max_len_context_seq, padding_idx=0),
+            context_dialogue_state, max_len_context_seq, padding_idx=padding_idx),
         "target": pad_and_convert_to_tensor(
             target, max_len_target_seq, padding_idx=padding_idx),
         "target_dialogue_state": pad_and_convert_to_tensor(
-            target_dialogue_state, max_len_target_seq, padding_idx=0),
+            target_dialogue_state, max_len_target_seq, padding_idx=padding_idx),
         "emotion":  torch.LongTensor(emotion),
     }
 

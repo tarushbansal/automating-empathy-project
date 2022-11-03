@@ -41,7 +41,7 @@ def main():
     tokenizer = tokenizer_cls(**config["tokenizer"]["kwargs"])
 
     model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
-    model = model_cls(**config["model"]["kwargs"])
+    model = model_cls(tokenizer=tokenizer, **config["model"]["kwargs"])
     model_supervisor = ModelSupervisor.load_from_checkpoint(
         ckpt_path, 
         tokenizer=tokenizer, 

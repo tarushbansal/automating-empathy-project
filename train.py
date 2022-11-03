@@ -121,14 +121,9 @@ def main():
         tokenizer_kwargs = model_config["tokenizer_kwargs"]
         tokenizer = tokenizer_cls(**tokenizer_kwargs)
 
-        model_kwargs = {
-            "vocab_size": tokenizer.vocab_size,
-            "num_emo_labels": tokenizer.num_emo_labels,
-            "padding_idx": tokenizer.PAD_IDX,
-            **model_config["model_kwargs"]
-        }
+        model_kwargs = model_config["model_kwargs"]
         model_cls = get_model_cls()
-        model = model_cls(**model_kwargs)
+        model = model_cls(tokenizer=tokenizer, **model_kwargs)
     
     # Set up model supervisor
     model_supervisor = ModelSupervisor(

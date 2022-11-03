@@ -37,7 +37,7 @@ def main():
     tokenizer = tokenizer_cls(**config["tokenizer"]["kwargs"])
 
     model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
-    model = model_cls(**config["model"]["kwargs"])
+    model = model_cls(tokenizer=tokenizer, **config["model"]["kwargs"])
     model_supervisor = ModelSupervisor.load_from_checkpoint(
         ckpt_path, 
         tokenizer=tokenizer, 
@@ -58,6 +58,7 @@ def main():
     trainer = pl.Trainer(
         accelerator="auto", 
         devices=-1 if torch.cuda.is_available() else 1,
+        strategy="ddp_find_unused_parameters_false",
         logger=None
     )
 

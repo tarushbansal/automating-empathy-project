@@ -21,8 +21,7 @@ class NltkTokenizer(TokenizerBase):
         
         self.decoder = {v : k for k, v in self.vocab.items()}
 
-        # Special tokens (Start / End of continguous dialogue sentence, Padding)
-        self.PAD_IDX = self.vocab["[PAD]"]
+        # Special tokens (Start / End of continguous dialogue sentence, Unknown)
         self.UNK_IDX = self.vocab["[UNK]"]
         self.SOS_IDX = self.vocab["[SOS]"]
         self.EOS_IDX = self.vocab["[EOS]"]
@@ -58,6 +57,10 @@ class NltkTokenizer(TokenizerBase):
     def decode_to_text(self, sequence: List[int]) -> str:
         decoded_text = ""
         for token_idx in sequence:
+            if token_idx == self.SOS_IDX or token_idx == self.EOS_IDX:
+                continue
+            if token_idx == self.PAD_IDX:
+                break
             decoded_text += self.decoder[token_idx]
         return decoded_text
 
@@ -66,13 +69,16 @@ class HuggingFaceAutoTokenizer(TokenizerBase):
     def __init__(self, model_name: str) -> None:
         super().__init__()
         self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        special_tokens_dict = {
-            'bos_token': '<BOS>', 
-            'eos_token': '<EOS>', 
-            'pad_token': '<PAD>'
-        }
-        self.tokenizer.add_special_tokens(special_tokens_dict)
-        self.PAD_IDX = self.tokenizer.pad_token_id
+        num_added = self.tokenizer.add_special_tokens({
+            "bos_token": (self.tokenizer.bos_token 
+                          if self.tokenizer.bos_token_id is not None 
+                          else"<SOS>"),
+            "eos_token": (self.tokenizer.eos_token 
+                          if self.tokenizer.eos_token_id is not None
+                          else "<EOS>")
+        })
+        if num_added > 0:
+            print(f"{num_added} SOS/EOS tokens added to pretrained model")
         self.SOS_IDX = self.tokenizer.bos_token_id
         self.EOS_IDX = self.tokenizer.eos_token_id
         self.vocab_size = len(self.tokenizer)
@@ -84,8 +90,11 @@ class HuggingFaceAutoTokenizer(TokenizerBase):
         return token_ids
     
     def decode_to_text(self, sequence: List[int]) -> str:
+        for i in range(len(sequence)):
+            if sequence[i] == self.PAD_IDX:
+                break
         decoded_text = self.tokenizer.decode(
-            sequence, 
+            sequence[:i], 
             skip_special_tokens=True
         )
         return decoded_text        

@@ -74,7 +74,7 @@ class GODELTokenizer(TokenizerBase):
         self.tokenizer.add_special_tokens({
             "bos_token": "<SOS>"
         })
-        self.SOS_IDX = None
+        self.SOS_IDX = self.tokenizer.bos_token_id
         self.EOS_IDX = self.tokenizer.eos_token_id
         self.vocab_size = len(self.tokenizer)
         self.instruction = ("Instruction: given a dialog context, " 
@@ -120,7 +120,6 @@ class GPT2Tokenizer(TokenizerBase):
     def __init__(self) -> None:
         super().__init__()
         self.tokenizer = AutoTokenizer.from_pretrained("gpt2")
-        self.SOS_IDX = self.tokenizer.eos_token_id
         self.EOS_IDX = self.tokenizer.eos_token_id
         self.vocab_size = len(self.tokenizer)
     

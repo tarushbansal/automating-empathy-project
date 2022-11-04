@@ -14,6 +14,9 @@ class TokenizerBase:
         # However, it should not conflict with any token id in the vocab!!
         self.PAD_IDX = -100
 
+        # No start of sentence tokens will be used for target responses by default
+        self.SOS_IDX = None
+
         # Dialog state indices
         self.DS_SPEAKER_IDX = 0
         self.DS_LISTENER_IDX = 1

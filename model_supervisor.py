@@ -92,8 +92,8 @@ class ModelSupervisor(pl.LightningModule):
     def test_step(self, batch: Dict, _) -> Tuple[List]:
         contexts = [self.tokenizer.decode_to_text(context)
                     for context in batch["context"].tolist()]
-        targets = [self.tokenizer.decode_to_text(enc) for enc in batch["target"]]
-        enc_targets = self.tokenizer.encode_text(targets)
+        targets = [self.tokenizer.decode_to_text(enc) for enc in batch["target"].tolist()]
+        enc_targets = [self.tokenizer.encode_text(target, "target")[0] for target in targets]
         enc_predictions, log_probs = self.beam_search(batch)
         predictions = [self.tokenizer.decode_to_text(enc) for enc in enc_predictions]
         log_probs = [log_probs[i] / len(enc_predictions[i]) for i in range(len(log_probs))]
@@ -198,7 +198,7 @@ class ModelSupervisor(pl.LightningModule):
         # Return most probable sequence and its log probability for each beam in batch
         predictions = []
         for pred in batch_beam[:, 0, :].tolist():
-            for i in range(1, len(pred)):
+            for i in range(len(pred)):
                 if pred[i] == self.tokenizer.EOS_IDX:
                     i += 1
                     break

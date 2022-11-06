@@ -47,7 +47,7 @@ class ModelSupervisor(pl.LightningModule):
             if self.tokenizer.supports_dialogue_states:
                 input_kwargs["source_dialogue_state"] = batch["context_dialogue_state"]
                 input_kwargs["target_dialogue_state"] = batch["target_dialogue_state"]
-            if self.tokenizer.is_knowledge_based:
+            if self.tokenizer.supports_knowledge_concepts:
                 input_kwargs["concepts"] = batch["concepts"]
             logits = self.model(**input_kwargs)
             target_seq = batch["target"][:, 1:]

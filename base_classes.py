@@ -39,7 +39,7 @@ class TokenizerBase:
         return False
     
     @property
-    def is_knowledge_based(self) -> bool:
+    def supports_knowledge_concepts(self) -> bool:
         return False
 
     def encode_text(

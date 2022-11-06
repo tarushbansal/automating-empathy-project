@@ -200,7 +200,7 @@ class KnowledgeBridgedGODELTokenizer(TokenizerBase):
         return False
     
     @property
-    def is_knowledge_based(self) -> bool:
+    def supports_knowledge_concepts(self) -> bool:
         return True
 
     def emotion_intensity(self, word):

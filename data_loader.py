@@ -35,14 +35,15 @@ class Dataset(data.Dataset):
         item['emotion'] = self.tokenizer.emo_map[self.emotions[idx]]
 
         # Tokenize dialogue history / context
-        context, context_ds = self.tokenizer.encode_text(
+        context, context_ds, concepts = self.tokenizer.encode_text(
             self.contexts[idx], "context"
         )     
         item["context"] = context
         item["context_dialogue_state"] = context_ds
+        item["concepts"] = concepts
 
         # Tokenize response utterance
-        target, target_ds = self.tokenizer.encode_text(
+        target, target_ds, _ = self.tokenizer.encode_text(
             self.targets[idx], "target"
         )
         item['target'] = target
@@ -84,6 +85,9 @@ def collate_batch(batch, padding_idx):
             context_dialogue_state, max_len_context_seq, padding_idx=0)
         collated_batch["target_dialogue_state"] = pad_and_convert_to_tensor(
             target_dialogue_state, max_len_target_seq, padding_idx=0)
+
+    if batch[0]["concepts"] is not None:
+        collated_batch["concepts"] = [item["concepts"] for item in batch]
 
     return collated_batch
 

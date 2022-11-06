@@ -1,8 +1,10 @@
 # ------------------------- IMPORT MODULES ----------------------------------------
 
 # System Modules
-# import json
-from typing import List, Union, Tuple
+import json
+import nltk
+import numpy as np
+from typing import List, Union, Tuple, Optional
 
 # from nltk import word_tokenize
 from transformers import AutoTokenizer
@@ -88,7 +90,7 @@ class GODELTokenizer(TokenizerBase):
         self, 
         text: Union[str, List[str]], 
         text_type: str
-    ) -> Tuple[List[int], List]:
+    ) -> Tuple[Optional[List[int]]]:
 
         if text_type == "context":
             knowledge = ""
@@ -103,7 +105,7 @@ class GODELTokenizer(TokenizerBase):
             input_,
             add_special_tokens=False)["input_ids"]
         
-        return token_ids, []
+        return token_ids, None, None
     
     def decode_to_text(self, sequence: List[int]) -> str:
         for i in range(len(sequence)):
@@ -131,17 +133,17 @@ class GPT2Tokenizer(TokenizerBase):
         self, 
         text: Union[str, List[str]], 
         text_type: str
-    ) -> Tuple[List[int], List[int]]:
+    ) -> Tuple[List[int]]:
 
         if text_type == "context":
             input_ = f' {self.tokenizer.eos_token} '.join(text)
         elif text_type == "target":
-            input_ = f"{text} {self.tokenizer.eos_token}"
+            input_ = text
         else:
             raise ValueError("Unsupported text type!")
         
         token_ids = self.tokenizer(
-            input_,
+            f"{input_} {self.tokenizer.eos_token}",
             add_special_tokens=False)["input_ids"]
 
         current = (self.DS_SPEAKER_IDX
@@ -155,7 +157,7 @@ class GPT2Tokenizer(TokenizerBase):
                            if current == self.DS_SPEAKER_IDX
                            else self.DS_SPEAKER_IDX)
         
-        return token_ids, ds
+        return token_ids, ds, None
     
     def decode_to_text(self, sequence: List[int]) -> str:
         for i in range(len(sequence)):
@@ -166,5 +168,94 @@ class GPT2Tokenizer(TokenizerBase):
             skip_special_tokens=True
         )
         return decoded_text        
+
+
+class KnowledgeBridgedGODELTokenizer(TokenizerBase):
+    def __init__(self, vad_fpath, concept_fpath, num_top_concepts=3) -> None:
+        super().__init__()
+        self.tokenizer = AutoTokenizer.from_pretrained("microsoft/GODEL-v1_1-base-seq2seq")
+        self.tokenizer.add_special_tokens({
+            "bos_token": "<SOS>"
+        })
+        self.SOS_IDX = self.tokenizer.bos_token_id
+        self.EOS_IDX = self.tokenizer.eos_token_id
+        self.vocab_size = len(self.tokenizer)
+        self.instruction = ("Instruction: given a dialog context, " 
+                            + "you need to response empathically.")
+        self.num_top_concepts = num_top_concepts
+        self.stopwords = nltk.corpus.stopwords.words('english')
+        self.ignore_relations = set(["Antonym", "ExternalURL", "NotDesires", 
+                                     "NotHasProperty", "NotCapableOf", "dbpedia", 
+                                     "DistinctFrom", "EtymologicallyDerivedFrom", 
+                                     "EtymologicallyRelatedTo", "SymbolOf", "FormOf", 
+                                     "AtLocation", "DerivedFrom", "SymbolOf",
+                                     "CreatedBy", "Synonym", "MadeOf"])
+        with open(vad_fpath) as f:
+            self.vad = json.load(f)
+        with open(concept_fpath) as f:
+            self.concepts = json.load(f)
+    
+    @property
+    def supports_dialogue_states(self) -> bool:
+        return False
+    
+    @property
+    def is_knowledge_based(self) -> bool:
+        return True
+
+    def emotion_intensity(self, word):
+        if word not in self.vad:
+            return 0
+        v, a, _ = self.vad[word]
+        a /= 2
+        return (np.linalg.norm(
+            np.array([v, a]) - np.array([0.5, 0])) - 0.06467) / 0.607468
+
+    def encode_text(
+        self, 
+        text: Union[str, List[str]], 
+        text_type: str
+    ) -> Tuple[Union[List[int], List[List[int]]]]:
+        
+        concepts = []
+
+        if text_type == "context":
+            dialog_history = f' EOS '.join(text)
+            input_ = f"{self.instruction} [CONTEXT] {dialog_history}"
+            for token in self.tokenizer.tokenize(dialog_history):
+                token_concepts = []
+                token = token.lower()
+                if (token not in self.stopwords) and (token in self.concepts):
+                    for concept in self.concepts[token]:
+                        if ((concept[1] not in self.ignore_relations) and 
+                            (self.emotion_intensity(concept[0]) >= 0.6)):
+                            concept_ids = self.tokenizer(
+                                concept[0], 
+                                add_special_tokens=False
+                            )
+                            assert len(concept_ids) == 1
+                            token_concepts.append(concept_ids[0])
+                concepts.append(token_concepts)
+
+        elif text_type == "target":
+            input_ = f"{self.tokenizer.bos_token} {text} {self.tokenizer.eos_token}"
+        else:
+            raise ValueError("Unsupported text type!")
+        
+        token_ids = self.tokenizer(
+            f"{input_} {self.tokenizer.eos_token}",
+            add_special_tokens=False)["input_ids"]
+        
+        return token_ids, None, concepts
+    
+    def decode_to_text(self, sequence: List[int]) -> str:
+        for i in range(len(sequence)):
+            if sequence[i] == self.PAD_IDX:
+                break
+        decoded_text = self.tokenizer.decode(
+            sequence[:i], 
+            skip_special_tokens=True
+        )
+        return decoded_text
 
 # ---------------------------------------------------------------------------------

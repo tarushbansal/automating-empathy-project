@@ -7,7 +7,6 @@ from typing import Dict, List, Tuple
 import torch
 import torch.nn.functional as F
 import pytorch_lightning as pl
-from pytorch_lightning.utilities.distributed import rank_zero_only
 
 # User-defined Modules
 from base_classes import DialogueModelBase, TokenizerBase
@@ -39,27 +38,27 @@ class ModelSupervisor(pl.LightningModule):
         self.pred_n_grams = pred_n_grams
 
     def forward(self, batch: Dict) -> Tuple[torch.Tensor]:
+        input_kwargs = {}
+        if self.model.requires_emotion_label:
+            input_kwargs["emotion_label"] = batch["emotion"]
         if self.model.has_encoder:
-            logits = self.model(
-                source_seq=batch["context"],
-                target_seq=batch["target"],
-                source_dialogue_state=batch["context_dialogue_state"],
-                target_dialogue_state=batch["target_dialogue_state"],
-                emotion_label=batch["emotion"]
-            )
+            input_kwargs["source_seq"] = batch["context"]
+            input_kwargs["target_seq"] = batch["target"]
+            if self.tokenizer.supports_dialogue_states:
+                input_kwargs["source_dialogue_state"] = batch["context_dialogue_state"]
+                input_kwargs["target_dialogue_state"] = batch["target_dialogue_state"]
+            if self.tokenizer.is_knowledge_based:
+                input_kwargs["concepts"] = batch["concepts"]
+            logits = self.model(**input_kwargs)
             target_seq = batch["target"][:, 1:]
         else:
             input_seq = torch.cat((batch["context"], batch["target"]), dim=1)
-            input_dialogue_state = None
+            input_kwargs["input_seq"] = input_seq
             if self.tokenizer.supports_dialogue_states:
-                input_dialogue_state = torch.cat(
+                input_kwargs["input_dialogue_state"] = torch.cat(
                     (batch["context_dialogue_state"], 
                      batch["target_dialogue_state"]), dim=1)
-            logits = self.model(
-                input_seq=input_seq,
-                input_dialogue_state=input_dialogue_state,
-                emotion_label=batch["emotion"]
-            )
+            logits = self.model(**input_kwargs)
             target_seq = input_seq[:, 1:]
         return logits, target_seq
     
@@ -99,55 +98,58 @@ class ModelSupervisor(pl.LightningModule):
         log_probs = [log_probs[i] / len(enc_predictions[i]) for i in range(len(log_probs))]
         return contexts, targets, enc_targets, predictions, enc_predictions, log_probs
 
-    @rank_zero_only
     def test_epoch_end(self, test_data: List[Tuple]) -> None:
-        [batch_contexts, batch_targets, 
-         batch_enc_targets, batch_pred, 
-         batch_enc_pred, batch_log_probs] = zip(*test_data)
-        
-        targets, predictions = [], []
-        with open(f"{self.test_output_dir}/test_predictions.txt", "w") as f:
-            for i in range(len(batch_contexts)):
-                for j in range(len(batch_contexts[i])):
-                    context, target, prediction = (
-                        batch_contexts[i][j], 
-                        batch_targets[i][j], 
-                        batch_pred[i][j]
-                    )
-                    f.write(f"Context: {context}; Target: {target}; Predicted: {prediction}\n")
-                    targets.append([target.split(" ")])
-                    predictions.append(prediction.split(" "))
+        merged_data = [test_data]
+        if self.trainer.is_global_zero:
+            encoded_targets, targets, predictions, encoded_predictions, log_probs = [], [], [], [], []
+            with open(f"{self.test_output_dir}/test_predictions.txt", "w") as f:
+                for test_data in merged_data:
+                    [batch_contexts, batch_targets, 
+                    batch_enc_targets, batch_pred, 
+                    batch_enc_pred, batch_log_probs] = zip(*test_data)
+                    for i in range(len(batch_contexts)):
+                        for j in range(len(batch_contexts[i])):
+                            context, target, prediction = (
+                                batch_contexts[i][j], 
+                                batch_targets[i][j], 
+                                batch_pred[i][j]
+                            )
+                            f.write(f"Context: {context}; Target: {target}; Predicted: {prediction}\n")
+                            targets.append([target.split(" ")])
+                            predictions.append(prediction.split(" "))
 
-        encoded_targets = [target for batch in batch_enc_targets for target in batch]
-        encoded_predictions = [prediction for batch in batch_enc_pred for prediction in batch]
-        log_probs = [log_prob for batch in batch_log_probs for log_prob in batch]
+                    encoded_targets.extend([target for batch in batch_enc_targets for target in batch])
+                    encoded_predictions.extend([prediction for batch in batch_enc_pred for prediction in batch])
+                    log_probs.extend([log_prob for batch in batch_log_probs for log_prob in batch])
 
-        test_metrics = compute_test_metrics(
-            targets, 
-            predictions,
-            encoded_targets,
-            encoded_predictions,
-            self.pred_n_grams,
-            log_probs,
-            self.model.word_embeddings,
-        )
-        self.log_dict(test_metrics)
-        
-        if self.test_output_dir is not None:
-            with open(f"{self.test_output_dir}/test_metrics.json", "w") as f:
-                json.dump(test_metrics, f)
+            test_metrics = compute_test_metrics(
+                targets, 
+                predictions,
+                encoded_targets,
+                encoded_predictions,
+                self.pred_n_grams,
+                log_probs,
+                self.model.word_embeddings,
+            )
+            self.log_dict(test_metrics)
+            
+            if self.test_output_dir is not None:
+                with open(f"{self.test_output_dir}/test_metrics.json", "w") as f:
+                    json.dump(test_metrics, f)
 
     def beam_search(self, batch: Dict) -> Tuple[List[List[int]]]:
         ## BEAM SEARCH: Objective is to determine the most probable output sequence from the model
-        
+        batch = batch.copy()
+        batch.pop("target", None)
+        if self.tokenizer.supports_dialogue_states:
+            ds = batch["target_dialogue_state"][:, 0:1]
+        batch["target_dialogue_state"] = None
+
         # Set model in evaluation mode (Important to turn off dropout layers!!)
         self.model.eval()
 
         N, seq_len = batch["context"].size(dim=0), 0
         device = batch["context"].device
-
-        if self.tokenizer.supports_dialogue_states:
-            ds = batch["target_dialogue_state"][:, 0:1]
 
         batch_beam_prob = torch.zeros(N, 1, device=device)
         batch_beam = torch.empty(N, 1, 0, dtype=torch.long, device=device)
@@ -211,7 +213,7 @@ class ModelSupervisor(pl.LightningModule):
         optimizer = torch.optim.AdamW(
             self.parameters(), lr=self.initial_lr)
         scheduler = torch.optim.lr_scheduler.StepLR(
-            optimizer, step_size=10, gamma=0.9)
+            optimizer, step_size=2, gamma=0.9)
         return {
             "optimizer": optimizer,
             "lr_scheduler": scheduler

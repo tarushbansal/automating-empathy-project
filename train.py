@@ -95,7 +95,7 @@ def main():
 
         model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
         model_kwargs = config["model"]["kwargs"]
-        model = model_cls(**model_kwargs)
+        model = model_cls(tokenizer=tokenizer, **model_kwargs)
 
     else:
         if cli_args.dialogue_model is None:
@@ -104,25 +104,22 @@ def main():
 
         dirname = os.path.dirname(os.path.abspath(__file__))
         with open(f"{dirname}/configs.json") as f:
-            configs = json.load(f)
-            if cli_args.dialogue_model not in configs:
-                raise ValueError(
-                    f"Configuration not found for dialogue model {cli_args.dialogue_model}!")
-            model_config = configs[cli_args.dialogue_model]
+            model_config = getattr(json.load(f), cli_args.dialogue_model, {})
 
-        # Additional check for Hugging Face models
-        if (cli_args.dialogue_model in ["HuggingFaceEncoderDecoderModel", "HuggingFaceDecoderModel"]) and (
-            model_config["model_kwargs"]["model_name"] != model_config["tokenizer_kwargs"]["model_name"]):
-            raise ValueError("Pretrained model names supplied to tokenizer and model don't match!")
-
-        tokenizer_cls = getattr(__import__("data_tokenizers"), model_config["tokenizer_cls"])
+        model_cls = get_model_cls()
+        tokenizer_name = model_cls.tokenizer_cls()
+        if tokenizer_name is None:
+            raise ValueError(
+                "Must specify the tokenizer associated with the model as a static method!")
+        
+        tokenizer_cls = getattr(__import__("data_tokenizers"), tokenizer_name)
         if not issubclass(tokenizer_cls, TokenizerBase):
-            raise ValueError("Tokenizer must be derived from base class 'TokenizerBase'!")
-        tokenizer_kwargs = model_config["tokenizer_kwargs"]
+            raise ValueError(
+                "Tokenizer must be derived from base class 'TokenizerBase'!")
+        tokenizer_kwargs = getattr(model_config, "tokenizer_kwargs", {})
         tokenizer = tokenizer_cls(**tokenizer_kwargs)
 
-        model_kwargs = model_config["model_kwargs"]
-        model_cls = get_model_cls()
+        model_kwargs = getattr(model_config, "model_kwargs", {})
         model = model_cls(tokenizer=tokenizer, **model_kwargs)
     
     # Set up model supervisor

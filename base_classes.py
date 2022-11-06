@@ -37,12 +37,16 @@ class TokenizerBase:
     @property
     def supports_dialogue_states(self) -> bool:
         return False
+    
+    @property
+    def is_knowledge_based(self) -> bool:
+        return False
 
     def encode_text(
         self, 
         text: Union[str, List[str]], 
         text_type: str
-    ) -> Tuple[List[int], List[int]]:
+    ) -> Tuple[Optional[Union[List[int], List[List[int]]]]]:
         pass
 
     def decode_to_text(self, sequence: List[int]) -> str:
@@ -54,6 +58,14 @@ class DialogueModelBase(nn.Module):
         super().__init__()
         self.tokenizer = tokenizer
     
+    @staticmethod
+    def tokenizer_cls():
+        return None
+
+    @property
+    def requires_emotion_label(self) -> bool:
+        return False
+
     def create_padding_mask(self, batch_seq) -> Tuple[torch.Tensor]:
         padding_mask = (batch_seq != self.tokenizer.PAD_IDX)
         batch_seq = batch_seq.masked_fill(padding_mask == 0, 0)

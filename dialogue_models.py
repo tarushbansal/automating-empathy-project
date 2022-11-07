@@ -1,6 +1,8 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
+from typing import List, Tuple
+
 import torch
 import torch.nn as nn
 
@@ -11,7 +13,7 @@ from transformers import (
 )
 
 # User-Defined Modules
-from components import Decoder
+from components import Decoder, TransformerBlock
 from base_classes import EncoderDecoderModel, DecoderModel, TokenizerBase
 
 # ------------------------- IMPLEMENTATION ------------------------------------
@@ -21,10 +23,6 @@ class GODEL(EncoderDecoderModel):
         super().__init__(tokenizer)
         self.model = AutoModelForSeq2SeqLM.from_pretrained("microsoft/GODEL-v1_1-base-seq2seq")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
-    
-    @property
-    def word_embeddings(self):
-        return self.model.get_input_embeddings()
 
     @staticmethod
     def tokenizer_cls():
@@ -32,8 +30,8 @@ class GODEL(EncoderDecoderModel):
 
     def forward(
         self, 
-        source_seq: torch.Tensor, 
-        target_seq: torch.Tensor
+        source_seq: torch.LongTensor, 
+        target_seq: torch.LongTensor
     ) -> torch.Tensor:
 
         source_seq, source_mask = self.create_padding_mask(source_seq)
@@ -42,6 +40,83 @@ class GODEL(EncoderDecoderModel):
         out = self.model(
             input_ids=source_seq,
             attention_mask=source_mask,
+            decoder_input_ids=target_seq,
+            decoder_attention_mask=target_mask
+        )
+        return out.logits
+
+
+class KnowledgeBridgedGODEL(EncoderDecoderModel):
+    def __init__(
+        self, 
+        tokenizer: TokenizerBase, 
+        dropout: float = 0.5, 
+        forward_expansion: int = 4
+    ) -> None:
+
+        super().__init__(tokenizer)
+        self.model = AutoModelForSeq2SeqLM.from_pretrained("microsoft/GODEL-v1_1-base-seq2seq")
+        self.model.resize_token_embeddings(tokenizer.vocab_size)
+        self.emotional_context = TransformerBlock(
+            self.model.config.hidden_size,
+            self.model.config.num_attention_heads,
+            dropout=dropout,
+            forward_expansion=forward_expansion
+        )
+        self.vertex_embeddings = nn.Embedding(2, self.model.config.hidden_size)
+
+    @staticmethod
+    def tokenizer_cls():
+        return "KnowledgeBridgedGODELTokenizer"
+
+    def construct_emotional_context(
+        self,
+        context: torch.LongTensor, 
+        concepts: torch.LongTensor,
+        adjacency_mask: torch.BoolTensor
+    ) -> Tuple[torch.Tensor]:
+
+        context, context_mask = self.create_padding_mask(context)
+        concepts, concept_mask = self.create_padding_mask(concepts)
+        transf_context_mask = context_mask.unsqueeze(2) * context_mask.unsqueeze(1)
+        graph_attention_mask = torch.cat((transf_context_mask, adjacency_mask), dim=-1).unsqueeze(1)
+
+        model_embeddings = self.model.get_input_embeddings()
+        context_vert_embeds = self.vertex_embeddings(
+            torch.zeros(context.size(), dtype=torch.long, device=context.device))
+        context_embeds = model_embeddings(context) + context_vert_embeds
+        concept_vert_embeds = self.vertex_embeddings(
+            torch.ones(concepts.size(), dtype=torch.long, device=concepts.device))
+        concept_embeds = model_embeddings(concepts) + concept_vert_embeds
+        input_embeds = torch.cat((context_embeds, concept_embeds), dim=1)
+
+        emotional_context = self.emotional_context(
+            keys=input_embeds,
+            values=input_embeds,
+            queries=context_embeds,
+            mask=graph_attention_mask
+        )
+
+        emotional_context = torch.cat((emotional_context, concept_embeds), dim=1)
+        emotional_context_mask = torch.cat((context_mask, concept_mask), dim=1)
+
+        return emotional_context, emotional_context_mask
+
+    def forward(
+        self, 
+        source_seq: torch.LongTensor, 
+        target_seq: torch.LongTensor,
+        concepts: torch.LongTensor,
+        adjacency_mask: torch.BoolTensor
+    ) -> torch.Tensor:
+
+        emo_context, emo_context_mask = self.construct_emotional_context(
+            source_seq, concepts, adjacency_mask)
+        target_seq, target_mask = self.create_padding_mask(target_seq)
+
+        out = self.model(
+            inputs_embeds=emo_context,
+            attention_mask=emo_context_mask,
             decoder_input_ids=target_seq,
             decoder_attention_mask=target_mask
         )
@@ -62,7 +137,7 @@ class GPT2(DecoderModel):
     def tokenizer_cls():
         return "GPT2Tokenizer"
 
-    def forward(self, input_seq: torch.Tensor) -> torch.Tensor:
+    def forward(self, input_seq: torch.LongTensor) -> torch.Tensor:
         input_seq, input_mask = self.create_padding_mask(input_seq)
         
         out = self.model(
@@ -94,9 +169,9 @@ class PrependDialoGPT2(DecoderModel):
 
     def forward(
         self, 
-        input_seq: torch.Tensor, 
-        input_dialogue_state: torch.Tensor, 
-        emotion_label: torch.Tensor
+        input_seq: torch.LongTensor, 
+        input_dialogue_state: torch.LongTensor, 
+        emotion_label: torch.LongTensor
     ) -> torch.Tensor:
 
         input_seq, input_mask = self.create_padding_mask(input_seq)
@@ -158,9 +233,9 @@ class BertEncodedTransformer(EncoderDecoderModel):
     
     def forward(
         self,
-        source_seq: torch.Tensor,
-        target_seq: torch.Tensor,
-        emotion_label: torch.Tensor
+        source_seq: torch.LongTensor,
+        target_seq: torch.LongTensor,
+        emotion_label: torch.LongTensor
     ) -> torch.Tensor:
         
         encoder_out = self.bert(source_seq)[0][-1]

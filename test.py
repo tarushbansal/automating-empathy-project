@@ -42,6 +42,7 @@ def main():
         ckpt_path, 
         tokenizer=tokenizer, 
         model=model,
+        batch_size=cli_args.batch_size,
         test_output_dir=os.path.abspath(cli_args.pretrained_model_dir), 
         pred_beam_width=cli_args.pred_beam_width,
         max_pred_seq_len=cli_args.max_pred_seq_len,

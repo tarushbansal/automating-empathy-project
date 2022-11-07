@@ -63,6 +63,10 @@ class DialogueModelBase(nn.Module):
         return None
 
     @property
+    def word_embeddings(self):
+        return None
+        
+    @property
     def requires_emotion_label(self) -> bool:
         return False
 

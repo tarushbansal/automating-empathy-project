@@ -3,7 +3,7 @@
 # System Modules
 import random
 import numpy as np
-from typing import Tuple, Dict, Iterable
+from typing import Tuple, Dict, Iterable, List
 
 import torch
 import torch.utils.data as data
@@ -35,61 +35,22 @@ class Dataset(data.Dataset):
         item['emotion'] = self.tokenizer.emo_map[self.emotions[idx]]
 
         # Tokenize dialogue history / context
-        context, context_ds, concepts = self.tokenizer.encode_text(
+        context, context_ds, concepts, adjacency_mask = self.tokenizer.encode_text(
             self.contexts[idx], "context"
         )     
         item["context"] = context
         item["context_dialogue_state"] = context_ds
         item["concepts"] = concepts
+        item["adjacency_mask"] = adjacency_mask
 
         # Tokenize response utterance
-        target, target_ds, _ = self.tokenizer.encode_text(
+        target, target_ds, _, _ = self.tokenizer.encode_text(
             self.targets[idx], "target"
         )
         item['target'] = target
         item['target_dialogue_state'] = target_ds
         
         return item
-
-
-def collate_batch(batch, padding_idx):
-    """
-    Pads each context and target sequence with zeroes and converts to tensor
-    """
-
-    def pad_and_convert_to_tensor(sequences, max_len, padding_idx):
-        sequences = [seq + [padding_idx] * (max_len - len(seq)) 
-                     for seq in sequences]
-        return torch.LongTensor(sequences)
-    
-    context = [item["context"] for item in batch]
-    target = [item["target"] for item in batch]
-    emotion = [item["emotion"] for item in batch]
-    max_len_context_seq = max([len(seq) for seq in context])
-    max_len_target_seq = max([len(seq) for seq in target])
-
-    collated_batch = {
-        "context": pad_and_convert_to_tensor(
-            context, max_len_context_seq, padding_idx=padding_idx),
-        "target": pad_and_convert_to_tensor(
-            target, max_len_target_seq, padding_idx=padding_idx),
-        "emotion":  torch.LongTensor(emotion),
-        "context_dialogue_state": None,
-        "target_dialogue_state": None
-    }
-
-    if batch[0]["context_dialogue_state"] is not None:
-        context_dialogue_state = [item["context_dialogue_state"] for item in batch]
-        target_dialogue_state = [item["target_dialogue_state"]for item in batch]
-        collated_batch["context_dialogue_state"] = pad_and_convert_to_tensor(
-            context_dialogue_state, max_len_context_seq, padding_idx=0)
-        collated_batch["target_dialogue_state"] = pad_and_convert_to_tensor(
-            target_dialogue_state, max_len_target_seq, padding_idx=0)
-
-    if batch[0]["concepts"] is not None:
-        collated_batch["concepts"] = [item["concepts"] for item in batch]
-
-    return collated_batch
 
 
 class DataModule(pl.LightningDataModule):
@@ -144,7 +105,7 @@ class DataModule(pl.LightningDataModule):
             self.train_dataset,
             batch_size=self.batch_size, 
             shuffle=True,
-            collate_fn= lambda x: collate_batch(x, self.tokenizer.PAD_IDX),
+            collate_fn= self.collate_batch,
             num_workers=self.num_workers
         )
 
@@ -152,7 +113,7 @@ class DataModule(pl.LightningDataModule):
         return data.DataLoader(
             self.val_dataset,
             batch_size=self.batch_size,
-            collate_fn= lambda x: collate_batch(x, self.tokenizer.PAD_IDX),
+            collate_fn= self.collate_batch,
             num_workers=self.num_workers
         )
 
@@ -160,8 +121,71 @@ class DataModule(pl.LightningDataModule):
         return data.DataLoader(
             self.test_dataset,
             batch_size=self.batch_size,
-            collate_fn= lambda x: collate_batch(x, self.tokenizer.PAD_IDX),
+            collate_fn= self.collate_batch,
             num_workers=self.num_workers
         )
+    
+    def pad_mask_and_convert_to_tensor(
+        self, 
+        mask: List[List[int]], 
+        max_row_len: int, 
+        max_column_len: int
+    ) -> torch.BoolTensor:
+
+        for i in range(len(mask)):
+            mask[i] = [row + [0] * (max_row_len - len(row))
+                       for row in mask[i]]
+            for _ in range(max_column_len - len(mask[i])):
+                mask[i].append([0] * max_row_len)
+        
+        return torch.BoolTensor(mask)
+
+    def pad_seq_and_convert_to_tensor(
+        self, 
+        sequences: List[int], 
+        max_len: int, 
+        padding_idx: int
+    ) -> torch.LongTensor:
+
+        sequences = [seq + [padding_idx] * (max_len - len(seq)) 
+                        for seq in sequences]
+        
+        return torch.LongTensor(sequences)
+
+    def collate_batch(self, batch: List[Dict]) -> Dict[str, torch.Tensor]:        
+        context = [item["context"] for item in batch]
+        target = [item["target"] for item in batch]
+        emotion = [item["emotion"] for item in batch]
+        max_len_context_seq = max([len(seq) for seq in context])
+        max_len_target_seq = max([len(seq) for seq in target])
+
+        collated_batch = {
+            "context": self.pad_seq_and_convert_to_tensor(
+                context, max_len_context_seq, padding_idx=self.tokenizer.PAD_IDX),
+            "target": self.pad_seq_and_convert_to_tensor(
+                target, max_len_target_seq, padding_idx=self.tokenizer.PAD_IDX),
+            "emotion":  torch.LongTensor(emotion),
+            "context_dialogue_state": None,
+            "target_dialogue_state": None
+        }
+
+        if self.tokenizer.supports_dialogue_states:
+            context_dialogue_state = [item["context_dialogue_state"] for item in batch]
+            target_dialogue_state = [item["target_dialogue_state"]for item in batch]
+            collated_batch["context_dialogue_state"] = self.pad_seq_and_convert_to_tensor(
+                context_dialogue_state, max_len_context_seq, padding_idx=0)
+            collated_batch["target_dialogue_state"] = self.pad_seq_and_convert_to_tensor(
+                target_dialogue_state, max_len_target_seq, padding_idx=0)
+
+        if self.tokenizer.supports_knowledge_concepts:
+            concepts = [item["concepts"] for item in batch]
+            max_len_concept_seq = max([len(seq) for seq in concepts])
+            collated_batch["concepts"] = self.pad_seq_and_convert_to_tensor(
+                concepts, max_len_concept_seq, padding_idx=self.tokenizer.PAD_IDX)
+            adjacency_mask = [item["adjacency_mask"] for item in batch]
+            collated_batch["adjacency_mask"] = self.pad_mask_and_convert_to_tensor(
+                adjacency_mask, max_len_concept_seq, max_len_context_seq)
+
+        return collated_batch
 
 # -----------------------------------------------------------------------------

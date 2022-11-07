@@ -1,12 +1,13 @@
 # ------------------------- IMPORT MODULES ----------------------------------------
 
 # System Modules
+import os
 import json
-import nltk
 import numpy as np
 from typing import List, Union, Tuple, Optional
 
-# from nltk import word_tokenize
+import nltk
+from pattern.text.en import singularize
 from transformers import AutoTokenizer
 
 # User-Defined Modules
@@ -105,7 +106,7 @@ class GODELTokenizer(TokenizerBase):
             input_,
             add_special_tokens=False)["input_ids"]
         
-        return token_ids, None, None
+        return token_ids, None, None, None
     
     def decode_to_text(self, sequence: List[int]) -> str:
         for i in range(len(sequence)):
@@ -157,7 +158,7 @@ class GPT2Tokenizer(TokenizerBase):
                            if current == self.DS_SPEAKER_IDX
                            else self.DS_SPEAKER_IDX)
         
-        return token_ids, ds, None
+        return token_ids, ds, None, None
     
     def decode_to_text(self, sequence: List[int]) -> str:
         for i in range(len(sequence)):
@@ -190,9 +191,9 @@ class KnowledgeBridgedGODELTokenizer(TokenizerBase):
                                      "EtymologicallyRelatedTo", "SymbolOf", "FormOf", 
                                      "AtLocation", "DerivedFrom", "SymbolOf",
                                      "CreatedBy", "Synonym", "MadeOf"])
-        with open(vad_fpath) as f:
+        with open(os.path.abspath(vad_fpath)) as f:
             self.vad = json.load(f)
-        with open(concept_fpath) as f:
+        with open(os.path.abspath(concept_fpath)) as f:
             self.concepts = json.load(f)
     
     @property
@@ -218,24 +219,29 @@ class KnowledgeBridgedGODELTokenizer(TokenizerBase):
     ) -> Tuple[Union[List[int], List[List[int]]]]:
         
         concepts = []
+        concept_pos = []
+        adjacency_mask = []
 
         if text_type == "context":
             dialog_history = f' EOS '.join(text)
             input_ = f"{self.instruction} [CONTEXT] {dialog_history}"
-            for token in self.tokenizer.tokenize(dialog_history):
-                token_concepts = []
-                token = token.lower()
+            tokens = self.tokenizer.tokenize(dialog_history)
+            offset_len = len(self.tokenizer.tokenize(input_)) - len(tokens)
+            for i, token in enumerate(tokens):
+                token = singularize(token.lower().replace("▁", ""))
                 if (token not in self.stopwords) and (token in self.concepts):
                     for concept in self.concepts[token]:
                         if ((concept[1] not in self.ignore_relations) and 
                             (self.emotion_intensity(concept[0]) >= 0.6)):
                             concept_ids = self.tokenizer(
                                 concept[0], 
-                                add_special_tokens=False
-                            )
-                            assert len(concept_ids) == 1
-                            token_concepts.append(concept_ids[0])
-                concepts.append(token_concepts)
+                                add_special_tokens=False)["input_ids"]
+                            for id in concept_ids:
+                                concepts.append(id)
+                                concept_pos.append((offset_len + i, len(concepts) - 1))
+            adjacency_mask = [[0] * len(concepts)] * (len(tokens) + offset_len)
+            for (i, j) in concept_pos:
+                adjacency_mask[i][j] = 1
 
         elif text_type == "target":
             input_ = f"{self.tokenizer.bos_token} {text} {self.tokenizer.eos_token}"
@@ -246,7 +252,7 @@ class KnowledgeBridgedGODELTokenizer(TokenizerBase):
             f"{input_} {self.tokenizer.eos_token}",
             add_special_tokens=False)["input_ids"]
         
-        return token_ids, None, concepts
+        return token_ids, None, concepts, adjacency_mask
     
     def decode_to_text(self, sequence: List[int]) -> str:
         for i in range(len(sequence)):

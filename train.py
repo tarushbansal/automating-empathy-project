@@ -104,7 +104,7 @@ def main():
 
         dirname = os.path.dirname(os.path.abspath(__file__))
         with open(f"{dirname}/configs.json") as f:
-            model_config = getattr(json.load(f), cli_args.dialogue_model, {})
+            model_config = json.load(f).get(cli_args.dialogue_model, {})
 
         model_cls = get_model_cls()
         tokenizer_name = model_cls.tokenizer_cls()
@@ -116,16 +116,17 @@ def main():
         if not issubclass(tokenizer_cls, TokenizerBase):
             raise ValueError(
                 "Tokenizer must be derived from base class 'TokenizerBase'!")
-        tokenizer_kwargs = getattr(model_config, "tokenizer_kwargs", {})
+        tokenizer_kwargs = model_config.get("tokenizer_kwargs", {})
         tokenizer = tokenizer_cls(**tokenizer_kwargs)
 
-        model_kwargs = getattr(model_config, "model_kwargs", {})
+        model_kwargs = model_config.get("model_kwargs", {})
         model = model_cls(tokenizer=tokenizer, **model_kwargs)
     
     # Set up model supervisor
     model_supervisor = ModelSupervisor(
         tokenizer=tokenizer,
         model=model,
+        batch_size=cli_args.batch_size,
         initial_lr=cli_args.initial_lr,
         test_output_dir=logger.log_dir,
         pred_beam_width=cli_args.pred_beam_width,

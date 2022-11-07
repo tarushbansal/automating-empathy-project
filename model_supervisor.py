@@ -19,6 +19,7 @@ class ModelSupervisor(pl.LightningModule):
         self, 
         model: DialogueModelBase,
         tokenizer: TokenizerBase,
+        batch_size: int,
         initial_lr: float = 0.0001,
         test_output_dir: str = None,
         pred_beam_width: int = 1,
@@ -32,6 +33,7 @@ class ModelSupervisor(pl.LightningModule):
         self.model = model
         self.tokenizer = tokenizer
         self.initial_lr = initial_lr
+        self.batch_size = batch_size
         self.test_output_dir = test_output_dir
         self.pred_beam_width = pred_beam_width
         self.max_pred_seq_len = max_pred_seq_len
@@ -49,6 +51,7 @@ class ModelSupervisor(pl.LightningModule):
                 input_kwargs["target_dialogue_state"] = batch["target_dialogue_state"]
             if self.tokenizer.supports_knowledge_concepts:
                 input_kwargs["concepts"] = batch["concepts"]
+                input_kwargs["adjacency_mask"] = batch["adjacency_mask"]
             logits = self.model(**input_kwargs)
             target_seq = batch["target"][:, 1:]
         else:
@@ -69,9 +72,8 @@ class ModelSupervisor(pl.LightningModule):
             target_seq,
             ignore_index=self.tokenizer.PAD_IDX
         )
-        self.log(f"{stage}_loss", loss, prog_bar=True)
-        self.logger.experiment.add_scalars(
-            'loss', {stage: loss}, self.global_step) 
+        self.log(f"{stage}_loss", loss, prog_bar=True, batch_size=self.batch_size)
+        self.logger.experiment.add_scalars('loss', {stage: loss}, self.global_step) 
         return loss
 
     def training_step(self, batch: Dict, _) -> float:
@@ -84,9 +86,9 @@ class ModelSupervisor(pl.LightningModule):
     
     def validation_epoch_end(self, val_losses: List[float]) -> float:
         avg_val_loss = sum(val_losses) / len(val_losses)
-        self.log("avg_val_loss", avg_val_loss, prog_bar=True)
-        self.logger.experiment.add_scalars(
-            'loss', {'avg_val': avg_val_loss}, self.global_step) 
+        self.log("avg_val_loss", avg_val_loss, prog_bar=True, batch_size=self.batch_size)
+        self.logger.experiment.add_scalars('loss', {'avg_val': avg_val_loss}, self.global_step)
+        return avg_val_loss 
 
     def test_step(self, batch: Dict, _) -> Tuple[List]:
         contexts = [self.tokenizer.decode_to_text(context)

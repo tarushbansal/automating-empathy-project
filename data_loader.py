@@ -35,13 +35,13 @@ class Dataset(data.Dataset):
         item['emotion'] = self.tokenizer.emo_map[self.emotions[idx]]
 
         # Tokenize dialogue history / context
-        context, context_ds, concepts, adjacency_mask = self.tokenizer.encode_text(
+        context, context_ds, concepts, concept_mask = self.tokenizer.encode_text(
             self.contexts[idx], "context"
         )     
         item["context"] = context
         item["context_dialogue_state"] = context_ds
         item["concepts"] = concepts
-        item["adjacency_mask"] = adjacency_mask
+        item["concept_mask"] = concept_mask
 
         # Tokenize response utterance
         target, target_ds, _, _ = self.tokenizer.encode_text(
@@ -125,20 +125,37 @@ class DataModule(pl.LightningDataModule):
             num_workers=self.num_workers
         )
     
-    def pad_mask_and_convert_to_tensor(
+    def create_adjacency_mask(
         self, 
-        mask: List[List[int]], 
-        max_row_len: int, 
-        max_column_len: int
+        concept_mask: List[List[int]], 
+        max_context_len: int, 
+        max_concept_len: int
     ) -> torch.BoolTensor:
 
-        for i in range(len(mask)):
-            mask[i] = [row + [0] * (max_row_len - len(row))
-                       for row in mask[i]]
-            for _ in range(max_column_len - len(mask[i])):
-                mask[i].append([0] * max_row_len)
+        N = len(concept_mask)
+        # Pad concept_mask
+        for i in range(N):
+            concept_mask[i] = [row + [0] * (max_concept_len - len(row))
+                               for row in concept_mask[i]]
+            for _ in range(max_context_len - len(concept_mask[i])):
+                concept_mask[i].append([0] * max_concept_len)
         
-        return torch.BoolTensor(mask)
+        # Create adjacency mask A from submask C, identity matrix I and ones / zeros 
+        # A = [[1 C], [[0 1], I]]
+        concept_mask = torch.BoolTensor(concept_mask)
+        assert concept_mask.size() == (N, max_context_len, max_concept_len)
+        upper = torch.cat((
+            torch.ones(N, max_context_len, max_context_len), 
+            concept_mask), dim=-1)
+        prefix_len = len(getattr(self.tokenizer, "prefix", []))
+        lower = torch.cat((
+            torch.zeros(N, max_concept_len, prefix_len), 
+            torch.ones(N, max_concept_len, max_context_len - prefix_len),
+            torch.eye(max_concept_len, max_concept_len).unsqueeze(0).expand(N, -1, -1)
+            ), dim=-1)
+        adjacency_mask = torch.cat((upper, lower), dim=1)
+
+        return adjacency_mask
 
     def pad_seq_and_convert_to_tensor(
         self, 
@@ -182,9 +199,9 @@ class DataModule(pl.LightningDataModule):
             max_len_concept_seq = max([len(seq) for seq in concepts])
             collated_batch["concepts"] = self.pad_seq_and_convert_to_tensor(
                 concepts, max_len_concept_seq, padding_idx=self.tokenizer.PAD_IDX)
-            adjacency_mask = [item["adjacency_mask"] for item in batch]
-            collated_batch["adjacency_mask"] = self.pad_mask_and_convert_to_tensor(
-                adjacency_mask, max_len_concept_seq, max_len_context_seq)
+            concept_mask = [item["concept_mask"] for item in batch]
+            collated_batch["adjacency_mask"] = self.create_adjacency_mask(
+                concept_mask, max_len_context_seq, max_len_concept_seq)
 
         return collated_batch
 

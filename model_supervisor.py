@@ -93,12 +93,16 @@ class ModelSupervisor(pl.LightningModule):
     def test_step(self, batch: Dict, _) -> Tuple[List]:
         contexts = [self.tokenizer.decode_to_text(context)
                     for context in batch["context"].tolist()]
+        concepts = None
+        if self.tokenizer.supports_knowledge_concepts:
+            concepts = [self.tokenizer.decode_to_text(concepts)
+                        for concepts in batch["concepts"].tolist()]
         targets = [self.tokenizer.decode_to_text(enc) for enc in batch["target"].tolist()]
         enc_targets = [self.tokenizer.encode_text(target, "target")[0] for target in targets]
         enc_predictions, log_probs = self.beam_search(batch)
         predictions = [self.tokenizer.decode_to_text(enc) for enc in enc_predictions]
         log_probs = [log_probs[i] / len(enc_predictions[i]) for i in range(len(log_probs))]
-        return contexts, targets, enc_targets, predictions, enc_predictions, log_probs
+        return contexts, concepts, targets, enc_targets, predictions, enc_predictions, log_probs
 
     def test_epoch_end(self, test_data: List[Tuple]) -> None:
         merged_data = [test_data]
@@ -106,17 +110,18 @@ class ModelSupervisor(pl.LightningModule):
             encoded_targets, targets, predictions, encoded_predictions, log_probs = [], [], [], [], []
             with open(f"{self.test_output_dir}/test_predictions.txt", "w") as f:
                 for test_data in merged_data:
-                    [batch_contexts, batch_targets, 
-                    batch_enc_targets, batch_pred, 
-                    batch_enc_pred, batch_log_probs] = zip(*test_data)
+                    [batch_contexts, batch_concepts, batch_targets, 
+                     batch_enc_targets, batch_pred, 
+                     batch_enc_pred, batch_log_probs] = zip(*test_data)
                     for i in range(len(batch_contexts)):
                         for j in range(len(batch_contexts[i])):
                             context, target, prediction = (
-                                batch_contexts[i][j], 
+                                batch_contexts[i][j],
                                 batch_targets[i][j], 
                                 batch_pred[i][j]
                             )
-                            f.write(f"Context: {context}; Target: {target}; Predicted: {prediction}\n")
+                            concepts = "" if batch_concepts[i] is None else f"Concepts: {batch_concepts[i][j]}"
+                            f.write(f"Context: {context}; Target: {target}; Predicted: {prediction}; {concepts}\n")
                             targets.append([target.split(" ")])
                             predictions.append(prediction.split(" "))
 
@@ -215,7 +220,7 @@ class ModelSupervisor(pl.LightningModule):
         optimizer = torch.optim.AdamW(
             self.parameters(), lr=self.initial_lr)
         scheduler = torch.optim.lr_scheduler.StepLR(
-            optimizer, step_size=2, gamma=0.9)
+            optimizer, step_size=2, gamma=0.85)
         return {
             "optimizer": optimizer,
             "lr_scheduler": scheduler

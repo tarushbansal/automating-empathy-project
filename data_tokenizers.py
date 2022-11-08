@@ -181,10 +181,8 @@ class KnowledgeBridgedGODELTokenizer(TokenizerBase):
         self.SOS_IDX = self.tokenizer.bos_token_id
         self.EOS_IDX = self.tokenizer.eos_token_id
         self.vocab_size = len(self.tokenizer)
-        self.instruction = ("Instruction: given a dialog context, " 
-                            + "you need to response empathically.")
         self.num_top_concepts = num_top_concepts
-        self.stopwords = nltk.corpus.stopwords.words('english')
+        self.stopwords = set(nltk.corpus.stopwords.words('english'))
         self.ignore_relations = set(["Antonym", "ExternalURL", "NotDesires", 
                                      "NotHasProperty", "NotCapableOf", "dbpedia", 
                                      "DistinctFrom", "EtymologicallyDerivedFrom", 
@@ -195,6 +193,13 @@ class KnowledgeBridgedGODELTokenizer(TokenizerBase):
             self.vad = json.load(f)
         with open(os.path.abspath(concept_fpath)) as f:
             self.concepts = json.load(f)
+        
+        os.environ["TOKENIZERS_PARALLELISM"] = "false"
+        instruction = ("Instruction: given a dialog context, " 
+                       + "you need to response empathically.")
+        self.prefix = self.tokenizer(
+            f"{instruction} [CONTEXT] ",
+            add_special_tokens=False)["input_ids"]
     
     @property
     def supports_dialogue_states(self) -> bool:
@@ -220,39 +225,42 @@ class KnowledgeBridgedGODELTokenizer(TokenizerBase):
         
         concepts = []
         concept_pos = []
-        adjacency_mask = []
+        concept_mask = []
 
         if text_type == "context":
             dialog_history = f' EOS '.join(text)
-            input_ = f"{self.instruction} [CONTEXT] {dialog_history}"
             tokens = self.tokenizer.tokenize(dialog_history)
-            offset_len = len(self.tokenizer.tokenize(input_)) - len(tokens)
             for i, token in enumerate(tokens):
-                token = singularize(token.lower().replace("▁", ""))
+                if token[0] == "▁":
+                    token = token[1:]
+                token = singularize(token.lower())
                 if (token not in self.stopwords) and (token in self.concepts):
+                    num_concepts_added = 0
                     for concept in self.concepts[token]:
+                        if num_concepts_added == self.num_top_concepts:
+                            break
                         if ((concept[1] not in self.ignore_relations) and 
                             (self.emotion_intensity(concept[0]) >= 0.6)):
+                            num_concepts_added += 1
                             concept_ids = self.tokenizer(
                                 concept[0], 
                                 add_special_tokens=False)["input_ids"]
                             for id in concept_ids:
                                 concepts.append(id)
-                                concept_pos.append((offset_len + i, len(concepts) - 1))
-            adjacency_mask = [[0] * len(concepts)] * (len(tokens) + offset_len)
+                                concept_pos.append((len(self.prefix) + i, len(concepts) - 1))
+            token_ids = self.prefix + self.tokenizer.convert_tokens_to_ids(tokens)
+            concept_mask = [[0] * len(concepts)] * len(token_ids)
             for (i, j) in concept_pos:
-                adjacency_mask[i][j] = 1
+                concept_mask[i][j] = 1
 
         elif text_type == "target":
-            input_ = f"{self.tokenizer.bos_token} {text} {self.tokenizer.eos_token}"
+            token_ids = self.tokenizer(
+                f"{self.tokenizer.bos_token} {text} {self.tokenizer.eos_token}",
+                add_special_tokens=False)["input_ids"]
         else:
             raise ValueError("Unsupported text type!")
         
-        token_ids = self.tokenizer(
-            f"{input_} {self.tokenizer.eos_token}",
-            add_special_tokens=False)["input_ids"]
-        
-        return token_ids, None, concepts, adjacency_mask
+        return token_ids, None, concepts, concept_mask
     
     def decode_to_text(self, sequence: List[int]) -> str:
         for i in range(len(sequence)):

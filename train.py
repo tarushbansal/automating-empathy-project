@@ -177,7 +177,11 @@ def main():
     )
 
     # Test the model
-    trainer.test(model_supervisor, data_module)
+    trainer.test(
+        model_supervisor, 
+        data_module,
+        ckpt_path=load_val_ckpt_path(logger.log_dir)    
+    )
 
 
 if __name__ == "__main__":

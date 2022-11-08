@@ -101,6 +101,7 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
         out = self.model(
             inputs_embeds=input_embeds,
             attention_mask=attention_mask,
+            encoder_attention_mask=pad_mask,
             decoder_input_ids=target_seq,
             decoder_attention_mask=target_mask
         )

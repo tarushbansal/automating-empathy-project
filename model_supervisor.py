@@ -135,7 +135,7 @@ class ModelSupervisor(pl.LightningModule):
                 concepts = "" if len(self.concepts) == 0 else f"Concepts: {self.concepts[i]};"
                 f.write(f"Emotion Label: {emotion} Context: {context}; Target: {target}; Predicted: {prediction}; ")
                 f.write(f"{pred_emotion} {concepts}\n")
-                if pred_emotion == emotion:
+                if len(self.emo_predictions) != 0 and self.emo_predictions[i] == emotion:
                     accurate_emo_labels += 1
 
         test_metrics = compute_test_metrics(

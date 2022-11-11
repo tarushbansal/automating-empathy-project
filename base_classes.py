@@ -32,6 +32,7 @@ class TokenizerBase:
             'sentimental': 26, 'caring': 27, 'trusting': 28, 'ashamed': 29,
             'apprehensive': 30, 'faithful': 31
         }
+        self.rev_emo_map = {v : k for k, v in self.emo_map.items()}
         self.num_emo_labels = len(self.emo_map)
 
     @property
@@ -39,7 +40,7 @@ class TokenizerBase:
         return False
     
     @property
-    def supports_knowledge_concepts(self) -> bool:
+    def supports_external_knowledge(self) -> bool:
         return False
 
     def encode_text(

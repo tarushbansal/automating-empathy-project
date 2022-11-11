@@ -49,9 +49,8 @@ class ModelSupervisor(pl.LightningModule):
             if self.tokenizer.supports_dialogue_states:
                 input_kwargs["source_dialogue_state"] = batch["context_dialogue_state"]
                 input_kwargs["target_dialogue_state"] = batch["target_dialogue_state"]
-            if self.tokenizer.supports_knowledge_concepts:
-                input_kwargs["concepts"] = batch["concepts"]
-                input_kwargs["adjacency_mask"] = batch["adjacency_mask"]
+            if self.tokenizer.supports_external_knowledge:
+                input_kwargs["external_knowledge"] = batch["external_knowledge"]
             logits = self.model(**input_kwargs)
             target_seq = batch["target"][:, 1:]
         else:
@@ -72,9 +71,15 @@ class ModelSupervisor(pl.LightningModule):
             target_seq,
             ignore_index=self.tokenizer.PAD_IDX
         )
+        emo_loss = F.cross_entropy(
+            self.model.emo_logits,
+            batch["emotion"]
+        )
         self.log(f"{stage}_loss", loss, prog_bar=True, batch_size=self.batch_size)
-        self.logger.experiment.add_scalars('loss', {stage: loss}, self.global_step) 
-        return loss
+        self.logger.experiment.add_scalars('loss', {stage: loss}, self.global_step)
+        self.log(f"{stage}_emo_loss", emo_loss, prog_bar=True, batch_size=self.batch_size)
+        self.logger.experiment.add_scalars('emo_loss', {stage: loss}, self.global_step) 
+        return loss + 1 * emo_loss
 
     def training_step(self, batch: Dict, _) -> float:
         train_loss = self.forward_and_log_metrics(batch, "train")
@@ -90,59 +95,67 @@ class ModelSupervisor(pl.LightningModule):
         self.logger.experiment.add_scalars('loss', {'avg_val': avg_val_loss}, self.global_step)
         return avg_val_loss 
 
+    def on_test_start(self) -> None:
+        (self.contexts, self.targets, self.emotions, 
+         self.predictions, self.enc_targets, self.enc_predictions,
+         self.emo_predictions, self.log_probs, self.concepts) = ([] for _ in range(9))
+
     def test_step(self, batch: Dict, _) -> Tuple[List]:
-        contexts = [self.tokenizer.decode_to_text(context)
-                    for context in batch["context"].tolist()]
-        concepts = None
-        if self.tokenizer.supports_knowledge_concepts:
-            concepts = [self.tokenizer.decode_to_text(concepts)
-                        for concepts in batch["concepts"].tolist()]
         targets = [self.tokenizer.decode_to_text(enc) for enc in batch["target"].tolist()]
-        enc_targets = [self.tokenizer.encode_text(target, "target")[0] for target in targets]
+        self.targets.extend(targets)
+        self.enc_targets.extend([self.tokenizer.encode_text(target, "target")[0] for target in targets])
+        
         enc_predictions, log_probs = self.beam_search(batch)
-        predictions = [self.tokenizer.decode_to_text(enc) for enc in enc_predictions]
-        log_probs = [log_probs[i] / len(enc_predictions[i]) for i in range(len(log_probs))]
-        return contexts, concepts, targets, enc_targets, predictions, enc_predictions, log_probs
+        self.enc_predictions.extend(enc_predictions)
+        self.predictions.extend([self.tokenizer.decode_to_text(enc) for enc in enc_predictions])
+        self.log_probs.extend([log_probs[i] / len(enc_predictions[i]) for i in range(len(log_probs))])
 
-    def test_epoch_end(self, test_data: List[Tuple]) -> None:
-        merged_data = [test_data]
-        if self.trainer.is_global_zero:
-            encoded_targets, targets, predictions, encoded_predictions, log_probs = [], [], [], [], []
-            with open(f"{self.test_output_dir}/test_predictions.txt", "w") as f:
-                for test_data in merged_data:
-                    [batch_contexts, batch_concepts, batch_targets, 
-                     batch_enc_targets, batch_pred, 
-                     batch_enc_pred, batch_log_probs] = zip(*test_data)
-                    for i in range(len(batch_contexts)):
-                        for j in range(len(batch_contexts[i])):
-                            context, target, prediction = (
-                                batch_contexts[i][j],
-                                batch_targets[i][j], 
-                                batch_pred[i][j]
-                            )
-                            concepts = "" if batch_concepts[i] is None else f"Concepts: {batch_concepts[i][j]}"
-                            f.write(f"Context: {context}; Target: {target}; Predicted: {prediction}; {concepts}\n")
-                            targets.append([target.split(" ")])
-                            predictions.append(prediction.split(" "))
+        self.contexts.extend([self.tokenizer.decode_to_text(context) for context in batch["context"].tolist()])
+        self.emotions.extend([self.tokenizer.rev_emo_map[emo_idx] for emo_idx in batch["emotion"].tolist()])
+        
+        if self.tokenizer.supports_external_knowledge:
+            self.emo_predictions.extend([self.tokenizer.rev_emo_map[emo_idx]
+                for emo_idx in torch.max(torch.softmax(self.model.emo_logits, dim=-1), dim=-1)[1].tolist()])
+            self.concepts.extend([self.tokenizer.decode_to_text(concepts)
+                        for concepts in batch["external_knowledge"]["concepts"].tolist()])
 
-                    encoded_targets.extend([target for batch in batch_enc_targets for target in batch])
-                    encoded_predictions.extend([prediction for batch in batch_enc_pred for prediction in batch])
-                    log_probs.extend([log_prob for batch in batch_log_probs for log_prob in batch])
+    def test_epoch_end(self, _) -> None:
+        N = len(self.contexts)
+        accurate_emo_labels = 0
 
-            test_metrics = compute_test_metrics(
-                targets, 
-                predictions,
-                encoded_targets,
-                encoded_predictions,
-                self.pred_n_grams,
-                log_probs,
-                self.model.word_embeddings,
-            )
-            self.log_dict(test_metrics)
-            
-            if self.test_output_dir is not None:
-                with open(f"{self.test_output_dir}/test_metrics.json", "w") as f:
-                    json.dump(test_metrics, f)
+        with open(f"{self.test_output_dir}/test_predictions.txt", "w") as f:
+            for i in range(N):
+                context, target, prediction, emotion = (
+                    self.contexts[i],
+                    self.targets[i], 
+                    self.predictions[i],
+                    self.emotions[i]
+                )
+                pred_emotion = "" if len(self.emo_predictions) == 0 else f"Predicted Emotion label: {self.emo_predictions[i]};"
+                concepts = "" if len(self.concepts) == 0 else f"Concepts: {self.concepts[i]};"
+                f.write(f"Emotion Label: {emotion} Context: {context}; Target: {target}; Predicted: {prediction}; ")
+                f.write(f"{pred_emotion} {concepts}\n")
+                if pred_emotion == emotion:
+                    accurate_emo_labels += 1
+
+        test_metrics = compute_test_metrics(
+            self.targets, 
+            self.predictions,
+            self.enc_targets,
+            self.enc_predictions,
+            self.pred_n_grams,
+            self.log_probs,
+            self.model.word_embeddings,
+        )
+
+        if len(self.emo_predictions) != 0:
+            test_metrics["emo_accuracy"] = accurate_emo_labels / N
+
+        self.log_dict(test_metrics)
+        
+        if self.test_output_dir is not None:
+            with open(f"{self.test_output_dir}/test_metrics.json", "w") as f:
+                json.dump(test_metrics, f)
 
     def beam_search(self, batch: Dict) -> Tuple[List[List[int]]]:
         ## BEAM SEARCH: Objective is to determine the most probable output sequence from the model

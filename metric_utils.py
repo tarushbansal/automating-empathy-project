@@ -16,8 +16,8 @@ from nltk.translate.nist_score import corpus_nist
 
     
 def compute_test_metrics(
-    targets: List[List[List[str]]], 
-    predictions: List[List[str]],
+    targets: List[str], 
+    predictions: List[str],
     encoded_targets: List[List[int]],
     encoded_predictions: List[List[int]],
     pred_n_grams: int = 4, 
@@ -30,6 +30,9 @@ def compute_test_metrics(
     avg_bow, extrema_bow, greedy_bow = [], [], []
 
     for i in range(len(targets)):
+        targets[i] = [targets[i].split(" ")]
+        predictions[i] = predictions[i].split(" ")
+
         # DIST - unigrams and bigrams
         unique_unigrams.update([tuple(predictions[i][j:j+1])
                                 for j in range(len(predictions[i]))])

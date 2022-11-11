@@ -72,8 +72,8 @@ def main():
               " model inputs will be masked!")
 
     # Set up data module
-    context_data = np.load(f"{dataset_dir}/test/contexts.npy", allow_pickle=True)
-    target_data = np.load(f"{dataset_dir}/test/targets.npy", allow_pickle=True)
+    contexts = np.load(f"{dataset_dir}/test/contexts.npy", allow_pickle=True)
+    targets = np.load(f"{dataset_dir}/test/targets.npy", allow_pickle=True)
     
     class TestDataset(torch.utils.data.Dataset):
         def __init__(self, context: Iterable) -> None:
@@ -84,21 +84,20 @@ def main():
             return self.context[idx]
 
     test_dataloader = torch.utils.data.DataLoader(
-        TestDataset(context_data),
+        TestDataset(contexts),
         batch_size=cli_args.batch_size,
         num_workers=max(1, os.cpu_count() // 4),
         collate_fn=lambda x: x
     )
 
-    targets = [[seq.split(" ")] for seq in target_data]
-    enc_targets = [tokenizer(seq).input_ids for seq in target_data]
+    enc_targets = [tokenizer(seq).input_ids for seq in targets]
     predictions, enc_predictions = [], []
 
     print("Generating predictions from model...")
     for batch in tqdm(test_dataloader):
         outputs = model_generation.generate(batch)
         enc_predictions.extend(outputs)
-        predictions.extend([tokenizer.decode(enc, skip_special_tokens=True).split(" ")
+        predictions.extend([tokenizer.decode(enc, skip_special_tokens=True)
                             for enc in outputs])
     print("Done.")
 
@@ -119,7 +118,7 @@ def main():
     
     if os.path.isdir(dir):
         with open(f"{dir}/test_predictions.txt", "w") as f:
-            for context, target, prediction in zip(context_data, target_data, predictions):
+            for context, target, prediction in zip(contexts, targets, predictions):
                 prediction = " ".join(prediction)
                 f.write(f"Context: {context}; Target: {target}; Predicted: {prediction}\n")
         with open(f"{dir}/test_metrics.json", "w") as f:

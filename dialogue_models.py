@@ -1,7 +1,7 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
-from typing import Tuple
+from typing import Tuple, Dict
 
 import torch
 import torch.nn as nn
@@ -56,6 +56,7 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
         self.model = AutoModelForSeq2SeqLM.from_pretrained("microsoft/GODEL-v1_1-base-seq2seq")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
         self.graph_embeddings = nn.Embedding(2, self.model.config.hidden_size)
+        self.emo_linear = nn.Linear(self.model.config.hidden_size, self.tokenizer.num_emo_labels)
 
     @staticmethod
     def tokenizer_cls():
@@ -90,12 +91,11 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
         self, 
         source_seq: torch.LongTensor, 
         target_seq: torch.LongTensor,
-        concepts: torch.LongTensor,
-        adjacency_mask: torch.BoolTensor
+        external_knowledge: Dict[str, torch.Tensor]
     ) -> torch.Tensor:
 
-        input_embeds, pad_mask = self.knowledge_enriched_context(source_seq, concepts)
-        attention_mask = torch.minimum(pad_mask.unsqueeze(1), adjacency_mask)
+        input_embeds, pad_mask = self.knowledge_enriched_context(source_seq, external_knowledge["concepts"])
+        attention_mask = torch.minimum(pad_mask.unsqueeze(1), external_knowledge["adjacency_mask"])
         target_seq, target_mask = self.create_padding_mask(target_seq)
 
         out = self.model(
@@ -105,6 +105,14 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
             decoder_input_ids=target_seq,
             decoder_attention_mask=target_mask
         )
+
+        emo_intensities = torch.cat(
+            (external_knowledge["context_emo_intensity"], 
+             external_knowledge["concept_emo_intensity"]), dim=1)
+        sum_weights = torch.softmax(emo_intensities, dim=1).unsqueeze(2)
+        c = torch.sum(sum_weights * out.encoder_last_hidden_state, dim=1)
+        self.emo_logits = self.emo_linear(c)
+
         return out.logits
 
 

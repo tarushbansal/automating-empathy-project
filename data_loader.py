@@ -3,7 +3,7 @@
 # System Modules
 import random
 import numpy as np
-from typing import Tuple, Dict, Iterable, List
+from typing import Tuple, Dict, Iterable, List, Union
 
 import torch
 import torch.utils.data as data
@@ -35,16 +35,15 @@ class Dataset(data.Dataset):
         item['emotion'] = self.tokenizer.emo_map[self.emotions[idx]]
 
         # Tokenize dialogue history / context
-        context, context_ds, concepts, concept_mask = self.tokenizer.encode_text(
+        context, context_ds, external_knowledge = self.tokenizer.encode_text(
             self.contexts[idx], "context"
         )     
         item["context"] = context
         item["context_dialogue_state"] = context_ds
-        item["concepts"] = concepts
-        item["concept_mask"] = concept_mask
+        item["external_knowledge"] = external_knowledge
 
         # Tokenize response utterance
-        target, target_ds, _, _ = self.tokenizer.encode_text(
+        target, target_ds, _ = self.tokenizer.encode_text(
             self.targets[idx], "target"
         )
         item['target'] = target
@@ -125,6 +124,39 @@ class DataModule(pl.LightningDataModule):
             num_workers=self.num_workers
         )
     
+    def collate_batch(self, batch: List[Dict]) -> Dict[str, Union[torch.Tensor, Dict[str, torch.Tensor]]]:        
+        context = [item["context"] for item in batch]
+        target = [item["target"] for item in batch]
+        emotion = [item["emotion"] for item in batch]
+
+        max_len_context_seq = max([len(seq) for seq in context])
+        max_len_target_seq = max([len(seq) for seq in target])
+
+        collated_batch = {
+            "context": self.pad_seq_and_convert_to_tensor(
+                context, max_len_context_seq, padding_idx=self.tokenizer.PAD_IDX),
+            "target": self.pad_seq_and_convert_to_tensor(
+                target, max_len_target_seq, padding_idx=self.tokenizer.PAD_IDX),
+            "emotion":  torch.LongTensor(emotion),
+        }
+
+        if self.tokenizer.supports_dialogue_states:
+            self.add_dialogue_states(
+                collated_batch, 
+                batch, 
+                max_len_context_seq,
+                max_len_target_seq
+            )
+
+        if self.tokenizer.supports_external_knowledge:
+            self.add_external_knowledge(
+                collated_batch, 
+                batch, 
+                max_len_context_seq
+            )
+
+        return collated_batch
+
     def create_adjacency_mask(
         self, 
         concept_mask: List[List[int]], 
@@ -161,48 +193,57 @@ class DataModule(pl.LightningDataModule):
         self, 
         sequences: List[int], 
         max_len: int, 
-        padding_idx: int
-    ) -> torch.LongTensor:
+        padding_idx: int,
+        dtype: torch.dtype = torch.long
+    ) -> torch.Tensor:
 
-        sequences = [seq + [padding_idx] * (max_len - len(seq)) 
-                        for seq in sequences]
+        sequences = [seq + [padding_idx] * (max_len - len(seq)) for seq in sequences]
         
-        return torch.LongTensor(sequences)
+        return torch.tensor(sequences, dtype=dtype)
 
-    def collate_batch(self, batch: List[Dict]) -> Dict[str, torch.Tensor]:        
-        context = [item["context"] for item in batch]
-        target = [item["target"] for item in batch]
-        emotion = [item["emotion"] for item in batch]
-        max_len_context_seq = max([len(seq) for seq in context])
-        max_len_target_seq = max([len(seq) for seq in target])
+    def add_dialogue_states(
+        self, 
+        collated_batch: Dict[str, torch.Tensor], 
+        batch: List[Dict], 
+        max_len_context_seq: int,
+        max_len_target_seq: int
+    ) -> None:
 
-        collated_batch = {
-            "context": self.pad_seq_and_convert_to_tensor(
-                context, max_len_context_seq, padding_idx=self.tokenizer.PAD_IDX),
-            "target": self.pad_seq_and_convert_to_tensor(
-                target, max_len_target_seq, padding_idx=self.tokenizer.PAD_IDX),
-            "emotion":  torch.LongTensor(emotion),
-            "context_dialogue_state": None,
-            "target_dialogue_state": None
-        }
+        context_dialogue_state = [item["context_dialogue_state"] for item in batch]
+        target_dialogue_state = [item["target_dialogue_state"]for item in batch]
+        
+        collated_batch["context_dialogue_state"] = self.pad_seq_and_convert_to_tensor(
+            context_dialogue_state, max_len_context_seq, padding_idx=0)
+        collated_batch["target_dialogue_state"] = self.pad_seq_and_convert_to_tensor(
+            target_dialogue_state, max_len_target_seq, padding_idx=0)
 
-        if self.tokenizer.supports_dialogue_states:
-            context_dialogue_state = [item["context_dialogue_state"] for item in batch]
-            target_dialogue_state = [item["target_dialogue_state"]for item in batch]
-            collated_batch["context_dialogue_state"] = self.pad_seq_and_convert_to_tensor(
-                context_dialogue_state, max_len_context_seq, padding_idx=0)
-            collated_batch["target_dialogue_state"] = self.pad_seq_and_convert_to_tensor(
-                target_dialogue_state, max_len_target_seq, padding_idx=0)
+    def add_external_knowledge(
+        self, 
+        collated_batch: Dict[str, torch.Tensor], 
+        batch: List[Dict], 
+        max_len_context_seq: int
+    ) -> None:
 
-        if self.tokenizer.supports_knowledge_concepts:
-            concepts = [item["concepts"] for item in batch]
-            max_len_concept_seq = max([len(seq) for seq in concepts])
-            collated_batch["concepts"] = self.pad_seq_and_convert_to_tensor(
-                concepts, max_len_concept_seq, padding_idx=self.tokenizer.PAD_IDX)
-            concept_mask = [item["concept_mask"] for item in batch]
-            collated_batch["adjacency_mask"] = self.create_adjacency_mask(
-                concept_mask, max_len_context_seq, max_len_concept_seq)
-
-        return collated_batch
+        concepts = [item["external_knowledge"]["concepts"] for item in batch]
+        context_emo_intensity = [item["external_knowledge"]["context_emo_intensity"] for item in batch]
+        concept_emo_intensity = [item["external_knowledge"]["concept_emo_intensity"] for item in batch]
+        concept_mask = [item["external_knowledge"]["concept_mask"] for item in batch]
+        max_len_concept_seq = max([len(seq) for seq in concepts])
+        
+        concepts = self.pad_seq_and_convert_to_tensor(
+            concepts, max_len_concept_seq, padding_idx=self.tokenizer.PAD_IDX)
+        context_emo_intensity = self.pad_seq_and_convert_to_tensor(
+            context_emo_intensity, max_len_context_seq, padding_idx=0, dtype=torch.float32)
+        concept_emo_intensity = self.pad_seq_and_convert_to_tensor(
+            concept_emo_intensity, max_len_concept_seq, padding_idx=0, dtype=torch.float32)
+        adjacency_mask = self.create_adjacency_mask(
+            concept_mask, max_len_context_seq, max_len_concept_seq)
+        
+        collated_batch["external_knowledge"] = {
+            "concepts": concepts,
+            "adjacency_mask": adjacency_mask,
+            "context_emo_intensity": context_emo_intensity,
+            "concept_emo_intensity": concept_emo_intensity
+        } 
 
 # -----------------------------------------------------------------------------

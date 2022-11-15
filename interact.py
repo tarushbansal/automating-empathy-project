@@ -8,9 +8,10 @@ import argparse
 import torch
 
 # User-defined Modules
-from model_supervisor import ModelSupervisor
-from utils import load_val_ckpt_path, load_config
 from base_classes import TokenizerBase
+from model_supervisor import ModelSupervisor
+from data_loader import collate_batch
+from utils import load_val_ckpt_path, load_config
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -60,21 +61,15 @@ def main():
     model_supervisor = ModelSupervisor.load_from_checkpoint(
         ckpt_path, 
         tokenizer=tokenizer, 
-        model=model, 
+        model=model,
         pred_beam_width=cli_args.pred_beam_width,
         max_pred_seq_len=cli_args.max_pred_seq_len,
     )
 
-    # Initialise target dialogue state to listener (if supported)
-    batch = {}
-    batch["target_dialogue_state"] = None
-    if tokenizer.supports_dialogue_states:
-        batch["target_dialogue_state"] = torch.LongTensor([[tokenizer.DS_LISTENER_IDX]])
-
     # Run main interface loop
     context = []
     initialise_interface()
-    batch["emotion"] = emotion_loop(tokenizer)
+    emotion = emotion_loop(tokenizer)
 
     while True:
         speaker_utterance = input(f"Speaker: ")
@@ -84,15 +79,19 @@ def main():
         if speaker_utterance.strip() == "<clear>":
             context = []
             initialise_interface()
-            batch["emotion"] = emotion_loop(tokenizer)
+            emotion = emotion_loop(tokenizer)
             continue
         
         context.append(speaker_utterance)
-        enc_context, context_ds = tokenizer.encode_text(context, "context")
-        batch["context"] = torch.LongTensor([enc_context])
-        batch["context_dialogue_state"] = None
-        if tokenizer.supports_dialogue_states:
-            batch["context_dialogue_state"] = torch.LongTensor([context_ds])
+        enc_context, context_ds, external_knowledge = tokenizer.encode_text(context, "context")
+        batch = collate_batch([{
+            "context": enc_context,
+            "context_dialogue_state": context_ds,
+            "external_knowledge": external_knowledge,
+            "target": [],
+            "target_dialogue_state": [tokenizer.DS_LISTENER_IDX],
+            "emotion": emotion
+        }], tokenizer)
 
         response, log_prob = model_supervisor.beam_search(batch)
         decoded_reponse = tokenizer.decode_to_text(response[0])

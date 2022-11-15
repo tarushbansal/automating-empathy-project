@@ -43,14 +43,14 @@ class ModelSupervisor(pl.LightningModule):
         input_kwargs = {}
         if self.model.requires_emotion_label:
             input_kwargs["emotion_label"] = batch["emotion"]
+        if self.tokenizer.supports_external_knowledge:
+            input_kwargs["external_knowledge"] = batch["external_knowledge"]
         if self.model.has_encoder:
             input_kwargs["source_seq"] = batch["context"]
             input_kwargs["target_seq"] = batch["target"]
             if self.tokenizer.supports_dialogue_states:
                 input_kwargs["source_dialogue_state"] = batch["context_dialogue_state"]
                 input_kwargs["target_dialogue_state"] = batch["target_dialogue_state"]
-            if self.tokenizer.supports_external_knowledge:
-                input_kwargs["external_knowledge"] = batch["external_knowledge"]
             logits = self.model(**input_kwargs)
             target_seq = batch["target"][:, 1:]
         else:
@@ -71,15 +71,21 @@ class ModelSupervisor(pl.LightningModule):
             target_seq,
             ignore_index=self.tokenizer.PAD_IDX
         )
-        emo_loss = F.cross_entropy(
-            self.model.emo_logits,
-            batch["emotion"]
-        )
+        emo_loss, emo_attn_loss = 0, 0
+        if hasattr(self.model, "emo_logits"):
+            emo_loss = F.cross_entropy(
+                self.model.emo_logits,
+                batch["emotion"]
+            )
+            self.log(f"{stage}_emo_loss", emo_loss, prog_bar=True, batch_size=self.batch_size)
+            self.logger.experiment.add_scalars('emo_loss', {stage: emo_loss}, self.global_step)
+        if hasattr(self.model, "emo_attn_loss"):
+            emo_attn_loss = self.model.emo_attn_loss
+            self.log(f"{stage}_emo_attn_loss", emo_attn_loss, prog_bar=True, batch_size=self.batch_size)
+            self.logger.experiment.add_scalars('emo_attn_loss', {stage: emo_attn_loss}, self.global_step)  
         self.log(f"{stage}_loss", loss, prog_bar=True, batch_size=self.batch_size)
         self.logger.experiment.add_scalars('loss', {stage: loss}, self.global_step)
-        self.log(f"{stage}_emo_loss", emo_loss, prog_bar=True, batch_size=self.batch_size)
-        self.logger.experiment.add_scalars('emo_loss', {stage: loss}, self.global_step) 
-        return loss + 1 * emo_loss
+        return loss + 1 * emo_loss + 0.1 * emo_attn_loss
 
     def training_step(self, batch: Dict, _) -> float:
         train_loss = self.forward_and_log_metrics(batch, "train")
@@ -114,8 +120,9 @@ class ModelSupervisor(pl.LightningModule):
         self.emotions.extend([self.tokenizer.rev_emo_map[emo_idx] for emo_idx in batch["emotion"].tolist()])
         
         if self.tokenizer.supports_external_knowledge:
-            self.emo_predictions.extend([self.tokenizer.rev_emo_map[emo_idx]
-                for emo_idx in torch.max(torch.softmax(self.model.emo_logits, dim=-1), dim=-1)[1].tolist()])
+            if hasattr(self.model, "emo_logits"):
+                self.emo_predictions.extend([self.tokenizer.rev_emo_map[emo_idx]
+                    for emo_idx in torch.max(torch.softmax(self.model.emo_logits, dim=-1), dim=-1)[1].tolist()])
             self.concepts.extend([self.tokenizer.decode_to_text(concepts)
                         for concepts in batch["external_knowledge"]["concepts"].tolist()])
 

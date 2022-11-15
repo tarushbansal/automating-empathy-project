@@ -113,6 +113,8 @@ class GODELTokenizer(TokenizerBase):
         return token_ids, None, None
     
     def decode_to_text(self, sequence: List[int]) -> str:
+        if len(sequence) == 0:
+            return ""
         for i in range(len(sequence)):
             if sequence[i] == self.PAD_IDX:
                 break
@@ -165,6 +167,8 @@ class GPT2Tokenizer(TokenizerBase):
         return token_ids, ds, None
     
     def decode_to_text(self, sequence: List[int]) -> str:
+        if len(sequence) == 0:
+            return ""
         for i in range(len(sequence)):
             if sequence[i] == self.PAD_IDX:
                 break
@@ -175,35 +179,32 @@ class GPT2Tokenizer(TokenizerBase):
         return decoded_text        
 
 
-class KnowledgeBridgedGODELTokenizer(GODELTokenizer):
-    def __init__(self, vad_fpath, concept_fpath, num_top_concepts=3) -> None:
+class KnowledgeBridgedGODELTokenizer(TokenizerBase):
+    def __init__(
+        self,
+        num_top_concepts: int, 
+        max_num_concepts: int
+    ) -> None:
+
         super().__init__()
-        self.num_top_concepts = num_top_concepts
-        self.stopwords = set(nltk.corpus.stopwords.words('english'))
-        self.ignore_relations = set(["Antonym", "ExternalURL", "NotDesires", 
-                                     "NotHasProperty", "NotCapableOf", "dbpedia", 
-                                     "DistinctFrom", "EtymologicallyDerivedFrom", 
-                                     "EtymologicallyRelatedTo", "SymbolOf", "FormOf", 
-                                     "AtLocation", "DerivedFrom", "SymbolOf",
-                                     "CreatedBy", "Synonym", "MadeOf"])
-        with open(os.path.abspath(vad_fpath)) as f:
-            self.vad = json.load(f)
-        with open(os.path.abspath(concept_fpath)) as f:
-            self.concepts = json.load(f)
-        
-        self.prefix = []
+        self.tokenizer = AutoTokenizer.from_pretrained(
+            "microsoft/GODEL-v1_1-base-seq2seq"
+        )
+        self.tokenizer.add_special_tokens({
+            "bos_token": "<SOS>"
+        })
+        self.SOS_IDX = self.tokenizer.bos_token_id
+        self.EOS_IDX = self.tokenizer.eos_token_id
+        self.vocab_size = len(self.tokenizer)
+        self.external_knowledge = ExternalKnowlege(
+            self.tokenizer,
+            num_top_concepts,
+            max_num_concepts
+        )
     
     @property
     def supports_external_knowledge(self) -> bool:
         return True
-
-    def emotion_intensity(self, word):
-        if word not in self.vad:
-            return 0
-        v, a, _ = self.vad[word]
-        a /= 2
-        return (np.linalg.norm(
-            np.array([v, a]) - np.array([0.5, 0])) - 0.06467) / 0.607468
 
     def encode_text(
         self, 
@@ -211,41 +212,15 @@ class KnowledgeBridgedGODELTokenizer(GODELTokenizer):
         text_type: str
     ) -> Tuple[Union[List[int], Dict[str, List]]]:
         
-        concepts = []
-        concept_pos = []
-        concept_mask = []
-        context_emo_intensity = []
-        concept_emo_intensity = []
+        external_knowledge = None
 
         if text_type == "context":
-            # concepts = self.tokenizer("[KNOWLEDGE]", add_special_tokens=False)["input_ids"]
+            # Tokenize dialog history and retrieve related concepts and emo intensities
             dialog_history = f' EOS '.join(text)
             tokens = self.tokenizer.tokenize(dialog_history)
-            for i, token in enumerate(tokens):
-                context_emo_intensity.append(self.emotion_intensity(token))
-                if token[0] == "▁":
-                    token = token[1:]
-                token = singularize(token.lower())
-                if (token not in self.stopwords) and (token in self.concepts):
-                    num_concepts_added = 0
-                    for concept in self.concepts[token]:
-                        if num_concepts_added == self.num_top_concepts:
-                            break
-                        if ((concept[1] not in self.ignore_relations) and 
-                            (self.emotion_intensity(concept[0]) >= 0.6)):
-                            num_concepts_added += 1
-                            concept_ids = self.tokenizer(
-                                concept[0], 
-                                add_special_tokens=False)["input_ids"]
-                            emo_intensity = self.emotion_intensity(concept[0])
-                            for id in concept_ids:
-                                concepts.append(id)
-                                concept_emo_intensity.append(emo_intensity)
-                                concept_pos.append((len(self.prefix) + i, len(concepts) - 1))
-            token_ids = self.prefix + self.tokenizer.convert_tokens_to_ids(tokens)
-            concept_mask = [[0] * len(concepts)] * len(token_ids)
-            for (i, j) in concept_pos:
-                concept_mask[i][j] = 1
+            tokens = [token[1:] if token[0] == "▁" else token for token in tokens]
+            external_knowledge = self.external_knowledge.retrieve(tokens)
+            token_ids = self.tokenizer.convert_tokens_to_ids(tokens)
 
         elif text_type == "target":
             token_ids = self.tokenizer(
@@ -257,12 +232,160 @@ class KnowledgeBridgedGODELTokenizer(GODELTokenizer):
         return (
             token_ids, 
             None, 
-            {
+            external_knowledge
+        )
+    
+    def decode_to_text(self, sequence: List[int]) -> str:
+        if len(sequence) == 0:
+            return ""
+        for i in range(len(sequence)):
+            if sequence[i] == self.PAD_IDX:
+                break
+        decoded_text = self.tokenizer.decode(
+            sequence[:i], 
+            skip_special_tokens=True
+        )
+        return decoded_text 
+
+
+class KnowledgeBridgedGPT2Tokenizer(TokenizerBase):
+    def __init__(
+        self, 
+        num_top_concepts: int, 
+        max_num_concepts: int
+    ) -> None:
+    
+        super().__init__()
+        self.tokenizer = AutoTokenizer.from_pretrained("gpt2")
+        self.EOS_IDX = self.tokenizer.eos_token_id
+        self.vocab_size = len(self.tokenizer)
+        self.external_knowledge = ExternalKnowlege(
+            self.tokenizer,
+            num_top_concepts,
+            max_num_concepts
+        )
+    
+    @property
+    def supports_external_knowledge(self) -> bool:
+        return True
+
+    def encode_text(
+        self, 
+        text: Union[str, List[str]], 
+        text_type: str
+    ) -> Tuple[List[int]]:
+
+        external_knowledge = None
+
+        if text_type == "context":
+            input_ = f' {self.tokenizer.eos_token} '.join(text)
+        elif text_type == "target":
+            input_ = text
+        else:
+            raise ValueError("Unsupported text type!")
+        
+        tokens = self.tokenizer.tokenize(f"{input_} {self.tokenizer.eos_token}")
+        tokens = [token[1:] if token[0] == "Ġ" else token for token in tokens]
+        external_knowledge = self.external_knowledge.retrieve(tokens)
+        token_ids = self.tokenizer.convert_tokens_to_ids(tokens)
+        
+        return token_ids, None, external_knowledge
+    
+    def decode_to_text(self, sequence: List[int]) -> str:
+        if len(sequence) == 0:
+            return ""
+        for i in range(len(sequence)):
+            if sequence[i] == self.PAD_IDX:
+                break
+        decoded_text = self.tokenizer.decode(
+            sequence[:i], 
+            skip_special_tokens=True
+        )
+        return decoded_text 
+
+class ExternalKnowlege:
+    def __init__(
+        self, 
+        tokenizer: TokenizerBase, 
+        num_top_concepts: int, 
+        max_num_concepts: int,
+    ) -> None:
+
+        self.tokenizer = tokenizer
+        self.num_top_concepts = num_top_concepts
+        self.max_num_concepts = max_num_concepts
+        self.stopwords = set(nltk.corpus.stopwords.words('english'))
+        self.ignore_relations = set(["Antonym", "ExternalURL", "NotDesires", 
+                                     "NotHasProperty", "NotCapableOf", "dbpedia", 
+                                     "DistinctFrom", "EtymologicallyDerivedFrom", 
+                                     "EtymologicallyRelatedTo", "SymbolOf", "FormOf", 
+                                     "AtLocation", "DerivedFrom", "SymbolOf",
+                                     "CreatedBy", "Synonym", "MadeOf"])
+        with open("/home/tb662/rds/hpc-work/automating-empathy-project/vad.json") as f:
+            self.vad = json.load(f)
+        with open("/home/tb662/rds/hpc-work/automating-empathy-project/concepts.json") as f:
+            self.concepts = json.load(f)
+    
+    def emotion_intensity(self, word):
+        if word not in self.vad:
+            return 0
+        v, a, _ = self.vad[word]
+        a /= 2
+        return (np.linalg.norm(
+            np.array([v, a]) - np.array([0.5, 0])) - 0.06467) / 0.607468
+
+    def retrieve(
+        self,
+        tokens: List[str]
+    ) -> Dict[str, Union[List[int], List[int]]]:
+        
+        concepts = []
+        concept_pos = []
+        concept_mask = []
+        context_emo_intensity = []
+        concept_emo_intensity = []
+
+        for i, token in enumerate(tokens):
+            token = singularize(token.lower())
+            context_emo_intensity.append(self.emotion_intensity(token))
+            if (token not in self.stopwords) and (token in self.concepts):
+                num_concepts_added = 0
+                for concept in self.concepts[token]:
+                    if num_concepts_added == self.num_top_concepts:
+                        break
+                    if ((concept[1] not in self.ignore_relations) and 
+                        (self.emotion_intensity(concept[0]) >= 0.6)):
+                        num_concepts_added += 1
+                        concept_ids = self.tokenizer(
+                            concept[0], 
+                            add_special_tokens=False)["input_ids"]
+                        emo_intensity = self.emotion_intensity(concept[0])
+                        for id in concept_ids:
+                            concepts.append(id)
+                            concept_emo_intensity.append(emo_intensity)
+                            concept_pos.append(i)
+        
+        # Filter max_num_concepts with highest emotional intensities
+        top_indices = sorted(
+            range(len(concept_emo_intensity)), 
+            key=lambda i:concept_emo_intensity[i], 
+            reverse=True
+        )
+        for i in sorted(top_indices[self.max_num_concepts:], reverse=True):
+            concepts.pop(i)
+            concept_pos.pop(i)
+            concept_emo_intensity.pop(i)
+
+        # Create concept mask (upper right matrix in adjacency matrix)
+        concept_mask = [[0] * len(concepts)] * len(tokens)
+        for j, i in enumerate(concept_pos):
+            concept_mask[i][j] = 1
+
+        return {
                 "concepts": concepts, 
                 "concept_mask": concept_mask, 
                 "context_emo_intensity": context_emo_intensity, 
                 "concept_emo_intensity": concept_emo_intensity
-            }
-        )
+        }
 
 # ---------------------------------------------------------------------------------

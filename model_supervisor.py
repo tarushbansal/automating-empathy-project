@@ -14,9 +14,10 @@ from metric_utils import compute_test_metrics
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
+
 class ModelSupervisor(pl.LightningModule):
     def __init__(
-        self, 
+        self,
         model: DialogueModelBase,
         tokenizer: TokenizerBase,
         batch_size: int,
@@ -58,16 +59,16 @@ class ModelSupervisor(pl.LightningModule):
             input_kwargs["input_seq"] = input_seq
             if self.tokenizer.supports_dialogue_states:
                 input_kwargs["input_dialogue_state"] = torch.cat(
-                    (batch["context_dialogue_state"], 
+                    (batch["context_dialogue_state"],
                      batch["target_dialogue_state"]), dim=1)
             logits = self.model(**input_kwargs)
             target_seq = input_seq[:, 1:]
         return logits, target_seq
-    
+
     def forward_and_log_metrics(self, batch: Dict, stage: str):
         logits, target_seq = self.forward(batch)
         loss = F.cross_entropy(
-            logits[:, :-1, :].permute(0, 2, 1), 
+            logits[:, :-1, :].permute(0, 2, 1),
             target_seq,
             ignore_index=self.tokenizer.PAD_IDX
         )
@@ -81,72 +82,80 @@ class ModelSupervisor(pl.LightningModule):
             self.logger.experiment.add_scalars('emo_loss', {stage: emo_loss}, self.global_step)
         if hasattr(self.model, "emo_attn_loss"):
             emo_attn_loss = self.model.emo_attn_loss
-            self.log(f"{stage}_emo_attn_loss", emo_attn_loss, prog_bar=True, batch_size=self.batch_size)
-            self.logger.experiment.add_scalars('emo_attn_loss', {stage: emo_attn_loss}, self.global_step)  
+            self.log(f"{stage}_emo_attn_loss", emo_attn_loss,
+                     prog_bar=True, batch_size=self.batch_size)
+            self.logger.experiment.add_scalars(
+                'emo_attn_loss', {stage: emo_attn_loss}, self.global_step)
         self.log(f"{stage}_loss", loss, prog_bar=True, batch_size=self.batch_size)
         self.logger.experiment.add_scalars('loss', {stage: loss}, self.global_step)
         return loss + 1 * emo_loss + 0.1 * emo_attn_loss
 
     def training_step(self, batch: Dict, _) -> float:
         train_loss = self.forward_and_log_metrics(batch, "train")
-        return train_loss        
+        return train_loss
 
     def validation_step(self, batch: Dict, _) -> float:
         val_loss = self.forward_and_log_metrics(batch, "val")
         return val_loss
-    
+
     def validation_epoch_end(self, val_losses: List[float]) -> float:
         avg_val_loss = sum(val_losses) / len(val_losses)
         self.log("avg_val_loss", avg_val_loss, prog_bar=True, batch_size=self.batch_size)
         self.logger.experiment.add_scalars('loss', {'avg_val': avg_val_loss}, self.global_step)
-        return avg_val_loss 
+        return avg_val_loss
 
     def on_test_start(self) -> None:
-        (self.contexts, self.targets, self.emotions, 
+        (self.contexts, self.targets, self.emotions,
          self.predictions, self.enc_targets, self.enc_predictions,
          self.emo_predictions, self.log_probs, self.concepts) = ([] for _ in range(9))
 
     def test_step(self, batch: Dict, _) -> Tuple[List]:
         targets = [self.tokenizer.decode_to_text(enc) for enc in batch["target"].tolist()]
         self.targets.extend(targets)
-        self.enc_targets.extend([self.tokenizer.encode_text(target, "target")[0] for target in targets])
-        
+        self.enc_targets.extend([self.tokenizer.encode_text(target, "target")[0]
+                                for target in targets])
+
         enc_predictions, log_probs = self.beam_search(batch)
         self.enc_predictions.extend(enc_predictions)
         self.predictions.extend([self.tokenizer.decode_to_text(enc) for enc in enc_predictions])
-        self.log_probs.extend([log_probs[i] / len(enc_predictions[i]) for i in range(len(log_probs))])
+        self.log_probs.extend([log_probs[i] / len(enc_predictions[i])
+                              for i in range(len(log_probs))])
 
-        self.contexts.extend([self.tokenizer.decode_to_text(context) for context in batch["context"].tolist()])
-        self.emotions.extend([self.tokenizer.rev_emo_map[emo_idx] for emo_idx in batch["emotion"].tolist()])
-        
+        self.contexts.extend([self.tokenizer.decode_to_text(context)
+                             for context in batch["context"].tolist()])
+        self.emotions.extend([self.tokenizer.rev_emo_map[emo_idx]
+                             for emo_idx in batch["emotion"].tolist()])
+
         if self.tokenizer.supports_external_knowledge:
             if hasattr(self.model, "emo_logits"):
                 self.emo_predictions.extend([self.tokenizer.rev_emo_map[emo_idx]
-                    for emo_idx in torch.max(torch.softmax(self.model.emo_logits, dim=-1), dim=-1)[1].tolist()])
+                                             for emo_idx in torch.max(torch.softmax(self.model.emo_logits, dim=-1), dim=-1)[1].tolist()])
             self.concepts.extend([self.tokenizer.decode_to_text(concepts)
-                        for concepts in batch["external_knowledge"]["concepts"].tolist()])
+                                  for concepts in batch["external_knowledge"]["concepts"].tolist()])
 
     def test_epoch_end(self, _) -> None:
         N = len(self.contexts)
         accurate_emo_labels = 0
+        test_data = []
+        for i in range(N):
+            entry = {
+                "id": i,
+                "context": self.contexts[i],
+                "target": self.targets[i],
+                "prediction": self.predictions[i],
+                "emotion": self.emotions[i],
+                "pred_emotion": None if len(self.emo_predictions) == 0 else self.emo_predictions[i],
+                "concepts": None if len(self.concepts) == 0 else self.concepts[i]
+            }
+            test_data.append(entry)
+            if len(self.emo_predictions) != 0 and entry["emotion"] == entry["pred_emotion"]:
+                accurate_emo_labels += 1
 
-        with open(f"{self.test_output_dir}/test_predictions.txt", "w") as f:
-            for i in range(N):
-                context, target, prediction, emotion = (
-                    self.contexts[i],
-                    self.targets[i], 
-                    self.predictions[i],
-                    self.emotions[i]
-                )
-                pred_emotion = "" if len(self.emo_predictions) == 0 else f"Predicted Emotion label: {self.emo_predictions[i]};"
-                concepts = "" if len(self.concepts) == 0 else f"Concepts: {self.concepts[i]};"
-                f.write(f"Emotion Label: {emotion} Context: {context}; Target: {target}; Predicted: {prediction}; ")
-                f.write(f"{pred_emotion} {concepts}\n")
-                if len(self.emo_predictions) != 0 and self.emo_predictions[i] == emotion:
-                    accurate_emo_labels += 1
+        with open(f"{self.test_output_dir}/test_data.json", "w") as f:
+            json.dump(test_data, f)
 
         test_metrics = compute_test_metrics(
-            self.targets, 
+            self.targets,
             self.predictions,
             self.enc_targets,
             self.enc_predictions,
@@ -159,13 +168,13 @@ class ModelSupervisor(pl.LightningModule):
             test_metrics["emo_accuracy"] = accurate_emo_labels / N
 
         self.log_dict(test_metrics)
-        
+
         if self.test_output_dir is not None:
             with open(f"{self.test_output_dir}/test_metrics.json", "w") as f:
                 json.dump(test_metrics, f)
 
     def beam_search(self, batch: Dict) -> Tuple[List[List[int]]]:
-        ## BEAM SEARCH: Objective is to determine the most probable output sequence from the model
+        # BEAM SEARCH: Objective is to determine the most probable output sequence from the model
         batch = batch.copy()
         batch.pop("target", None)
         if self.tokenizer.supports_dialogue_states:
@@ -182,7 +191,8 @@ class ModelSupervisor(pl.LightningModule):
         batch_beam = torch.empty(N, 1, 0, dtype=torch.long, device=device)
         if self.tokenizer.SOS_IDX is not None:
             seq_len += 1
-            sos_tensor = torch.empty(N, 1, 1, dtype=torch.long, device=device).fill_(self.tokenizer.SOS_IDX)
+            sos_tensor = torch.empty(N, 1, 1, dtype=torch.long,
+                                     device=device).fill_(self.tokenizer.SOS_IDX)
             batch_beam = torch.cat((batch_beam, sos_tensor), dim=-1)
         eos_detected = torch.zeros(N, self.pred_beam_width, dtype=torch.bool, device=device)
 
@@ -193,7 +203,7 @@ class ModelSupervisor(pl.LightningModule):
             prob_sequences = torch.empty(
                 N, self.pred_beam_width ** 2, device=device).fill_(float("-inf"))
 
-            # Determine all possible output sequences and probabilities for current beam 
+            # Determine all possible output sequences and probabilities for current beam
             for i in range(1 if seq_len == 1 else self.pred_beam_width):
                 batch["target"] = batch_beam[:, i, :]
                 if self.tokenizer.supports_dialogue_states:
@@ -206,7 +216,7 @@ class ModelSupervisor(pl.LightningModule):
                     prob_sequences[:, i * self.pred_beam_width + j] = (
                         batch_beam_prob[:, i] + conditional_p[:, j])
                     sequences[:, i * self.pred_beam_width + j, :] = torch.cat(
-                            (batch_beam[:, i, :], top_responses[:, j:j+1]), dim=-1)
+                        (batch_beam[:, i, :], top_responses[:, j:j+1]), dim=-1)
 
             # Choose {self.pred_beam_width} number of sequences with highest probabilities
             batch_beam_prob, top_indices = torch.topk(
@@ -220,7 +230,7 @@ class ModelSupervisor(pl.LightningModule):
                 for j in range(self.pred_beam_width):
                     if int(batch_beam[i, j, -1]) == self.tokenizer.EOS_IDX:
                         eos_detected[i, j] = True
-            
+
             # Increment target sequence length
             seq_len += 1
 

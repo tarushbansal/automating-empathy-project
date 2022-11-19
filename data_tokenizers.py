@@ -21,25 +21,25 @@ from base_classes import TokenizerBase
 
 #         with open(vocab_fpath) as f:
 #             self.vocab = json.load(f)
-        
+
 #         self.decoder = {v : k for k, v in self.vocab.items()}
 
 #         # Special tokens (Start / End of continguous dialogue sentence, Unknown)
 #         self.UNK_IDX = self.vocab["[UNK]"]
 #         self.SOS_IDX = self.vocab["[SOS]"]
 #         self.EOS_IDX = self.vocab["[EOS]"]
-        
-#         # Size of vocabulary and special tokens 
+
+#         # Size of vocabulary and special tokens
 #         self.vocab_size = len(self.vocab)
 
 #         self.word_pairs = {
-#             "it's": "it is", "don't": "do not", "doesn't": "does not", 
-#             "didn't": "did not", "you'd": "you would", "you're": "you are", 
-#             "you'll": "you will", "i'm": "i am", "they're": "they are", 
-#             "that's": "that is", "what's": "what is", "couldn't": "could not", 
-#             "i've": "i have", "we've": "we have", "can't": "cannot", 
-#             "i'd": "i would", "aren't": "are not", "isn't": "is not", 
-#             "wasn't": "was not", "weren't": "were not", "won't": "will not", 
+#             "it's": "it is", "don't": "do not", "doesn't": "does not",
+#             "didn't": "did not", "you'd": "you would", "you're": "you are",
+#             "you'll": "you will", "i'm": "i am", "they're": "they are",
+#             "that's": "that is", "what's": "what is", "couldn't": "could not",
+#             "i've": "i have", "we've": "we have", "can't": "cannot",
+#             "i'd": "i would", "aren't": "are not", "isn't": "is not",
+#             "wasn't": "was not", "weren't": "were not", "won't": "will not",
 #             "there's": "there is", "there're": "there are"
 #         }
 
@@ -81,7 +81,7 @@ class GODELTokenizer(TokenizerBase):
         self.EOS_IDX = self.tokenizer.eos_token_id
         self.vocab_size = len(self.tokenizer)
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
-        instruction = ("Instruction: given a dialog context, " 
+        instruction = ("Instruction: given a dialog context, "
                        + "you need to response empathically.")
         self.prefix = self.tokenizer(
             f"{instruction} [CONTEXT] ",
@@ -92,8 +92,8 @@ class GODELTokenizer(TokenizerBase):
         return False
 
     def encode_text(
-        self, 
-        text: Union[str, List[str]], 
+        self,
+        text: Union[str, List[str]],
         text_type: str
     ) -> Tuple[Optional[List[int]]]:
 
@@ -109,9 +109,9 @@ class GODELTokenizer(TokenizerBase):
                 add_special_tokens=False)["input_ids"]
         else:
             raise ValueError("Unsupported text type!")
-        
+
         return token_ids, None, None
-    
+
     def decode_to_text(self, sequence: List[int]) -> str:
         if len(sequence) == 0:
             return ""
@@ -119,10 +119,10 @@ class GODELTokenizer(TokenizerBase):
             if sequence[i] == self.PAD_IDX:
                 break
         decoded_text = self.tokenizer.decode(
-            sequence[:i], 
+            sequence[:i],
             skip_special_tokens=True
         )
-        return decoded_text 
+        return decoded_text
 
 
 class GPT2Tokenizer(TokenizerBase):
@@ -131,14 +131,14 @@ class GPT2Tokenizer(TokenizerBase):
         self.tokenizer = AutoTokenizer.from_pretrained("gpt2")
         self.EOS_IDX = self.tokenizer.eos_token_id
         self.vocab_size = len(self.tokenizer)
-    
+
     @property
     def supports_dialogue_states(self) -> bool:
         return True
 
     def encode_text(
-        self, 
-        text: Union[str, List[str]], 
+        self,
+        text: Union[str, List[str]],
         text_type: str
     ) -> Tuple[List[int]]:
 
@@ -148,7 +148,7 @@ class GPT2Tokenizer(TokenizerBase):
             input_ = text
         else:
             raise ValueError("Unsupported text type!")
-        
+
         token_ids = self.tokenizer(
             f"{input_} {self.tokenizer.eos_token}",
             add_special_tokens=False)["input_ids"]
@@ -160,12 +160,12 @@ class GPT2Tokenizer(TokenizerBase):
         for token_id in range(len(token_ids)):
             ds.append(current)
             if token_id == self.EOS_IDX:
-                current = (self.DS_LISTENER_IDX 
+                current = (self.DS_LISTENER_IDX
                            if current == self.DS_SPEAKER_IDX
                            else self.DS_SPEAKER_IDX)
-        
+
         return token_ids, ds, None
-    
+
     def decode_to_text(self, sequence: List[int]) -> str:
         if len(sequence) == 0:
             return ""
@@ -173,16 +173,16 @@ class GPT2Tokenizer(TokenizerBase):
             if sequence[i] == self.PAD_IDX:
                 break
         decoded_text = self.tokenizer.decode(
-            sequence[:i], 
+            sequence[:i],
             skip_special_tokens=True
         )
-        return decoded_text        
+        return decoded_text
 
 
 class KnowledgeBridgedGODELTokenizer(TokenizerBase):
     def __init__(
         self,
-        num_top_concepts: int, 
+        num_top_concepts: int,
         max_num_concepts: int
     ) -> None:
 
@@ -201,17 +201,17 @@ class KnowledgeBridgedGODELTokenizer(TokenizerBase):
             num_top_concepts,
             max_num_concepts
         )
-    
+
     @property
     def supports_external_knowledge(self) -> bool:
         return True
 
     def encode_text(
-        self, 
-        text: Union[str, List[str]], 
+        self,
+        text: Union[str, List[str]],
         text_type: str
     ) -> Tuple[Union[List[int], Dict[str, List]]]:
-        
+
         external_knowledge = None
 
         if text_type == "context":
@@ -228,13 +228,13 @@ class KnowledgeBridgedGODELTokenizer(TokenizerBase):
                 add_special_tokens=False)["input_ids"]
         else:
             raise ValueError("Unsupported text type!")
-        
+
         return (
-            token_ids, 
-            None, 
+            token_ids,
+            None,
             external_knowledge
         )
-    
+
     def decode_to_text(self, sequence: List[int]) -> str:
         if len(sequence) == 0:
             return ""
@@ -242,19 +242,19 @@ class KnowledgeBridgedGODELTokenizer(TokenizerBase):
             if sequence[i] == self.PAD_IDX:
                 break
         decoded_text = self.tokenizer.decode(
-            sequence[:i], 
+            sequence[:i],
             skip_special_tokens=True
         )
-        return decoded_text 
+        return decoded_text
 
 
 class KnowledgeBridgedGPT2Tokenizer(TokenizerBase):
     def __init__(
-        self, 
-        num_top_concepts: int, 
+        self,
+        num_top_concepts: int,
         max_num_concepts: int
     ) -> None:
-    
+
         super().__init__()
         self.tokenizer = AutoTokenizer.from_pretrained("gpt2")
         self.EOS_IDX = self.tokenizer.eos_token_id
@@ -264,14 +264,14 @@ class KnowledgeBridgedGPT2Tokenizer(TokenizerBase):
             num_top_concepts,
             max_num_concepts
         )
-    
+
     @property
     def supports_external_knowledge(self) -> bool:
         return True
 
     def encode_text(
-        self, 
-        text: Union[str, List[str]], 
+        self,
+        text: Union[str, List[str]],
         text_type: str
     ) -> Tuple[List[int]]:
 
@@ -283,14 +283,14 @@ class KnowledgeBridgedGPT2Tokenizer(TokenizerBase):
             input_ = text
         else:
             raise ValueError("Unsupported text type!")
-        
+
         tokens = self.tokenizer.tokenize(f"{input_} {self.tokenizer.eos_token}")
+        token_ids = self.tokenizer.convert_tokens_to_ids(tokens)
         tokens = [token[1:] if token[0] == "Ġ" else token for token in tokens]
         external_knowledge = self.external_knowledge.retrieve(tokens)
-        token_ids = self.tokenizer.convert_tokens_to_ids(tokens)
-        
+
         return token_ids, None, external_knowledge
-    
+
     def decode_to_text(self, sequence: List[int]) -> str:
         if len(sequence) == 0:
             return ""
@@ -298,16 +298,17 @@ class KnowledgeBridgedGPT2Tokenizer(TokenizerBase):
             if sequence[i] == self.PAD_IDX:
                 break
         decoded_text = self.tokenizer.decode(
-            sequence[:i], 
+            sequence[:i],
             skip_special_tokens=True
         )
-        return decoded_text 
+        return decoded_text
+
 
 class ExternalKnowlege:
     def __init__(
-        self, 
-        tokenizer: TokenizerBase, 
-        num_top_concepts: int, 
+        self,
+        tokenizer: TokenizerBase,
+        num_top_concepts: int,
         max_num_concepts: int,
     ) -> None:
 
@@ -315,17 +316,17 @@ class ExternalKnowlege:
         self.num_top_concepts = num_top_concepts
         self.max_num_concepts = max_num_concepts
         self.stopwords = set(nltk.corpus.stopwords.words('english'))
-        self.ignore_relations = set(["Antonym", "ExternalURL", "NotDesires", 
-                                     "NotHasProperty", "NotCapableOf", "dbpedia", 
-                                     "DistinctFrom", "EtymologicallyDerivedFrom", 
-                                     "EtymologicallyRelatedTo", "SymbolOf", "FormOf", 
+        self.ignore_relations = set(["Antonym", "ExternalURL", "NotDesires",
+                                     "NotHasProperty", "NotCapableOf", "dbpedia",
+                                     "DistinctFrom", "EtymologicallyDerivedFrom",
+                                     "EtymologicallyRelatedTo", "SymbolOf", "FormOf",
                                      "AtLocation", "DerivedFrom", "SymbolOf",
                                      "CreatedBy", "Synonym", "MadeOf"])
         with open("/home/tb662/rds/hpc-work/automating-empathy-project/vad.json") as f:
             self.vad = json.load(f)
         with open("/home/tb662/rds/hpc-work/automating-empathy-project/concepts.json") as f:
             self.concepts = json.load(f)
-    
+
     def emotion_intensity(self, word):
         if word not in self.vad:
             return 0
@@ -338,7 +339,7 @@ class ExternalKnowlege:
         self,
         tokens: List[str]
     ) -> Dict[str, Union[List[int], List[int]]]:
-        
+
         concepts = []
         concept_pos = []
         concept_mask = []
@@ -353,22 +354,22 @@ class ExternalKnowlege:
                 for concept in self.concepts[token]:
                     if num_concepts_added == self.num_top_concepts:
                         break
-                    if ((concept[1] not in self.ignore_relations) and 
-                        (self.emotion_intensity(concept[0]) >= 0.6)):
+                    if ((concept[1] not in self.ignore_relations) and
+                            (self.emotion_intensity(concept[0]) >= 0.6)):
                         num_concepts_added += 1
                         concept_ids = self.tokenizer(
-                            concept[0], 
+                            concept[0],
                             add_special_tokens=False)["input_ids"]
                         emo_intensity = self.emotion_intensity(concept[0])
                         for id in concept_ids:
                             concepts.append(id)
                             concept_emo_intensity.append(emo_intensity)
                             concept_pos.append(i)
-        
+
         # Filter max_num_concepts with highest emotional intensities
         top_indices = sorted(
-            range(len(concept_emo_intensity)), 
-            key=lambda i:concept_emo_intensity[i], 
+            range(len(concept_emo_intensity)),
+            key=lambda i: concept_emo_intensity[i],
             reverse=True
         )
         for i in sorted(top_indices[self.max_num_concepts:], reverse=True):
@@ -382,10 +383,10 @@ class ExternalKnowlege:
             concept_mask[i][j] = 1
 
         return {
-                "concepts": concepts, 
-                "concept_mask": concept_mask, 
-                "context_emo_intensity": context_emo_intensity, 
-                "concept_emo_intensity": concept_emo_intensity
+            "concepts": concepts,
+            "concept_mask": concept_mask,
+            "context_emo_intensity": context_emo_intensity,
+            "concept_emo_intensity": concept_emo_intensity
         }
 
 # ---------------------------------------------------------------------------------

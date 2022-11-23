@@ -201,6 +201,12 @@ class KnowledgeBridgedGODELTokenizer(TokenizerBase):
             num_top_concepts,
             max_num_concepts
         )
+        os.environ["TOKENIZERS_PARALLELISM"] = "false"
+        instruction = ("Instruction: given a dialog context, "
+                       + "you need to response empathically.")
+        self.prefix = self.tokenizer(
+            f"{instruction} [CONTEXT] ",
+            add_special_tokens=False)["input_ids"]
 
     @property
     def supports_external_knowledge(self) -> bool:
@@ -218,9 +224,9 @@ class KnowledgeBridgedGODELTokenizer(TokenizerBase):
             # Tokenize dialog history and retrieve related concepts and emo intensities
             dialog_history = f' EOS '.join(text)
             tokens = self.tokenizer.tokenize(dialog_history)
-            tokens = [token[1:] if token[0] == "▁" else token for token in tokens]
-            external_knowledge = self.external_knowledge.retrieve(tokens)
-            token_ids = self.tokenizer.convert_tokens_to_ids(tokens)
+            token_ids = self.prefix + self.tokenizer.convert_tokens_to_ids(tokens)
+            # tokens = [token[1:] if token[0] == "▁" else token for token in tokens]
+            external_knowledge = self.external_knowledge.retrieve(dialog_history.split(" "))
 
         elif text_type == "target":
             token_ids = self.tokenizer(
@@ -286,8 +292,9 @@ class KnowledgeBridgedGPT2Tokenizer(TokenizerBase):
 
         tokens = self.tokenizer.tokenize(f"{input_} {self.tokenizer.eos_token}")
         token_ids = self.tokenizer.convert_tokens_to_ids(tokens)
-        tokens = [token[1:] if token[0] == "Ġ" else token for token in tokens]
-        external_knowledge = self.external_knowledge.retrieve(tokens)
+        # tokens = [token[1:] if token[0] == "Ġ" else token for token in tokens]
+        external_knowledge = self.external_knowledge.retrieve(
+            f"{input_} {self.tokenizer.eos_token}".split(" "))
 
         return token_ids, None, external_knowledge
 

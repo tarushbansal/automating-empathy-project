@@ -12,15 +12,15 @@ from torchmetrics.functional import pairwise_cosine_similarity
 from nltk.translate.bleu_score import corpus_bleu
 from nltk.translate.nist_score import corpus_nist
 
-# ------------------------- IMPLEMENTATION -----------------------------------  
+# ------------------------- IMPLEMENTATION -----------------------------------
 
-    
+
 def compute_test_metrics(
-    targets: List[str], 
+    targets: List[str],
     predictions: List[str],
     encoded_targets: List[List[int]],
     encoded_predictions: List[List[int]],
-    pred_n_grams: int = 4, 
+    pred_n_grams: int = 4,
     log_probs: Optional[List[float]] = None,
     word_embeddings: Optional[nn.Module] = None,
 ) -> Dict[str, float]:
@@ -40,7 +40,7 @@ def compute_test_metrics(
                                for j in range(len(predictions[i]) - 1)])
         n_unigrams += len(predictions[i])
         n_bigrams += len(predictions[i]) - 1
-        
+
         if word_embeddings is not None:
             # Embed both targets and predictions
             device = word_embeddings.weight.device
@@ -58,18 +58,18 @@ def compute_test_metrics(
             # Extrema BOW
             max_target, _ = torch.max(target_embeddings, dim=1)
             min_target, _ = torch.min(target_embeddings, dim=1)
-            mask_target = (torch.abs(max_target) >= torch.abs(min_target)) 
+            mask_target = (torch.abs(max_target) >= torch.abs(min_target))
             extrema_target_embed = torch.where(mask_target, max_target, min_target)
             max_pred, _ = torch.max(pred_embeddings, dim=1)
             min_pred, _ = torch.min(pred_embeddings, dim=1)
-            mask_pred = (torch.abs(max_pred) >= torch.abs(min_pred)) 
+            mask_pred = (torch.abs(max_pred) >= torch.abs(min_pred))
             extrema_pred_embed = torch.where(mask_pred, max_pred, min_pred)
             extrema_bow.append(
                 float(F.cosine_similarity(extrema_target_embed, extrema_pred_embed)))
 
             # Greedy BOW
             sim = pairwise_cosine_similarity(
-                target_embeddings.squeeze(dim=0), 
+                target_embeddings.squeeze(dim=0),
                 pred_embeddings.squeeze(dim=0)
             )
             greedy_bow.append(
@@ -81,7 +81,7 @@ def compute_test_metrics(
         "dist-1": len(unique_unigrams) / n_unigrams,
         "dist-2": len(unique_bigrams) / n_bigrams
     }
-    
+
     if log_probs is not None:
         test_metrics["ppl"] = 1 / math.exp(sum(log_probs) / len(log_probs))
     if word_embeddings is not None:

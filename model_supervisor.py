@@ -250,7 +250,7 @@ class ModelSupervisor(pl.LightningModule):
         optimizer = torch.optim.AdamW(
             self.parameters(), lr=self.initial_lr)
         scheduler = torch.optim.lr_scheduler.StepLR(
-            optimizer, step_size=2, gamma=0.85)
+            optimizer, step_size=1, gamma=0.75)
         return {
             "optimizer": optimizer,
             "lr_scheduler": scheduler

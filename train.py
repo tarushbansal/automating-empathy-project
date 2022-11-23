@@ -9,19 +9,20 @@ from typing import Optional, List
 import torch
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
-from pytorch_lightning.callbacks import ModelCheckpoint
+from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
 # User-defined Modules
 from data_loader import DataModule
 from model_supervisor import ModelSupervisor
 from base_classes import DialogueModelBase, TokenizerBase
 from utils import (
-    load_val_ckpt_path, 
-    load_config, 
+    load_val_ckpt_path,
+    load_config,
     SaveConfigCallback
 )
 
 # ------------------------- IMPLEMENTATION -----------------------------------
+
 
 def get_model_cls() -> DialogueModelBase:
     single_arg_parser = argparse.ArgumentParser()
@@ -35,8 +36,9 @@ def get_model_cls() -> DialogueModelBase:
 
     return model_cls
 
+
 def parse_args() -> argparse.Namespace:
-    
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--dataset_dir", type=str, default=None, required=True)
@@ -55,10 +57,11 @@ def parse_args() -> argparse.Namespace:
 
     return cli_args
 
+
 def get_model_checkpoints(ckpt_dir: str) -> Optional[List[ModelCheckpoint]]:
     if ckpt_dir is None:
         return None
-    
+
     return [
         ModelCheckpoint(
             monitor="train_loss",
@@ -73,13 +76,14 @@ def get_model_checkpoints(ckpt_dir: str) -> Optional[List[ModelCheckpoint]]:
         ),
     ]
 
+
 def main():
     # Parse command line arguments
     cli_args = parse_args()
 
     if not os.path.isdir(cli_args.dataset_dir):
         raise ValueError(f"Specified dataset directory does not exist!")
-    
+
     # Set up tensorboard logger
     logger = TensorBoardLogger(
         save_dir=cli_args.output_dir,
@@ -111,7 +115,7 @@ def main():
         if tokenizer_name is None:
             raise ValueError(
                 "Must specify the tokenizer associated with the model as a static method!")
-        
+
         tokenizer_cls = getattr(__import__("data_tokenizers"), tokenizer_name)
         if not issubclass(tokenizer_cls, TokenizerBase):
             raise ValueError(
@@ -121,7 +125,7 @@ def main():
 
         model_kwargs = model_config.get("model_kwargs", {})
         model = model_cls(tokenizer=tokenizer, **model_kwargs)
-    
+
     # Set up model supervisor
     model_supervisor = ModelSupervisor(
         tokenizer=tokenizer,
@@ -156,31 +160,40 @@ def main():
             "kwargs": tokenizer_kwargs,
         }
     }
-    callbacks.append(SaveConfigCallback(config=config))
+    callbacks.extend([
+        SaveConfigCallback(config=config),
+        EarlyStopping(
+            monitor="avg_val_loss",
+            min_delta=0.009,
+            mode="min",
+            patience=2
+        )
+    ]
+    )
 
     # Set up trainer
     trainer = pl.Trainer(
-        accelerator="auto", 
+        accelerator="auto",
         devices=-1 if torch.cuda.is_available() else 1,
         num_nodes=cli_args.num_nodes,
         strategy="ddp_find_unused_parameters_false",
-        max_epochs=cli_args.max_epochs, 
-        logger=logger, 
+        max_epochs=cli_args.max_epochs,
+        logger=logger,
         callbacks=callbacks,
     )
 
     # Train / Validate the model
     trainer.fit(
-        model_supervisor, 
-        data_module, 
+        model_supervisor,
+        data_module,
         ckpt_path=load_val_ckpt_path(cli_args.pretrained_model_dir)
     )
 
     # Test the model
     trainer.test(
-        model_supervisor, 
+        model_supervisor,
         data_module,
-        ckpt_path=load_val_ckpt_path(logger.log_dir)    
+        ckpt_path=load_val_ckpt_path(logger.log_dir)
     )
 
 

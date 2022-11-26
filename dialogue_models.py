@@ -61,7 +61,7 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
         self.model.config.dropout_rate = 0.8
         self.graph_embeddings = nn.Embedding(2, self.model.config.hidden_size)
         # self.emo_linear = nn.Linear(self.model.config.hidden_size, self.tokenizer.num_emo_labels)
-        # self.attn_loss = nn.MSELoss()
+        self.attn_loss = nn.MSELoss()
 
     @staticmethod
     def tokenizer_cls():
@@ -101,27 +101,27 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
 
         input_embeds, pad_mask = self.knowledge_enriched_context(
             source_seq, external_knowledge["concepts"])
-        # attention_mask = torch.minimum(pad_mask.unsqueeze(1), external_knowledge["adjacency_mask"])
+        attention_mask = torch.minimum(pad_mask.unsqueeze(1), external_knowledge["adjacency_mask"])
         target_seq, target_mask = self.create_padding_mask(target_seq)
 
         out = self.model(
             inputs_embeds=input_embeds,
-            attention_mask=pad_mask,
+            attention_mask=attention_mask,
             encoder_attention_mask=pad_mask,
             decoder_input_ids=target_seq,
             decoder_attention_mask=target_mask,
-            # output_attentions=True
+            output_attentions=True
         )
 
-        # emo_intensities = torch.cat(
-        #     (external_knowledge["context_emo_intensity"],
-        #      external_knowledge["concept_emo_intensity"]), dim=1)
+        emo_intensities = torch.cat(
+            (external_knowledge["context_emo_intensity"],
+             external_knowledge["concept_emo_intensity"]), dim=1)
         # sum_weights = torch.softmax(emo_intensities, dim=1).unsqueeze(2)
         # c = torch.sum(sum_weights * out.encoder_last_hidden_state, dim=1)
         # self.emo_logits = self.emo_linear(c)
 
-        # average_attn_weights = torch.stack(out.cross_attentions).mean((0, 2, 3))
-        # self.emo_attn_loss = self.attn_loss(emo_intensities, average_attn_weights)
+        average_attn_weights = torch.stack(out.cross_attentions).mean((0, 2, 3))
+        self.emo_attn_loss = self.attn_loss(emo_intensities, average_attn_weights)
 
         return out.logits
 

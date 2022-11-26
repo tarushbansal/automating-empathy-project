@@ -1,4 +1,4 @@
 *.npy filter=lfs diff=lfs merge=lfs -text
 glove.6B.300d.txt filter=lfs diff=lfs merge=lfs -text
-concepts.json filter=lfs diff=lfs merge=lfs -text
-vad.json filter=lfs diff=lfs merge=lfs -text
+knowledge_data/concepts.json filter=lfs diff=lfs merge=lfs -text
+knowledge_data/vad.json filter=lfs diff=lfs merge=lfs -text

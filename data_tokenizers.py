@@ -225,8 +225,8 @@ class KnowledgeBridgedGODELTokenizer(TokenizerBase):
             dialog_history = f' EOS '.join(text)
             tokens = self.tokenizer.tokenize(dialog_history)
             token_ids = self.prefix + self.tokenizer.convert_tokens_to_ids(tokens)
-            # tokens = [token[1:] if token[0] == "▁" else token for token in tokens]
-            external_knowledge = self.external_knowledge.retrieve(dialog_history.split(" "))
+            tokens = [token[1:] if token[0] == "▁" else token for token in tokens]
+            external_knowledge = self.external_knowledge.retrieve(tokens)
 
         elif text_type == "target":
             token_ids = self.tokenizer(
@@ -329,9 +329,10 @@ class ExternalKnowlege:
                                      "EtymologicallyRelatedTo", "SymbolOf", "FormOf",
                                      "AtLocation", "DerivedFrom", "SymbolOf",
                                      "CreatedBy", "Synonym", "MadeOf"])
-        with open("/home/tb662/rds/hpc-work/automating-empathy-project/vad.json") as f:
+        knowledge_dir = "/home/tb662/rds/hpc-work/automating-empathy-project/knowledge_data"
+        with open(f"{knowledge_dir}/vad.json") as f:
             self.vad = json.load(f)
-        with open("/home/tb662/rds/hpc-work/automating-empathy-project/concepts.json") as f:
+        with open(f"{knowledge_dir}/concepts.json") as f:
             self.concepts = json.load(f)
 
     def emotion_intensity(self, word):

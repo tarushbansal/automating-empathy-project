@@ -243,18 +243,18 @@ def add_external_knowledge(
 
     concepts = pad_seq_and_convert_to_tensor(
         concepts, max_len_concept_seq, padding_idx=padding_idx)
-    # context_emo_intensity = pad_seq_and_convert_to_tensor(
-    #     context_emo_intensity, max_len_context_seq, padding_idx=0, dtype=torch.float32)
-    # concept_emo_intensity = pad_seq_and_convert_to_tensor(
-    #     concept_emo_intensity, max_len_concept_seq, padding_idx=0, dtype=torch.float32)
-    # adjacency_mask = create_adjacency_mask(
-    #     concept_mask, max_len_context_seq, max_len_concept_seq, prefix_len)
+    context_emo_intensity = pad_seq_and_convert_to_tensor(
+        context_emo_intensity, max_len_context_seq, padding_idx=0, dtype=torch.float32)
+    concept_emo_intensity = pad_seq_and_convert_to_tensor(
+        concept_emo_intensity, max_len_concept_seq, padding_idx=0, dtype=torch.float32)
+    adjacency_mask = create_adjacency_mask(
+        concept_mask, max_len_context_seq, max_len_concept_seq, prefix_len)
 
     collated_batch["external_knowledge"] = {
         "concepts": concepts,
-        # "adjacency_mask": adjacency_mask,
-        # "context_emo_intensity": context_emo_intensity,
-        # "concept_emo_intensity": concept_emo_intensity
+        "adjacency_mask": adjacency_mask,
+        "context_emo_intensity": context_emo_intensity,
+        "concept_emo_intensity": concept_emo_intensity
     }
 
 # -----------------------------------------------------------------------------

@@ -11,6 +11,13 @@ from typing import List, Dict
 
 # ------------------------- IMPLEMENTATION ------------------------------------
 
+ignore_relations = set(["Antonym", "ExternalURL", "NotDesires",
+                        "NotHasProperty", "NotCapableOf", "dbpedia",
+                        "DistinctFrom", "EtymologicallyDerivedFrom",
+                        "EtymologicallyRelatedTo", "SymbolOf", "FormOf",
+                        "AtLocation", "DerivedFrom", "SymbolOf",
+                        "CreatedBy", "Synonym", "MadeOf"])
+
 
 def retrieve_concepts(
     queries: List[str],
@@ -23,14 +30,14 @@ def retrieve_concepts(
     failed_reqs = 0
     for word in tqdm(queries):
         word_concepts = []
-        endpoint = f"c/en/{word}?offset=0&limit=1000"
+        endpoint = f"query?start=/c/en/{word}&offset=0&limit=1000"
         while endpoint is not None:
             try:
                 obj = requests.get(
                     f'http://api.conceptnet.io/{endpoint}').json()
             except requests.exceptions.RequestException:
                 failed_reqs += 1
-                print(f"ERROR: {failed_reqs} failed requests recorded!", end=" ")
+                print(f"ERROR: {failed_reqs} failed request(s) recorded!", end=" ")
                 print(f"Maximum {max_req_failures} are allowed")
                 if failed_reqs > max_req_failures:
                     print("ERROR: Exiting loop as failure threshold has been breached!")
@@ -41,11 +48,15 @@ def retrieve_concepts(
                 if concept_intensity < emo_thresh or edge["rel"]["label"] in ignore_relations:
                     continue
                 if edge["surfaceText"] is not None:
-                    word_concepts.append((concept_intensity, edge["surfaceText"]))
+                    word_concepts.append({
+                        "intensity": concept_intensity,
+                        "word": edge["end"]["label"],
+                        "text": edge["surfaceText"]
+                    })
             endpoint = dict.get(dict.get(obj, "view", {}), "nextPage", None)
-        if len(word_concepts) != 0:
-            word_concepts = sorted(word_concepts, key=lambda x: x[0], reverse=True)
-            concepts[word] = [concept[1] for concept in word_concepts]
+
+        word_concepts = sorted(word_concepts, key=lambda x: x["intensity"], reverse=True)
+        concepts[word] = word_concepts
 
     return concepts
 
@@ -67,13 +78,6 @@ if __name__ == "__main__":
     parser.add_argument("--max_req_failures", type=int, default=3)
     cli_args = parser.parse_args()
 
-    ignore_relations = set(["Antonym", "ExternalURL", "NotDesires",
-                            "NotHasProperty", "NotCapableOf", "dbpedia",
-                            "DistinctFrom", "EtymologicallyDerivedFrom",
-                            "EtymologicallyRelatedTo", "SymbolOf", "FormOf",
-                            "AtLocation", "DerivedFrom", "SymbolOf",
-                            "CreatedBy", "Synonym", "MadeOf"])
-
     with open(os.path.abspath(cli_args.nrc_vad_fpath)) as f:
         vad = json.load(f)
 
@@ -94,6 +98,7 @@ if __name__ == "__main__":
     queries = [word for word in vad
                if emotion_intensity(word) >= cli_args.emo_thresh
                and word not in preretrieved]
+
     concepts = retrieve_concepts(
         queries,
         cli_args.emo_thresh,

@@ -95,7 +95,7 @@ if __name__ == "__main__":
     # Load all model tables from model_data directory
     model_tables = []
     for item in os.listdir(model_dir):
-        path = os.path.join(model_dir, "item")
+        path = os.path.join(model_dir, item)
         if os.path.isfile(path) and item.endswith(".json"):
             with open(path) as f:
                 model_table = json.load(f)
@@ -112,7 +112,7 @@ if __name__ == "__main__":
             id=str(uuid.uuid4()),
             name="GOLD",
             version=None,
-            responses={i: target for i, target in enumerate(targets)}
+            responses={str(i): target for i, target in enumerate(targets)}
         )
         model_tables.append(gold_table)
 
@@ -136,38 +136,44 @@ if __name__ == "__main__":
     for id in tqdm(test_data):
         for model_table in model_tables:
             if model_table["model_name"] == cli_args.model_name:
-                new_model_version = model_table["model_version"] + 1
-            if id in model_table["responses"]:
+                new_model_version = model_table["version"] + 1
+            if str(id) in model_table["responses"]:
+                response_pair = [
+                    (new_model_id, test_data[id]["response"]),
+                    (model_table["model_id"], model_table["responses"][str(id)])
+                ]
+                random.seed()
+                random.shuffle(response_pair)
                 sample = {
                     "id": str(uuid.uuid4()),
-                    "modelA": new_model_id,
-                    "modelB": model_table["model_id"],
+                    "modelA": response_pair[0][0],
+                    "modelB": response_pair[1][0],
                     "sample": {
                         "id": id,
                         "context": contexts[id],
-                        "responseA": test_data[id]["response"],
-                        "responseB": model_table["responses"][id]
-                    },
+                        "responseA": response_pair[0][1],
+                        "responseB": response_pair[1][1]},
                     "status": PENDING
                 }
                 samples.append(sample)
     logger.info(f"Created {len(samples)} new survey samples")
 
-    # Retrieve / Create 'samples' DynamoDB table configured with backend
-    sample_table = retrieve_dynamodb_table("samples")
-    if sample_table is None:
-        table_schema = [{"name": "id", "key_type": "HASH", "type": "str"}]
-        sample_table = create_dynamodb_table("samples", table_schema)
+    if len(samples) != 0:
+        # Retrieve / Create 'samples' DynamoDB table configured with backend
+        sample_table = retrieve_dynamodb_table("samples")
+        if sample_table is None:
+            table_schema = [{"name": "id", "key_type": "HASH", "type": "str"}]
+            sample_table = create_dynamodb_table("samples", table_schema)
 
-    # Load new samples into table
-    fill_dynamodb_table(sample_table, samples)
+        # Load new samples into table
+        fill_dynamodb_table(sample_table, samples)
 
-    # Create new model table
-    create_model_table(
-        id=new_model_id,
-        name=cli_args.model_name,
-        version=new_model_version,
-        responses={id: test_data[id]["response"] for id in test_data}
-    )
+        # Create new model table
+        create_model_table(
+            id=new_model_id,
+            name=cli_args.model_name,
+            version=new_model_version,
+            responses={str(id): test_data[id]["response"] for id in test_data}
+        )
 
 # ---------------------------------------------------------------------------

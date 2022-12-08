@@ -3,6 +3,7 @@
 # System Modules
 import os
 import json
+import string
 import numpy as np
 from typing import List, Union, Tuple, Optional, Dict
 
@@ -69,7 +70,7 @@ from base_classes import TokenizerBase
 
 
 class GODELTokenizer(TokenizerBase):
-    def __init__(self) -> None:
+    def __init__(self, num_top_concepts: int, max_num_concepts: int) -> None:
         super().__init__()
         self.tokenizer = AutoTokenizer.from_pretrained(
             "microsoft/GODEL-v1_1-base-seq2seq"
@@ -80,6 +81,10 @@ class GODELTokenizer(TokenizerBase):
         self.SOS_IDX = self.tokenizer.bos_token_id
         self.EOS_IDX = self.tokenizer.eos_token_id
         self.vocab_size = len(self.tokenizer)
+        self.external_knowledge = ExternalKnowledgeText(
+            num_top_concepts=num_top_concepts,
+            max_num_concepts=max_num_concepts
+        )
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
         instruction = ("Instruction: given a dialog context, "
                        + "you need to response empathically.")
@@ -99,10 +104,13 @@ class GODELTokenizer(TokenizerBase):
 
         if text_type == "context":
             dialog_history = f' EOS '.join(text)
-            token_ids = self.tokenizer(
-                dialog_history,
-                add_special_tokens=False)["input_ids"]
-            token_ids = self.prefix + token_ids
+            words = dialog_history.split(" ")
+            knowledge = self.external_knowledge.retrieve(words)
+            token_ids = self.prefix + \
+                self.tokenizer(
+                    f"{dialog_history} [KNOWLEDGE] {knowledge}",
+                    add_special_tokens=False)["input_ids"]
+
         elif text_type == "target":
             token_ids = self.tokenizer(
                 f"{self.tokenizer.bos_token} {text} {self.tokenizer.eos_token}",
@@ -396,5 +404,36 @@ class ExternalKnowlege:
             "context_emo_intensity": context_emo_intensity,
             "concept_emo_intensity": concept_emo_intensity
         }
+
+
+class ExternalKnowledgeText:
+    def __init__(self, num_top_concepts: int, max_num_concepts: int) -> None:
+        self.num_top_concepts = num_top_concepts
+        self.max_num_concepts = max_num_concepts
+        self.stopwords = set(nltk.corpus.stopwords.words('english'))
+        knowledge_dir = "/home/tb662/rds/hpc-work/automating-empathy-project/knowledge_data"
+        with open(f"{knowledge_dir}/vad.json") as f:
+            self.vad = json.load(f)
+        with open(f"{knowledge_dir}/concepts_nrc_vad.json") as f:
+            self.concepts = json.load(f)
+
+    def retrieve(
+        self,
+        words: List[str]
+    ) -> str:
+
+        # Retrive num_top_concepts for all relevant words
+        concepts = []
+        for word in words:
+            word = singularize(word.lower()).translate(str.maketrans('', '', string.punctuation))
+            if (word not in self.stopwords) and (word in self.concepts):
+                concepts.extend([(concept["intensity"], concept["text"])
+                                 for concept in self.concepts[word][:self.num_top_concepts]])
+
+        # Sort by emotional intensity and retrieve top max_num_concepts
+        concepts = sorted(concepts, key=lambda x: x[0])
+        concepts = [concept[1] for concept in concepts[:self.max_num_concepts]]
+
+        return " ".join(concepts)
 
 # ---------------------------------------------------------------------------------

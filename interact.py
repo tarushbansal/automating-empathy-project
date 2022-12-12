@@ -15,6 +15,7 @@ from utils import load_val_ckpt_path, load_config
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
+
 def initialise_interface():
     os.system("clear")
     print("---- Welcome to this interface to interact with a dialogue model! -------")
@@ -23,7 +24,7 @@ def initialise_interface():
           "type a speaker utterance when prompted for a multi-turn dialogue.")
     print("")
     print("Command keys:")
-    print("---- <clear> - Clear conversation history and start a new conversation.") 
+    print("---- <clear> - Clear conversation history and start a new conversation.")
     print("---- <quit>  - Exit interface")
     print("")
 
@@ -59,8 +60,8 @@ def main():
     model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
     model = model_cls(tokenizer=tokenizer, **config["model"]["kwargs"])
     model_supervisor = ModelSupervisor.load_from_checkpoint(
-        ckpt_path, 
-        tokenizer=tokenizer, 
+        ckpt_path,
+        tokenizer=tokenizer,
         model=model,
         pred_beam_width=cli_args.pred_beam_width,
         max_pred_seq_len=cli_args.max_pred_seq_len,
@@ -81,7 +82,7 @@ def main():
             initialise_interface()
             emotion = emotion_loop(tokenizer)
             continue
-        
+
         context.append(speaker_utterance)
         enc_context, context_ds, external_knowledge = tokenizer.encode_text(context, "context")
         batch = collate_batch([{
@@ -98,6 +99,7 @@ def main():
         ppl = 1 / math.exp(log_prob[0] / len(response[0]))
         print(f"Dialogue Model: {decoded_reponse} (Perplexity: {ppl:.2f})")
         print("")
+
 
 if __name__ == "__main__":
     main()

@@ -164,7 +164,7 @@ def main():
         SaveConfigCallback(config=config),
         EarlyStopping(
             monitor="avg_val_loss",
-            min_delta=0.009,
+            min_delta=0.05,
             mode="min",
             patience=2
         )

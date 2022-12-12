@@ -194,7 +194,7 @@ class ModelSupervisor(pl.LightningModule):
             sos_tensor = torch.empty(N, 1, 1, dtype=torch.long,
                                      device=device).fill_(self.tokenizer.SOS_IDX)
             batch_beam = torch.cat((batch_beam, sos_tensor), dim=-1)
-        eos_detected = torch.zeros(N, self.pred_beam_width, dtype=torch.bool, device=device)
+        eos_detected = torch.zeros(N, 1, dtype=torch.bool, device=device)
 
         # Loop until EOS token detected for all beams in batch
         while (not torch.all(eos_detected)) and (seq_len < self.max_pred_seq_len):
@@ -204,19 +204,24 @@ class ModelSupervisor(pl.LightningModule):
                 N, self.pred_beam_width ** 2, device=device).fill_(float("-inf"))
 
             # Determine all possible output sequences and probabilities for current beam
-            for i in range(1 if seq_len == 1 else self.pred_beam_width):
+            for i in range(batch_beam.size(dim=1)):
                 batch["target"] = batch_beam[:, i, :]
                 if self.tokenizer.supports_dialogue_states:
                     batch["target_dialogue_state"] = ds.expand(batch["target"].size())
                 logits, _ = self.forward(batch)
                 conditional_p, top_responses = torch.topk(
                     F.log_softmax(logits[:, -1, :], dim=-1), self.pred_beam_width, dim=-1)
-                conditional_p = conditional_p.masked_fill(eos_detected[:, i:i+1], 0)
-                for j in range(1 if seq_len == 1 else self.pred_beam_width):
-                    prob_sequences[:, i * self.pred_beam_width + j] = (
-                        batch_beam_prob[:, i] + conditional_p[:, j])
-                    sequences[:, i * self.pred_beam_width + j, :] = torch.cat(
-                        (batch_beam[:, i, :], top_responses[:, j:j+1]), dim=-1)
+                for k in range(N):
+                    if eos_detected[k, i]:
+                        prob_sequences[k, i * self.pred_beam_width] = batch_beam_prob[k, i]
+                        sequences[k, i * self.pred_beam_width] = torch.cat(
+                            (batch_beam[k, i], torch.LongTensor([self.tokenizer.PAD_IDX]).to(device)), dim=-1)
+                        continue
+                    for j in range(self.pred_beam_width):
+                        prob_sequences[k, i * self.pred_beam_width + j] = (
+                            batch_beam_prob[k, i] + conditional_p[k, j])
+                        sequences[k, i * self.pred_beam_width + j] = torch.cat(
+                            (batch_beam[k, i], top_responses[k, j:j+1]), dim=-1)
 
             # Choose {self.pred_beam_width} number of sequences with highest probabilities
             batch_beam_prob, top_indices = torch.topk(
@@ -225,23 +230,24 @@ class ModelSupervisor(pl.LightningModule):
                 N, self.pred_beam_width, seq_len + 1)
             batch_beam = torch.gather(sequences, 1, top_indices)
 
-            # Check which beams in batch have reached the EOS token
-            for i in range(N):
-                for j in range(self.pred_beam_width):
-                    if int(batch_beam[i, j, -1]) == self.tokenizer.EOS_IDX:
-                        eos_detected[i, j] = True
-
             # Increment target sequence length
             seq_len += 1
 
+            # Break out of loop if EOS detected for all sequences in all beams
+            eos_detected = torch.tensor(
+                [[self.tokenizer.EOS_IDX in seq for seq in beam]
+                 for beam in batch_beam],
+                device=device
+            )
+
         # Return most probable sequence and its log probability for each beam in batch
         predictions = []
-        for pred in batch_beam[:, 0, :].tolist():
-            for i in range(len(pred)):
-                if pred[i] == self.tokenizer.EOS_IDX:
+        for seq in batch_beam[:, 0, :].tolist():
+            for i in range(len(seq)):
+                if seq[i] == self.tokenizer.EOS_IDX:
                     i += 1
                     break
-            predictions.append(pred[:i])
+            predictions.append(seq[:i])
         log_prob = batch_beam_prob[:, 0].tolist()
 
         return predictions, log_prob

@@ -1,9 +1,8 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
-import random
-import numpy as np
-from typing import Tuple, Dict, Iterable, List, Union
+import json
+from typing import Tuple, Dict, Optional, List, Union
 
 import torch
 import torch.utils.data as data
@@ -18,7 +17,7 @@ from data_tokenizers import TokenizerBase
 class Dataset(data.Dataset):
     def __init__(
         self,
-        data: Tuple[Iterable],
+        data: Tuple[List],
         tokenizer: TokenizerBase
     ) -> None:
 
@@ -59,7 +58,8 @@ class DataModule(pl.LightningDataModule):
         dataset_dir: str,
         batch_size: int,
         tokenizer: TokenizerBase,
-        num_workers: int
+        num_workers: int,
+        model_has_encoder: Optional[bool] = None,
     ) -> None:
 
         super().__init__()
@@ -67,40 +67,29 @@ class DataModule(pl.LightningDataModule):
         self.batch_size = batch_size
         self.tokenizer = tokenizer
         self.num_workers = num_workers
+        self.model_has_encoder = model_has_encoder
 
     def load_data(self, stage: str):
-        contexts = np.load(
-            f"{self.dataset_dir}/{stage}/contexts.npy", allow_pickle=True)
-        targets = np.load(
-            f"{self.dataset_dir}/{stage}/targets.npy", allow_pickle=True)
-        emotions = np.load(
-            f"{self.dataset_dir}/{stage}/emotions.npy", allow_pickle=True)
+        path_prefix = f"{self.dataset_dir}/{stage}"
+        if stage == "train":
+            if self.model_has_encoder is None:
+                raise ValueError(
+                    "Must specify whether model has encoder for loading training datasets!")
+            path_prefix += "/with_encoder" if self.model_has_encoder else "/without_encoder"
+        with open(f"{path_prefix}/contexts.json") as f:
+            contexts = json.load(f)
+        with open(f"{path_prefix}/targets.json") as f:
+            targets = json.load(f)
+        with open(f"{path_prefix}/emotions.json") as f:
+            emotions = json.load(f)
         return contexts, targets, emotions
 
     def setup(self, stage: str) -> None:
         if stage == "fit":
-            data = list(zip(*self.load_data("train")))
-            # Set seed for reproducability
-            random.seed(0)
-            # Shuffle data to form train and validation sets
-            random.shuffle(data)
-            contexts, targets, emotions = zip(*data)
-            split_index = int(0.9 * len(contexts))
-            train_data = (
-                contexts[:split_index],
-                targets[:split_index],
-                emotions[:split_index]
-            )
-            val_data = (
-                contexts[split_index:],
-                targets[split_index:],
-                emotions[split_index:]
-            )
-            self.train_dataset = Dataset(train_data, self.tokenizer)
-            self.val_dataset = Dataset(val_data, self.tokenizer)
+            self.train_dataset = Dataset(self.load_data("train"), self.tokenizer)
+            self.val_dataset = Dataset(self.load_data("val"), self.tokenizer)
         if stage == "test":
-            test_data = self.load_data("test")
-            self.test_dataset = Dataset(test_data, self.tokenizer)
+            self.test_dataset = Dataset(self.load_data("test"), self.tokenizer)
 
     def train_dataloader(self) -> data.DataLoader:
         return data.DataLoader(
@@ -115,6 +104,7 @@ class DataModule(pl.LightningDataModule):
         return data.DataLoader(
             self.val_dataset,
             batch_size=self.batch_size,
+            shuffle=True,
             collate_fn=lambda x: collate_batch(x, self.tokenizer),
             num_workers=self.num_workers
         )

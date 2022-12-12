@@ -81,10 +81,6 @@ class GODELTokenizer(TokenizerBase):
         self.SOS_IDX = self.tokenizer.bos_token_id
         self.EOS_IDX = self.tokenizer.eos_token_id
         self.vocab_size = len(self.tokenizer)
-        self.external_knowledge = ExternalKnowledgeText(
-            num_top_concepts=num_top_concepts,
-            max_num_concepts=max_num_concepts
-        )
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
         instruction = ("Instruction: given a dialog context, "
                        + "you need to response empathically.")
@@ -104,11 +100,9 @@ class GODELTokenizer(TokenizerBase):
 
         if text_type == "context":
             dialog_history = f' EOS '.join(text)
-            words = dialog_history.split(" ")
-            knowledge = self.external_knowledge.retrieve(words)
             token_ids = self.prefix + \
                 self.tokenizer(
-                    f"{dialog_history} [KNOWLEDGE] {knowledge}",
+                    f"{dialog_history}",
                     add_special_tokens=False)["input_ids"]
 
         elif text_type == "target":

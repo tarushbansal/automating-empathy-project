@@ -142,7 +142,8 @@ def main():
     data_module = DataModule(dataset_dir=cli_args.dataset_dir,
                              batch_size=cli_args.batch_size,
                              tokenizer=tokenizer,
-                             num_workers=max(1, os.cpu_count() // 4))
+                             num_workers=max(1, os.cpu_count() // 4),
+                             model_has_encoder=model.has_encoder)
 
     # Set up model checkpointing
     ckpt_dir = f"{logger.log_dir}/checkpoints"
@@ -164,9 +165,9 @@ def main():
         SaveConfigCallback(config=config),
         EarlyStopping(
             monitor="avg_val_loss",
-            min_delta=0.05,
+            min_delta=0.01,
             mode="min",
-            patience=2
+            patience=1
         )
     ]
     )

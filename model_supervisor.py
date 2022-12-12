@@ -8,6 +8,8 @@ import torch
 import torch.nn.functional as F
 import pytorch_lightning as pl
 
+from transformers.optimization import get_linear_schedule_with_warmup
+
 # User-defined Modules
 from base_classes import DialogueModelBase, TokenizerBase
 from metric_utils import compute_test_metrics
@@ -21,7 +23,7 @@ class ModelSupervisor(pl.LightningModule):
         model: DialogueModelBase,
         tokenizer: TokenizerBase,
         batch_size: int,
-        initial_lr: float = 0.0001,
+        initial_lr: float,
         test_output_dir: str = None,
         pred_beam_width: int = 1,
         max_pred_seq_len: int = 100,
@@ -254,12 +256,18 @@ class ModelSupervisor(pl.LightningModule):
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = torch.optim.AdamW(
-            self.parameters(), lr=self.initial_lr)
-        scheduler = torch.optim.lr_scheduler.StepLR(
-            optimizer, step_size=1, gamma=0.75)
+            self.parameters(),
+            lr=self.initial_lr
+        )
+        scheduler = get_linear_schedule_with_warmup(
+            optimizer,
+            num_warmup_steps=100,
+            num_training_steps=self.trainer.estimated_stepping_batches
+        )
         return {
             "optimizer": optimizer,
-            "lr_scheduler": scheduler
+            "lr_scheduler": scheduler,
+            "interval": "step"
         }
 
 # -----------------------------------------------------------------------------

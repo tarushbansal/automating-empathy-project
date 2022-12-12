@@ -25,7 +25,7 @@ class GODEL(EncoderDecoderModel):
         super().__init__(tokenizer)
         self.model = AutoModelForSeq2SeqLM.from_pretrained("microsoft/GODEL-v1_1-large-seq2seq")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
-        self.model.config.dropout_rate = 0.8
+        # self.model.config.dropout_rate = 0.8
 
     @staticmethod
     def tokenizer_cls():
@@ -131,7 +131,7 @@ class GPT2(DecoderModel):
         super().__init__(tokenizer)
         self.model = AutoModelForCausalLM.from_pretrained("gpt2-large")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
-        self.model.config.resid_pdrop = self.model.config.attn_pdrop = self.model.config.embd_pdrop = 0.6
+        # self.model.config.resid_pdrop = self.model.config.attn_pdrop = self.model.config.embd_pdrop = 0.6
 
     @property
     def word_embeddings(self):

@@ -4,7 +4,6 @@
 import os
 import json
 import argparse
-import numpy as np
 from tqdm import tqdm
 from typing import Iterable
 
@@ -65,16 +64,13 @@ def main():
         cli_args.max_pred_seq_len
     )
 
-    # Make modifications to tokenizer to allow padding
-    os.environ["TOKENIZERS_PARALLELISM"] = "false"
-    if tokenizer.pad_token is None:
-        tokenizer.pad_token = tokenizer.eos_token
-        print("Model tokenizer does not contain any padding tokens! Setting pad token to eos token.")
-
     # Set up data module
-    contexts = np.load(f"{dataset_dir}/test/contexts.npy", allow_pickle=True)
-    targets = np.load(f"{dataset_dir}/test/targets.npy", allow_pickle=True)
-    emotions = np.load(f"{dataset_dir}/test/emotions.npy", allow_pickle=True)
+    with open(f"{dataset_dir}/test/contexts.json") as f:
+        contexts = json.load(f)
+    with open(f"{dataset_dir}/test/targets.json") as f:
+        targets = json.load(f)
+    with open(f"{dataset_dir}/test/emotions.json") as f:
+        emotions = json.load(f)
 
     class TestDataset(torch.utils.data.Dataset):
         def __init__(self, contexts: Iterable) -> None:
@@ -93,10 +89,8 @@ def main():
         collate_fn=lambda x: x
     )
 
-    enc_targets = [tokenizer(seq).input_ids for seq in targets]
-    predictions, enc_predictions = [], []
-
     print("Generating predictions from model...")
+    predictions, enc_predictions = [], []
     for batch in tqdm(test_dataloader):
         outputs = model_generation.generate(batch)
         enc_predictions.extend(outputs)
@@ -105,6 +99,8 @@ def main():
     print("Done.")
 
     print("Computing test metrics")
+    os.environ["TOKENIZERS_PARALLELISM"] = "false"
+    enc_targets = [tokenizer(seq).input_ids for seq in targets]
     test_metrics = compute_test_metrics(
         targets.tolist(),
         predictions.copy(),

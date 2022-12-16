@@ -51,7 +51,16 @@ class TokenizerBase:
         pass
 
     def decode_to_text(self, sequence: List[int]) -> str:
-        pass
+        if len(sequence) == 0:
+            return ""
+        for i in range(len(sequence)):
+            if sequence[i] == self.PAD_IDX:
+                break
+        decoded_text = self.tokenizer.decode(
+            sequence[:i],
+            skip_special_tokens=True
+        )
+        return decoded_text
 
 
 class DialogueModelBase(nn.Module):

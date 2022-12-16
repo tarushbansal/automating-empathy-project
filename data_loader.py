@@ -25,7 +25,7 @@ class Dataset(data.Dataset):
         self.contexts, self.targets, self.emotions = data
 
     def __len__(self) -> int:
-        return len(self.targets)
+        return len(self.contexts)
 
     def __getitem__(self, idx: int) -> Dict:
         """returns one data pair"""
@@ -71,7 +71,7 @@ class DataModule(pl.LightningDataModule):
 
     def load_data(self, stage: str):
         path_prefix = f"{self.dataset_dir}/{stage}"
-        if stage == "train":
+        if (stage == "train") or (stage == "val"):
             if self.model_has_encoder is None:
                 raise ValueError(
                     "Must specify whether model has encoder for loading training datasets!")
@@ -104,7 +104,6 @@ class DataModule(pl.LightningDataModule):
         return data.DataLoader(
             self.val_dataset,
             batch_size=self.batch_size,
-            shuffle=True,
             collate_fn=lambda x: collate_batch(x, self.tokenizer),
             num_workers=self.num_workers
         )

@@ -19,7 +19,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset_dir", type=str, default=None, required=True)
     parser.add_argument("--pretrained_model_dir", type=str, default=None, required=True)
-    parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--pred_beam_width", type=int, default=1)
     parser.add_argument("--max_pred_seq_len", type=int, default=200)
     parser.add_argument("--pred_n_grams", type=int, default=4)
@@ -42,7 +41,7 @@ def main():
         ckpt_path, 
         tokenizer=tokenizer, 
         model=model,
-        batch_size=cli_args.batch_size,
+        batch_size=1,
         test_output_dir=os.path.abspath(cli_args.pretrained_model_dir), 
         pred_beam_width=cli_args.pred_beam_width,
         max_pred_seq_len=cli_args.max_pred_seq_len,
@@ -51,15 +50,14 @@ def main():
 
     # Set up data module
     data_module = DataModule(dataset_dir=cli_args.dataset_dir,
-                             batch_size=cli_args.batch_size,
+                             batch_size=1,
                              tokenizer=tokenizer,
                              num_workers=max(1, os.cpu_count() // 4))
 
     # Set up trainer
     trainer = pl.Trainer(
         accelerator="auto", 
-        devices=-1 if torch.cuda.is_available() else 1,
-        strategy="ddp_find_unused_parameters_false",
+        devices=1,
         logger=None
     )
 

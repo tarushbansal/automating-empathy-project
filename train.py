@@ -163,12 +163,12 @@ def main():
     }
     callbacks.extend([
         SaveConfigCallback(config=config),
-        EarlyStopping(
-            monitor="avg_val_loss",
-            min_delta=0.01,
-            mode="min",
-            patience=1
-        )
+        # EarlyStopping(
+        #     monitor="avg_val_loss",
+        #     min_delta=0.01,
+        #     mode="min",
+        #     patience=1
+        # )
     ]
     )
 
@@ -189,14 +189,6 @@ def main():
         data_module,
         ckpt_path=load_val_ckpt_path(cli_args.pretrained_model_dir)
     )
-
-    # Test the model
-    trainer.test(
-        model_supervisor,
-        data_module,
-        ckpt_path=load_val_ckpt_path(logger.log_dir)
-    )
-
 
 if __name__ == "__main__":
     main()

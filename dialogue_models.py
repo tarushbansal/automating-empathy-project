@@ -20,10 +20,43 @@ from base_classes import EncoderDecoderModel, DecoderModel, TokenizerBase
 # ------------------------- IMPLEMENTATION ------------------------------------
 
 
+class BlenderBot(EncoderDecoderModel):
+    def __init__(self, tokenizer: TokenizerBase) -> None:
+        super().__init__(tokenizer)
+        self.model = AutoModelForSeq2SeqLM.from_pretrained("facebook/blenderbot-400M-distill")
+        self.model.resize_token_embeddings(tokenizer.vocab_size)
+        # self.model.config.dropout_rate = 0.8
+
+    @staticmethod
+    def tokenizer_cls():
+        return "BlenderBotTokenizer"
+
+    @property
+    def word_embeddings(self):
+        return self.model.get_input_embeddings()
+
+    def forward(
+        self,
+        source_seq: torch.LongTensor,
+        target_seq: torch.LongTensor
+    ) -> torch.Tensor:
+
+        source_seq, source_mask = self.create_padding_mask(source_seq)
+        target_seq, target_mask = self.create_padding_mask(target_seq)
+
+        out = self.model(
+            input_ids=source_seq,
+            attention_mask=source_mask,
+            decoder_input_ids=target_seq,
+            decoder_attention_mask=target_mask
+        )
+        return out.logits
+
+
 class GODEL(EncoderDecoderModel):
     def __init__(self, tokenizer: TokenizerBase) -> None:
         super().__init__(tokenizer)
-        self.model = AutoModelForSeq2SeqLM.from_pretrained("microsoft/GODEL-v1_1-large-seq2seq")
+        self.model = AutoModelForSeq2SeqLM.from_pretrained("microsoft/GODEL-v1_1-base-seq2seq")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
         # self.model.config.dropout_rate = 0.8
 
@@ -56,7 +89,7 @@ class GODEL(EncoderDecoderModel):
 class KnowledgeBridgedGODEL(EncoderDecoderModel):
     def __init__(self, tokenizer: TokenizerBase) -> None:
         super().__init__(tokenizer)
-        self.model = AutoModelForSeq2SeqLM.from_pretrained("microsoft/GODEL-v1_1-large-seq2seq")
+        self.model = AutoModelForSeq2SeqLM.from_pretrained("microsoft/GODEL-v1_1-base-seq2seq")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
         self.model.config.dropout_rate = 0.8
         self.graph_embeddings = nn.Embedding(2, self.model.config.hidden_size)
@@ -131,7 +164,7 @@ class GPT2(DecoderModel):
         super().__init__(tokenizer)
         self.model = AutoModelForCausalLM.from_pretrained("gpt2-large")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
-        # self.model.config.resid_pdrop = self.model.config.attn_pdrop = self.model.config.embd_pdrop = 0.6
+        self.model.config.resid_pdrop = self.model.config.attn_pdrop = self.model.config.embd_pdrop = 0.6
 
     @property
     def word_embeddings(self):

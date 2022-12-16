@@ -1,6 +1,7 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
+import os
 import torch
 from typing import Union, List
 
@@ -31,6 +32,32 @@ class Generate:
         self.model.eval()
 
 
+class BlenderBot(Generate):
+    def __init__(
+        self,
+        model: Union[AutoModelForCausalLM, AutoModelForSeq2SeqLM],
+        tokenizer: AutoTokenizer,
+        device: torch.device,
+        beam_width: int,
+        max_len: int
+    ) -> None:
+
+        super().__init__(model, tokenizer, device, beam_width, max_len)
+        model.config.max_position_embeddings = 512
+
+    def generate(self, batch: List[List[str]]) -> List[List[int]]:
+        batch = [f"{f' {self.tokenizer.sep_token} '.join(history)} {self.tokenizer.sep_token}"
+                 for history in batch]
+        input_ids = self.tokenizer(batch, return_tensors="pt", padding=True).input_ids
+        input_ids = input_ids.to(self.device)
+        outputs = self.model.generate(
+            input_ids,
+            pad_token_id=self.tokenizer.pad_token_id,
+            max_length=self.max_len,
+            num_beams=self.beam_width
+        )
+        return outputs.tolist()
+
 class GODEL(Generate):
     def __init__(
         self,
@@ -52,8 +79,7 @@ class GODEL(Generate):
             input_ids,
             pad_token_id=self.tokenizer.pad_token_id,
             max_length=self.max_len,
-            top_p=0.9,
-            do_sample=True
+            num_beams=self.beam_width
         )
         return outputs.tolist()
 
@@ -69,19 +95,31 @@ class GPT2(Generate):
     ) -> None:
 
         super().__init__(model, tokenizer, device, beam_width, max_len)
+        # Make modifications to tokenizer to allow padding
+        os.environ["TOKENIZERS_PARALLELISM"] = "false"
+        tokenizer.pad_token = tokenizer.eos_token
+        print("Model tokenizer does not contain any padding tokens! Setting pad token to eos token.")
         self.instruction = "Respond empathetically to this conversation: "
 
     def generate(self, batch: List[List[str]]) -> List[List[int]]:
-        batch = [self.instruction + " ".join(history) for history in batch]
-        input_ids = self.tokenizer(batch, return_tensors="pt", padding=True).input_ids
+        _inputs = [] 
+        for history in batch:
+            dialog = self.instruction + " "
+            for i in range(len(history)):
+                if i % 2 == 0:
+                    dialog += f"Speaker: {history[i]} ;"
+                else:
+                    dialog += f"Listener: {history[i]} ;"
+            dialog += "Listener: "
+            _inputs.append(dialog)
+        input_ids = self.tokenizer(_inputs, return_tensors="pt", padding=True).input_ids
         input_ids = input_ids.to(self.device)
         seq_len = input_ids.size(dim=1)
         outputs = self.model.generate(
             input_ids,
             pad_token_id=self.tokenizer.pad_token_id,
             max_length=(seq_len + self.max_len),
-            top_p=0.9,
-            do_sample=True
+            num_beams=self.beam_width
         )
         outputs = outputs[:, seq_len:]
         return outputs.tolist()
@@ -89,7 +127,8 @@ class GPT2(Generate):
 
 generate_map = {
     "gpt2": GPT2,
-    "microsoft/GODEL-v1_1-base-seq2seq": GODEL
+    "microsoft/GODEL-v1_1-base-seq2seq": GODEL,
+    "facebook/blenderbot-400M-distill": BlenderBot
 }
 
 # ----------------------------------------------------------------------------

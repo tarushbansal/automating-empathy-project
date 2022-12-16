@@ -2,7 +2,7 @@
 
 # System Modules
 import json
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Union
 
 import torch
 import torch.nn.functional as F
@@ -102,7 +102,8 @@ class ModelSupervisor(pl.LightningModule):
 
     def validation_epoch_end(self, val_losses: List[float]) -> float:
         avg_val_loss = sum(val_losses) / len(val_losses)
-        self.log("avg_val_loss", avg_val_loss, prog_bar=True, batch_size=self.batch_size, sync_dist=True)
+        self.log("avg_val_loss", avg_val_loss, prog_bar=True,
+                 batch_size=self.batch_size, sync_dist=True)
         self.logger.experiment.add_scalars('loss', {'avg_val': avg_val_loss}, self.global_step)
         return avg_val_loss
 
@@ -176,16 +177,14 @@ class ModelSupervisor(pl.LightningModule):
                 json.dump(test_metrics, f)
 
     def beam_search(
-        self, 
-        batch: Dict
+        self,
+        batch: Dict[str, Union[Dict, torch.LongTensor]]
     ) -> Tuple[List[List[int]]]:
 
         # BEAM SEARCH: Objective is to determine the most probable output sequence from the model
         batch = batch.copy()
-        batch.pop("target", None)
         if self.tokenizer.supports_dialogue_states:
             ds = batch["target_dialogue_state"][:, 0:1]
-        batch["target_dialogue_state"] = None
 
         # Set model in evaluation mode (Important to turn off dropout layers!!)
         self.model.eval()
@@ -218,8 +217,8 @@ class ModelSupervisor(pl.LightningModule):
                     batch["target_dialogue_state"] = ds.expand(batch["target"].size())
                 logits, _ = self.forward(batch)
                 conditional_p, top_responses = torch.topk(
-                    F.log_softmax(logits[0, -1, :], dim=-1), 
-                    self.pred_beam_width, 
+                    F.log_softmax(logits[0, -1, :], dim=-1),
+                    self.pred_beam_width,
                     dim=-1
                 )
                 if eos_detected[i]:

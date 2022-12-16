@@ -95,8 +95,8 @@ def main():
         }], tokenizer)
 
         response, log_prob = model_supervisor.beam_search(batch)
-        decoded_reponse = tokenizer.decode_to_text(response[0])
-        ppl = 1 / math.exp(log_prob[0] / len(response[0]))
+        decoded_reponse = tokenizer.decode_to_text(response)
+        ppl = 1 / math.exp(log_prob / len(response))
         print(f"Dialogue Model: {decoded_reponse} (Perplexity: {ppl:.2f})")
         print("")
 

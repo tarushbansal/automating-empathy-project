@@ -127,7 +127,8 @@ def main():
         model = model_cls(tokenizer=tokenizer, **model_kwargs)
 
     # Set up model supervisor
-    model_supervisor = ModelSupervisor(
+    model_supervisor = ModelSupervisor.load_from_checkpoint(
+        load_val_ckpt_path(cli_args.pretrained_model_dir),
         tokenizer=tokenizer,
         model=model,
         batch_size=cli_args.batch_size,
@@ -186,9 +187,9 @@ def main():
     # Train / Validate the model
     trainer.fit(
         model_supervisor,
-        data_module,
-        ckpt_path=load_val_ckpt_path(cli_args.pretrained_model_dir)
+        data_module
     )
+
 
 if __name__ == "__main__":
     main()

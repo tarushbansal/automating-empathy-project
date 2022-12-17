@@ -7,7 +7,6 @@ import uuid
 import random
 import logging
 import argparse
-import numpy as np
 from tqdm import tqdm
 from stat import S_IREAD
 from typing import List, Dict
@@ -107,7 +106,7 @@ if __name__ == "__main__":
     dataset_dir = "/home/tb662/rds/hpc-work/automating-empathy-project/empdial_dataset/test"
     if "GOLD" not in [model_table["model_name"] for model_table in model_tables]:
         logger.info("Table for target model 'GOLD' not present! Creating new one...")
-        targets = np.load(f"{dataset_dir}/targets.npy", allow_pickle=True)
+        targets = json.load(open(f"{dataset_dir}/targets.json"))
         gold_table = create_model_table(
             id=str(uuid.uuid4()),
             name="GOLD",
@@ -123,7 +122,7 @@ if __name__ == "__main__":
     logger.info("Loaded and preprocessed new model predictions")
 
     # Load dialogue contexts
-    contexts = np.load(f"{dataset_dir}/contexts.npy", allow_pickle=True)
+    contexts = json.load(open(f"{dataset_dir}/contexts.json"))
     logger.info("Loaded all dialogue contexts")
 
     # Assign defaults to new model table

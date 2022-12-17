@@ -21,7 +21,7 @@ class GODELTokenizer(TokenizerBase):
     def __init__(self) -> None:
         super().__init__()
         self.tokenizer = AutoTokenizer.from_pretrained(
-            "microsoft/GODEL-v1_1-base-seq2seq"
+            "microsoft/GODEL-v1_1-large-seq2seq"
         )
         self.tokenizer.add_special_tokens({
             "bos_token": "<SOS>"

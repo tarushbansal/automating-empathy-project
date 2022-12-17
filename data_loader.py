@@ -1,6 +1,7 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
+import os
 import json
 from typing import Tuple, Dict, Optional, List, Union
 
@@ -32,7 +33,10 @@ class Dataset(data.Dataset):
         item = {}
 
         # Map emotion label to token
-        item['emotion'] = self.tokenizer.emo_map[self.emotions[idx]]
+        if self.emotions is None:
+            item['emotion'] = None
+        else:
+            item['emotion'] = self.tokenizer.emo_map[self.emotions[idx]]
 
         # Tokenize dialogue history / context
         context, context_ds, external_knowledge = self.tokenizer.encode_text(
@@ -71,6 +75,7 @@ class DataModule(pl.LightningDataModule):
 
     def load_data(self, stage: str):
         path_prefix = f"{self.dataset_dir}/{stage}"
+
         if (stage == "train") or (stage == "val"):
             if self.model_has_encoder is None:
                 raise ValueError(
@@ -80,8 +85,13 @@ class DataModule(pl.LightningDataModule):
             contexts = json.load(f)
         with open(f"{path_prefix}/targets.json") as f:
             targets = json.load(f)
-        with open(f"{path_prefix}/emotions.json") as f:
-            emotions = json.load(f)
+
+        emotions = None
+        fname = f"{path_prefix}/emotions.json"
+        if os.path.isfile(fname):
+            with open(fname) as f:
+                emotions = json.load(f)
+
         return contexts, targets, emotions
 
     def setup(self, stage: str) -> None:
@@ -124,7 +134,6 @@ def collate_batch(
 
     context = [item["context"] for item in batch]
     target = [item["target"] for item in batch]
-    emotion = [item["emotion"] for item in batch]
 
     max_len_context_seq = max([len(seq) for seq in context])
     max_len_target_seq = max([len(seq) for seq in target])
@@ -134,7 +143,8 @@ def collate_batch(
             context, max_len_context_seq, padding_idx=tokenizer.PAD_IDX),
         "target": pad_seq_and_convert_to_tensor(
             target, max_len_target_seq, padding_idx=tokenizer.PAD_IDX),
-        "emotion":  torch.LongTensor(emotion),
+        "emotion":  None if batch[0]["emotion"] is None else torch.LongTensor(
+            [item["emotion"] for item in batch]),
     }
 
     if tokenizer.supports_dialogue_states:

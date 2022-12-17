@@ -9,15 +9,8 @@ from typing import Iterable
 
 import torch
 
-from transformers import (
-    AutoModelForCausalLM,
-    AutoModelForSeq2SeqLM,
-    AutoTokenizer
-)
-
 # User-defined Modules
 from metric_utils import compute_test_metrics
-from generation_utils import generate_map
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -26,8 +19,7 @@ def main():
     # Parse command line arguments
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset_dir", type=str, default=None, required=True)
-    parser.add_argument("--model_name", type=str, default=None, required=True)
-    parser.add_argument("--model_type", type=str, default=None, required=True)
+    parser.add_argument("--dialogue_model", type=str, default=None, required=True)
     parser.add_argument("--output_dir", type=str, default=None, required=True)
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--pred_beam_width", type=int, default=1)
@@ -42,27 +34,14 @@ def main():
     # Set appropriate device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    # Initialise model and tokenizer
-    if cli_args.model_type == "EncoderDecoder":
-        model = AutoModelForSeq2SeqLM.from_pretrained(cli_args.model_name)
-    elif cli_args.model_type == "Decoder":
-        model = AutoModelForCausalLM.from_pretrained(cli_args.model_name)
-    else:
-        raise ValueError("Model type unsupported! Must be either'EncoderDecoder' or 'Decoder'")
-
-    if cli_args.model_name not in generate_map:
-        raise ValueError(
-            "Please define a generation class for the specified model!")
-
-    model = model.to(device)
-    tokenizer = AutoTokenizer.from_pretrained(cli_args.model_name)
-    model_generation = generate_map[cli_args.model_name](
-        model,
-        tokenizer,
+    gen_cls = getattr(__import__("generation"), cli_args.dialogue_model)
+    model_generation = gen_cls(
         device,
         cli_args.pred_beam_width,
         cli_args.max_pred_seq_len
     )
+    model = model_generation.model
+    tokenizer = model_generation.tokenizer
 
     # Set up data module
     with open(f"{dataset_dir}/test/contexts.json") as f:
@@ -89,7 +68,7 @@ def main():
         collate_fn=lambda x: x
     )
 
-    print("Generating predictions from model...")
+    print("Generating predictions from pretrained model...")
     predictions, enc_predictions = [], []
     for batch in tqdm(test_dataloader):
         outputs = model_generation.generate(batch)
@@ -98,22 +77,9 @@ def main():
                             for enc in outputs])
     print("Done.")
 
-    print("Computing test metrics")
-    os.environ["TOKENIZERS_PARALLELISM"] = "false"
-    enc_targets = [tokenizer(seq).input_ids for seq in targets]
-    test_metrics = compute_test_metrics(
-        targets.tolist(),
-        predictions.copy(),
-        enc_targets,
-        enc_predictions,
-        cli_args.pred_n_grams,
-        None,
-        model.get_input_embeddings()
-    )
-    print("Test metrics computed.")
-
     os.makedirs(cli_args.output_dir, exist_ok=True)
     dir = os.path.abspath(cli_args.output_dir)
+    print(f"Created test output directory at '{dir}'")
 
     N = len(contexts)
     test_data = []
@@ -128,12 +94,31 @@ def main():
             "concepts": None
         }
         test_data.append(entry)
-    with open(f"{dir}/test_data.json", "w") as f:
+
+    fname = f"{dir}/test_data.json"
+    with open(fname, "w") as f:
         json.dump(test_data, f)
-    with open(f"{dir}/test_metrics.json", "w") as f:
+
+    print(f"Test data saved at '{fname}'")
+
+    print("Computing test metrics")
+    enc_targets = [tokenizer(seq).input_ids for seq in targets]
+    test_metrics = compute_test_metrics(
+        targets,
+        predictions,
+        enc_targets,
+        enc_predictions,
+        cli_args.pred_n_grams,
+        None,
+        model.get_input_embeddings()
+    )
+    print("Test metrics computed.")
+
+    fname = f"{dir}/test_metrics.json"
+    with open(fname, "w") as f:
         json.dump(test_metrics, f)
 
-    print(f"Test data and metrics saved at '{dir}'")
+    print(f"Test metrics saved at '{fname}'")
 
 
 if __name__ == "__main__":

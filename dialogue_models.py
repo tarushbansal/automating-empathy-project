@@ -56,9 +56,9 @@ class BlenderBot(EncoderDecoderModel):
 class GODEL(EncoderDecoderModel):
     def __init__(self, tokenizer: TokenizerBase) -> None:
         super().__init__(tokenizer)
-        self.model = AutoModelForSeq2SeqLM.from_pretrained("microsoft/GODEL-v1_1-base-seq2seq")
+        self.model = AutoModelForSeq2SeqLM.from_pretrained("microsoft/GODEL-v1_1-large-seq2seq")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
-        # self.model.config.dropout_rate = 0.8
+        self.model.config.dropout_rate = 0.6
 
     @staticmethod
     def tokenizer_cls():

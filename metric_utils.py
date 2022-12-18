@@ -20,9 +20,8 @@ def compute_test_metrics(
     predictions: List[str],
     encoded_targets: List[List[int]],
     encoded_predictions: List[List[int]],
-    pred_n_grams: int = 4,
-    log_prob: Optional[float] = None,
     word_embeddings: Optional[nn.Module] = None,
+    pred_n_grams: int = 4,
 ) -> Dict[str, float]:
 
     n_unigrams, n_bigrams = 0, 0
@@ -82,9 +81,6 @@ def compute_test_metrics(
         "dist-2": len(unique_bigrams) / n_bigrams
     }
 
-    if log_prob is not None:
-        num_tokens = sum([len(enc) - 1 for enc in encoded_predictions])
-        test_metrics["ppl"] = math.exp(-log_prob/num_tokens)
     if word_embeddings is not None:
         test_metrics["avg_bow"] = sum(avg_bow) / len(avg_bow)
         test_metrics["extrema_bow"] = sum(extrema_bow) / len(extrema_bow)

@@ -2,10 +2,11 @@
 
 # System Modules
 import os
+import math
 import json
 import argparse
 from tqdm import tqdm
-from typing import Iterable
+from typing import List, Dict, Tuple
 
 import torch
 
@@ -48,33 +49,40 @@ def main():
         contexts = json.load(f)
     with open(f"{dataset_dir}/test/targets.json") as f:
         targets = json.load(f)
-    with open(f"{dataset_dir}/test/emotions.json") as f:
-        emotions = json.load(f)
 
     class TestDataset(torch.utils.data.Dataset):
-        def __init__(self, contexts: Iterable) -> None:
+        def __init__(self, contexts: list, targets: list) -> None:
             self.contexts = contexts
+            self.targets = targets
 
         def __len__(self) -> int:
             return len(self.contexts)
 
         def __getitem__(self, idx: int) -> list:
-            return self.contexts[idx]
+            return self.contexts[idx], self.targets[idx]
+
+    def collate_fn(batch: List[Tuple]) -> Dict[str, Tuple]:
+        contexts, targets = zip(*batch)
+        return {
+            "contexts": contexts,
+            "targets": targets
+        }
 
     test_dataloader = torch.utils.data.DataLoader(
-        TestDataset(contexts),
+        TestDataset(contexts, targets),
         batch_size=cli_args.batch_size,
         num_workers=max(1, os.cpu_count() // 4),
-        collate_fn=lambda x: x
+        collate_fn=collate_fn
     )
 
     print("Generating predictions from pretrained model...")
-    predictions, enc_predictions = [], []
-    for batch in tqdm(test_dataloader):
-        outputs = model_generation.generate(batch)
-        enc_predictions.extend(outputs)
-        predictions.extend([tokenizer.decode(enc, skip_special_tokens=True)
-                            for enc in outputs])
+    predictions, enc_predictions, cross_entropy = [], [], []
+    with torch.no_grad():
+        for batch in tqdm(test_dataloader):
+            preds, nll = model_generation.generate(batch)
+            cross_entropy.append(nll)
+            enc_predictions.extend(preds)
+            predictions.extend([tokenizer.decode(enc, skip_special_tokens=True) for enc in preds])
     print("Done.")
 
     os.makedirs(cli_args.output_dir, exist_ok=True)
@@ -89,9 +97,6 @@ def main():
             "context": contexts[i],
             "target": targets[i],
             "prediction": predictions[i],
-            "emotion": emotions[i],
-            "pred_emotion": None,
-            "concepts": None
         }
         test_data.append(entry)
 
@@ -101,17 +106,17 @@ def main():
 
     print(f"Test data saved at '{fname}'")
 
-    print("Computing test metrics")
+    print("Computing test metrics...")
     enc_targets = [tokenizer(seq).input_ids for seq in targets]
     test_metrics = compute_test_metrics(
         targets,
         predictions,
         enc_targets,
         enc_predictions,
+        model.get_input_embeddings(),
         cli_args.pred_n_grams,
-        None,
-        model.get_input_embeddings()
     )
+    test_metrics["ppl"] = math.exp(sum(cross_entropy) / len(cross_entropy))
     print("Test metrics computed.")
 
     fname = f"{dir}/test_metrics.json"

@@ -2,6 +2,7 @@
 
 # System Modules
 import json
+import math
 from typing import Dict, List, Tuple, Union
 
 import torch
@@ -108,10 +109,9 @@ class ModelSupervisor(pl.LightningModule):
         return avg_val_loss
 
     def on_test_start(self) -> None:
-        self.log_prob = 0
         (self.contexts, self.targets, self.emotions,
          self.predictions, self.enc_targets, self.enc_predictions,
-         self.emo_predictions, self.concepts) = ([] for _ in range(8))
+         self.emo_predictions, self.concepts, self.cross_entropy) = ([] for _ in range(9))
 
     def test_step(self, batch: Dict, _) -> Tuple[List]:
         targets = [self.tokenizer.decode_to_text(enc) for enc in batch["target"].tolist()]
@@ -119,10 +119,16 @@ class ModelSupervisor(pl.LightningModule):
         self.enc_targets.extend([self.tokenizer.encode_text(target, "target")[0]
                                 for target in targets])
 
-        enc_prediction, log_prob = self.beam_search(batch)
+        logits, target_seq = self.forward(batch)
+        self.cross_entropy.append(F.cross_entropy(
+            logits[:, :-1, :].permute(0, 2, 1),
+            target_seq,
+            ignore_index=self.tokenizer.PAD_IDX
+        ))
+
+        enc_prediction = self.beam_search(batch)
         self.enc_predictions.extend([enc_prediction])
         self.predictions.extend([self.tokenizer.decode_to_text(enc_prediction)])
-        self.log_prob += log_prob
 
         self.contexts.extend([self.tokenizer.decode_to_text(context)
                              for context in batch["context"].tolist()])
@@ -162,10 +168,11 @@ class ModelSupervisor(pl.LightningModule):
             self.predictions,
             self.enc_targets,
             self.enc_predictions,
-            self.pred_n_grams,
-            self.log_prob,
             self.model.word_embeddings,
+            self.pred_n_grams,
         )
+
+        test_metrics["ppl"] = math.exp(sum(self.cross_entropy) / len(self.cross_entropy))
 
         if len(self.emo_predictions) != 0:
             test_metrics["emo_accuracy"] = accurate_emo_labels / N
@@ -246,10 +253,7 @@ class ModelSupervisor(pl.LightningModule):
             eos_detected = [self.tokenizer.EOS_IDX in seq for seq in beam]
 
         # Return most probable sequence and its log probability for each beam in batch
-        prediction = beam[0].tolist()
-        log_prob = float(beam_prob[0])
-
-        return prediction, log_prob
+        return beam[0].tolist()
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = torch.optim.AdamW(

@@ -2,7 +2,9 @@
 
 # System Modules
 import torch
-from typing import List, Union
+import torch.nn.functional as F
+
+from typing import List, Union, Tuple, Dict
 
 from transformers import (
     AutoModelForCausalLM,
@@ -25,6 +27,7 @@ class GenerationBase:
 
         self.model = model
         self.model = self.model.to(device)
+        self.model.eval()
         self.tokenizer = tokenizer
         self.device = device
         self.beam_width = beam_width
@@ -45,16 +48,30 @@ class GODEL(GenerationBase):
 
         self.instruction = "Instruction: given a dialog context, you need to response empathically."
 
-    def generate(self, batch: List[List[str]]) -> List[List[int]]:
-        batch = [f"{self.instruction} [CONTEXT] {' EOS '.join(history)}" for history in batch]
-        input_ids = self.tokenizer(batch, return_tensors="pt", padding=True).input_ids
-        input_ids = input_ids.to(self.device)
-        outputs = self.model.generate(
-            input_ids,
+    def generate(self, batch: Dict[str, Tuple]) -> Tuple[List[List[int]], float]:
+        _input = [f"{self.instruction} [CONTEXT] {' EOS '.join(dialogue)}"
+                  for dialogue in batch["contexts"]]
+        _input = self.tokenizer(_input, return_tensors="pt", padding=True).to(self.device)
+        decoder_input = self.tokenizer(batch["targets"], return_tensors="pt", padding=True).to(self.device)
+        output = self.model(
+            input_ids=_input.input_ids,
+            attention_mask=_input.attention_mask,
+            decoder_input_ids=decoder_input.input_ids,
+            decoder_attention_mask=decoder_input.attention_mask
+        )
+        cross_entropy = F.cross_entropy(
+            output.logits[:, :-1, :].permute(0, 2, 1),
+            decoder_input.input_ids[:, 1:],
+            ignore_index=self.tokenizer.pad_token_id
+        )
+
+        predictions = self.model.generate(
+            _input.input_ids,
             pad_token_id=self.tokenizer.pad_token_id,
             max_length=self.max_len,
             num_beams=self.beam_width
         )
-        return outputs.tolist()
+
+        return predictions.tolist(), cross_entropy
 
 # ----------------------------------------------------------------------------

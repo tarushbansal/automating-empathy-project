@@ -1,7 +1,6 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
-import math
 from typing import Dict, List, Optional
 
 import torch

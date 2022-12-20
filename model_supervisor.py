@@ -27,8 +27,8 @@ class ModelSupervisor(pl.LightningModule):
         model: DialogueModelBase,
         tokenizer: TokenizerBase,
         batch_size: int,
-        initial_lr: float,
-        bleu_n_grams: Optional[int] = None,
+        initial_lr: Optional[float] = None,
+        metric_n_grams: Optional[int] = None,
         test_output_dir: Optional[str] = None,
         generation_kwargs: Optional[Dict] = None,
     ) -> None:
@@ -42,7 +42,7 @@ class ModelSupervisor(pl.LightningModule):
         self.batch_size = batch_size
         self.test_output_dir = test_output_dir
         self.generation_kwargs = generation_kwargs
-        self.bleu_n_grams = bleu_n_grams
+        self.metric_n_grams = metric_n_grams
 
     def forward(
         self, 
@@ -135,17 +135,10 @@ class ModelSupervisor(pl.LightningModule):
                               for context in batch.contexts.tolist()])
         targets = [self.tokenizer.decode_to_text(target) for target in batch.targets.tolist()]
         self.targets.extend(targets)
-        self.enc_targets.extend([self.tokenizer.encode_to_text(target, "target")[0]
+        self.enc_targets.extend([self.tokenizer.encode_to_text(target)[0]
                                  for target in targets])
 
-        enc_predictions = generate(
-            forward_fn=self.forward, 
-            batch=copy.deepcopy(batch), 
-            start_token=self.tokenizer.SOS_IDX,
-            stop_token=self.tokenizer.EOS_IDX,
-            model_has_encoder=self.model.has_encoder,
-            **self.generation_kwargs,
-        )
+        enc_predictions = self.generate(batch).tolist()
         self.enc_predictions.extend(enc_predictions)
         self.predictions.extend([self.tokenizer.decode_to_text(enc) 
                                  for enc in enc_predictions])
@@ -203,7 +196,7 @@ class ModelSupervisor(pl.LightningModule):
             self.enc_targets,
             self.enc_predictions,
             self.model.word_embeddings,
-            self.bleu_n_grams,
+            self.metric_n_grams,
         )
 
         test_metrics["ppl"] = math.exp(sum(self.cross_entropy) / len(self.cross_entropy))
@@ -216,6 +209,20 @@ class ModelSupervisor(pl.LightningModule):
         if self.test_output_dir is not None:
             with open(f"{self.test_output_dir}/test_metrics.json", "w") as f:
                 json.dump(test_metrics, f)
+
+    def generate(
+        self, 
+        batch: Union[EncoderDecoderModelBatch, DecoderModelBatch]
+    ) -> torch.LongTensor:
+
+        return generate(
+            forward_fn=self.forward, 
+            batch=copy.deepcopy(batch), 
+            start_token=self.tokenizer.SOS_IDX,
+            stop_token=self.tokenizer.EOS_IDX,
+            model_has_encoder=self.model.has_encoder,
+            **self.generation_kwargs
+        )
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = torch.optim.AdamW(

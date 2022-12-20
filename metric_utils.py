@@ -20,7 +20,7 @@ def compute_test_metrics(
     encoded_targets: List[List[int]],
     encoded_predictions: List[List[int]],
     word_embeddings: Optional[nn.Module] = None,
-    pred_n_grams: int = 4,
+    metric_n_grams: int = 4,
 ) -> Dict[str, float]:
 
     n_unigrams, n_bigrams = 0, 0
@@ -74,8 +74,8 @@ def compute_test_metrics(
                 float(sim.max(dim=0)[0].mean() + sim.max(dim=1)[0].mean() / 2))
 
     test_metrics = {
-        "bleu": corpus_bleu(targets, predictions, weights=[1/pred_n_grams]*pred_n_grams),
-        "nist": corpus_nist(targets, predictions, n=pred_n_grams),
+        "bleu": corpus_bleu(targets, predictions, weights=[1/metric_n_grams]*metric_n_grams),
+        "nist": corpus_nist(targets, predictions, n=metric_n_grams),
         "dist-1": len(unique_unigrams) / n_unigrams,
         "dist-2": len(unique_bigrams) / n_bigrams
     }

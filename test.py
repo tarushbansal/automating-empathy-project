@@ -20,7 +20,7 @@ def main():
     parser.add_argument("--dataset_dir", type=str, default=None, required=True)
     parser.add_argument("--pretrained_model_dir", type=str, default=None, required=True)
     parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--bleu_n_grams", type=int, default=4)
+    parser.add_argument("--metric_n_grams", type=int, default=4)
     parser.add_argument("--beam_width", type=int, default=1)
     parser.add_argument("--sample", action="store_true")
     parser.add_argument("--temperature", type=float, default=1.0)
@@ -48,8 +48,9 @@ def main():
         model=model,
         batch_size=cli_args.batch_size,
         test_output_dir=os.path.abspath(cli_args.pretrained_model_dir), 
-        bleu_n_grams=cli_args.bleu_n_grams,
+        metric_n_grams=cli_args.metric_n_grams,
         generation_kwargs={
+            "max_new_tokens": cli_args.max_new_tokens,
             "beam_width": cli_args.beam_width,
             "sample": cli_args.sample,
             "temperature": cli_args.temperature,

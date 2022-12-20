@@ -23,9 +23,9 @@ def main():
     parser.add_argument("--dialogue_model", type=str, default=None, required=True)
     parser.add_argument("--output_dir", type=str, default=None, required=True)
     parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--pred_beam_width", type=int, default=1)
-    parser.add_argument("--max_pred_seq_len", type=int, default=200)
-    parser.add_argument("--pred_n_grams", type=int, default=4)
+    parser.add_argument("--beam_width", type=int, default=1)
+    parser.add_argument("--max_new_tokens", type=int, default=200)
+    parser.add_argument("--bleu_n_grams", type=int, default=4)
     cli_args, _ = parser.parse_known_args()
 
     dataset_dir = os.path.abspath(cli_args.dataset_dir)
@@ -38,8 +38,8 @@ def main():
     gen_cls = getattr(__import__("generation"), cli_args.dialogue_model)
     model_generation = gen_cls(
         device,
-        cli_args.pred_beam_width,
-        cli_args.max_pred_seq_len
+        cli_args.beam_width,
+        cli_args.max_new_tokens
     )
     model = model_generation.model
     tokenizer = model_generation.tokenizer
@@ -114,7 +114,7 @@ def main():
         enc_targets,
         enc_predictions,
         model.get_input_embeddings(),
-        cli_args.pred_n_grams,
+        cli_args.bleu_n_grams,
     )
     test_metrics["ppl"] = math.exp(sum(cross_entropy) / len(cross_entropy))
     print("Test metrics computed.")

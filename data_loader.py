@@ -3,7 +3,7 @@
 # System Modules
 import os
 import json
-from typing import Tuple, Dict, Optional, List, Union
+from typing import Tuple, Optional, List, Union
 
 import torch
 import torch.utils.data as data
@@ -11,49 +11,103 @@ import pytorch_lightning as pl
 
 # User-defined Modules
 from data_tokenizers import TokenizerBase
+from data_classes import (
+    ConceptNetRawData,
+    ConceptNetBatchData,
+    EncoderDecoderModelRawData,
+    EncoderDecoderModelBatch,
+    DecoderModelRawData,
+    DecoderModelBatch
+)
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
 
-class Dataset(data.Dataset):
+class EncoderDecoderDataset(data.Dataset):
     def __init__(
         self,
-        data: Tuple[List],
-        tokenizer: TokenizerBase
+        tokenizer: TokenizerBase,
+        contexts: List[List[str]],
+        targets: List[str],
+        emotions: Optional[List[str]] = None,
     ) -> None:
-
+        
         self.tokenizer = tokenizer
-        self.contexts, self.targets, self.emotions = data
+        self.contexts = contexts
+        self.targets = targets
+        self.emotions = emotions
 
     def __len__(self) -> int:
         return len(self.contexts)
 
-    def __getitem__(self, idx: int) -> Dict:
-        """returns one data pair"""
-        item = {}
+    def __getitem__(
+        self, 
+        idx: int
+    ) -> EncoderDecoderModelRawData:
 
         # Map emotion label to token
-        if self.emotions is None:
-            item['emotion'] = None
-        else:
-            item['emotion'] = self.tokenizer.emo_map[self.emotions[idx]]
+        emotion = None
+        if self.emotions is not None:
+            emotion = self.tokenizer.emo_map[self.emotions[idx]]
 
-        # Tokenize dialogue history / context
-        context, context_ds, external_knowledge = self.tokenizer.encode_text(
+        # Tokenize dialogue context
+        context, concept_net_data = self.tokenizer.encode_text(
             self.contexts[idx], "context"
         )
-        item["context"] = context
-        item["context_dialogue_state"] = context_ds
-        item["external_knowledge"] = external_knowledge
-
         # Tokenize response utterance
-        target, target_ds, _ = self.tokenizer.encode_text(
+        target, _ = self.tokenizer.encode_text(
             self.targets[idx], "target"
         )
-        item['target'] = target
-        item['target_dialogue_state'] = target_ds
+        return EncoderDecoderModelRawData(
+            context=context,
+            target=target,
+            emotion=emotion,
+            concept_net_data=concept_net_data
+        )
 
-        return item
+
+class DecoderDataset(data.Dataset):
+    def __init__(
+        self,
+        tokenizer: TokenizerBase,
+        dialogues: List[List[str]],
+        targets: Optional[List[str]] = None,
+        emotions: Optional[List[str]] = None,
+    ) -> None:
+        
+        self.tokenizer = tokenizer
+        self.dialogues = dialogues
+        self.targets = targets
+        self.emotions = emotions
+
+    def __len__(self) -> int:
+        return len(self.dialogues)
+
+    def __getitem__(
+        self, 
+        idx: int
+    ) -> DecoderModelRawData:
+
+        # Map emotion label to token
+        emotion = None
+        if self.emotions is not None:
+            emotion = self.tokenizer.emo_map[self.emotions[idx]]
+
+        # Tokenize dialogue context
+        dialogue = self.tokenizer.encode_text(
+            self.dialogues[idx], "dialogue"
+        )
+        # Tokenize response utterance
+        target = None
+        if self.targets is not None:
+            target = self.tokenizer.encode_text(
+                self.targets[idx], "target"
+            )
+        return DecoderModelRawData(
+            dialogue=dialogue,
+            target=target,
+            emotion=emotion
+        )
 
 
 class DataModule(pl.LightningDataModule):
@@ -72,41 +126,71 @@ class DataModule(pl.LightningDataModule):
         self.tokenizer = tokenizer
         self.num_workers = num_workers
         self.model_has_encoder = model_has_encoder
+        self.collate_fn = (
+            collate_encoder_decoder_batch 
+            if self.model_has_encoder else collate_decoder_batch
+        )
 
-    def load_data(self, stage: str):
+    def load_dataset(self, stage: str):
         path_prefix = f"{self.dataset_dir}/{stage}"
 
-        if (stage == "train") or (stage == "val"):
-            if self.model_has_encoder is None:
-                raise ValueError(
-                    "Must specify whether model has encoder for loading training datasets!")
-            path_prefix += "/with_encoder" if self.model_has_encoder else "/without_encoder"
-        with open(f"{path_prefix}/contexts.json") as f:
-            contexts = json.load(f)
-        with open(f"{path_prefix}/targets.json") as f:
-            targets = json.load(f)
-
-        emotions = None
-        fname = f"{path_prefix}/emotions.json"
-        if os.path.isfile(fname):
-            with open(fname) as f:
-                emotions = json.load(f)
-
-        return contexts, targets, emotions
+        if self.model_has_encoder:
+            path_prefix += "/encoderdecoder"
+            with open(f"{path_prefix}/contexts.json") as f:
+                contexts = json.load(f)
+            with open(f"{path_prefix}/targets.json") as f:
+                targets = json.load(f)
+            
+            emotions = None
+            emotions_fpath = f"{path_prefix}/emotions.json"
+            if os.path.isfile(emotions_fpath):
+                with open(emotions_fpath) as f:
+                    emotions = json.load(f)
+            
+            return EncoderDecoderDataset(
+                self.tokenizer,
+                contexts,
+                targets,
+                emotions
+            )
+        else:
+            if stage == "test":
+                with open(f"{path_prefix}/contexts.json") as f:
+                    dialogues = json.load(f)
+                with open(f"{path_prefix}/targets.json"):
+                    targets = json.load(f)
+                emotions_fpath = f"{path_prefix}/emotions.json"
+            else:
+                targets = None
+                with open(f"{path_prefix}/decoder/dialogues.json") as f:
+                    dialogues = json.load(f)
+                emotions_fpath = f"{path_prefix}/decoder/emotions.json"
+            
+            emotions = None
+            if os.path.isfile(emotions_fpath):
+                with open(emotions_fpath) as f:
+                    emotions = json.load(f)
+            
+            return DecoderDataset(
+                self.tokenizer,
+                dialogues,
+                targets,
+                emotions
+            )
 
     def setup(self, stage: str) -> None:
         if stage == "fit":
-            self.train_dataset = Dataset(self.load_data("train"), self.tokenizer)
-            self.val_dataset = Dataset(self.load_data("val"), self.tokenizer)
+            self.train_dataset = self.load_dataset("train")
+            self.val_dataset = self.load_dataset("val")
         if stage == "test":
-            self.test_dataset = Dataset(self.load_data("test"), self.tokenizer)
+            self.test_dataset = self.load_dataset("test")
 
     def train_dataloader(self) -> data.DataLoader:
         return data.DataLoader(
             self.train_dataset,
             batch_size=self.batch_size,
             shuffle=True,
-            collate_fn=lambda x: collate_batch(x, self.tokenizer),
+            collate_fn=lambda x: self.collate_fn(x, self.tokenizer),
             num_workers=self.num_workers
         )
 
@@ -114,7 +198,7 @@ class DataModule(pl.LightningDataModule):
         return data.DataLoader(
             self.val_dataset,
             batch_size=self.batch_size,
-            collate_fn=lambda x: collate_batch(x, self.tokenizer),
+            collate_fn=lambda x: self.collate_fn(x, self.tokenizer),
             num_workers=self.num_workers
         )
 
@@ -122,53 +206,120 @@ class DataModule(pl.LightningDataModule):
         return data.DataLoader(
             self.test_dataset,
             batch_size=self.batch_size,
-            collate_fn=lambda x: collate_batch(x, self.tokenizer),
+            collate_fn=lambda x: self.collate_fn(x, self.tokenizer),
             num_workers=self.num_workers
         )
 
 
-def collate_batch(
-    batch: List[Dict],
+def collate_decoder_batch(
+    batch: List[DecoderModelRawData],
     tokenizer: TokenizerBase
-) -> Dict[str, Union[torch.Tensor, Dict[str, torch.Tensor]]]:
+) -> DecoderModelBatch:
 
-    context = [item["context"] for item in batch]
-    target = [item["target"] for item in batch]
+    dialogues = [item.dialogue for item in batch]
+    max_len_dialogue_seq = max([len(seq) for seq in dialogues])
+    dialogues = pad_seq_and_convert_to_tensor(
+        dialogues, max_len_dialogue_seq, padding_idx=tokenizer.PAD_IDX)
+    
+    targets = None
+    if batch[0].target is not None:
+        targets = [item.target for item in batch]
+        max_len_target_seq = max([len(seq) for seq in targets])
+        targets = pad_seq_and_convert_to_tensor(
+            targets, max_len_target_seq, padding_idx=tokenizer.PAD_IDX)
+    
+    emotions =  None 
+    if batch[0].emotion is not None:
+        emotions = torch.LongTensor([item.emotion for item in batch])
 
-    max_len_context_seq = max([len(seq) for seq in context])
-    max_len_target_seq = max([len(seq) for seq in target])
+    return DecoderModelBatch(
+        dialogues=dialogues,
+        targets=targets,
+        emotions=emotions
+    )
 
-    collated_batch = {
-        "context": pad_seq_and_convert_to_tensor(
-            context, max_len_context_seq, padding_idx=tokenizer.PAD_IDX),
-        "target": pad_seq_and_convert_to_tensor(
-            target, max_len_target_seq, padding_idx=tokenizer.PAD_IDX),
-        "emotion":  None if batch[0]["emotion"] is None else torch.LongTensor(
-            [item["emotion"] for item in batch]),
-    }
 
-    if tokenizer.supports_dialogue_states:
-        add_dialogue_states(
-            collated_batch,
-            batch,
-            max_len_context_seq,
-            max_len_target_seq
-        )
+def collate_encoder_decoder_batch(
+    batch: List[EncoderDecoderModelRawData],
+    tokenizer: TokenizerBase
+) -> EncoderDecoderModelBatch:
 
-    if tokenizer.supports_external_knowledge:
-        add_external_knowledge(
-            collated_batch,
-            batch,
+    contexts = [item.context for item in batch]
+    targets = [item.target for item in batch]
+
+    max_len_context_seq = max([len(seq) for seq in contexts])
+    max_len_target_seq = max([len(seq) for seq in targets])
+
+    contexts = pad_seq_and_convert_to_tensor(
+        contexts, max_len_context_seq, padding_idx=tokenizer.PAD_IDX)
+    targets = pad_seq_and_convert_to_tensor(
+        targets, max_len_target_seq, padding_idx=tokenizer.PAD_IDX)
+    
+    emotions =  None 
+    if batch[0]["emotion"] is not None:
+        emotions = torch.LongTensor([item.emotion for item in batch])
+
+    concept_net_data = None
+    if batch[0].concept_net_data is not None:
+        concept_net_data = process_concept_net_data(
+            [item.concept_net_data for item in batch],
             max_len_context_seq,
             tokenizer.PAD_IDX,
             len(getattr(tokenizer, "prefix", []))
         )
 
-    return collated_batch
+    return EncoderDecoderModelBatch(
+        contexts=contexts,
+        targets=targets,
+        emotions=emotions,
+        concept_net_data=concept_net_data
+    )
+
+
+def pad_seq_and_convert_to_tensor(
+    sequences: List[int],
+    max_len: int,
+    padding_idx: int,
+    dtype: torch.dtype = torch.long
+) -> torch.Tensor:
+
+    sequences = [[padding_idx] * (max_len - len(seq)) + seq for seq in sequences]
+
+    return torch.tensor(sequences, dtype=dtype)
+
+
+def process_concept_net_data(
+    data: List[ConceptNetRawData],
+    max_len_context_seq: int,
+    padding_idx: int,
+    prefix_len: int = 0
+) -> None:
+
+    concepts = [item.concepts for item in data]
+    context_emo_intensity = [item.context_emo_intensity for item in data]
+    concept_emo_intensity = [item.concept_emo_intensity for item in data]
+    concept_mask = [item.concept_mask for item in data]
+    max_len_concept_seq = max([len(seq) for seq in concepts])
+
+    concepts = pad_seq_and_convert_to_tensor(
+        concepts, max_len_concept_seq, padding_idx=padding_idx)
+    context_emo_intensity = pad_seq_and_convert_to_tensor(
+        context_emo_intensity, max_len_context_seq, padding_idx=0, dtype=torch.float32)
+    concept_emo_intensity = pad_seq_and_convert_to_tensor(
+        concept_emo_intensity, max_len_concept_seq, padding_idx=0, dtype=torch.float32)
+    adjacency_mask = create_adjacency_mask(
+        concept_mask, max_len_context_seq, max_len_concept_seq, prefix_len)
+
+    return ConceptNetBatchData(
+        concepts=concepts,
+        adjacency_mask=adjacency_mask,
+        context_emo_intensity=context_emo_intensity,
+        concept_emo_intensity=concept_emo_intensity
+    )
 
 
 def create_adjacency_mask(
-    concept_mask: List[List[int]],
+    concept_mask: List[List[List[int]]],
     max_context_len: int,
     max_concept_len: int,
     prefix_len: int
@@ -196,64 +347,5 @@ def create_adjacency_mask(
     adjacency_mask = torch.cat((upper, lower), dim=1)
 
     return adjacency_mask
-
-
-def pad_seq_and_convert_to_tensor(
-    sequences: List[int],
-    max_len: int,
-    padding_idx: int,
-    dtype: torch.dtype = torch.long
-) -> torch.Tensor:
-
-    sequences = [seq + [padding_idx] * (max_len - len(seq)) for seq in sequences]
-
-    return torch.tensor(sequences, dtype=dtype)
-
-
-def add_dialogue_states(
-    collated_batch: Dict[str, torch.Tensor],
-    batch: List[Dict],
-    max_len_context_seq: int,
-    max_len_target_seq: int
-) -> None:
-
-    context_dialogue_state = [item["context_dialogue_state"] for item in batch]
-    target_dialogue_state = [item["target_dialogue_state"]for item in batch]
-
-    collated_batch["context_dialogue_state"] = pad_seq_and_convert_to_tensor(
-        context_dialogue_state, max_len_context_seq, padding_idx=0)
-    collated_batch["target_dialogue_state"] = pad_seq_and_convert_to_tensor(
-        target_dialogue_state, max_len_target_seq, padding_idx=0)
-
-
-def add_external_knowledge(
-    collated_batch: Dict[str, torch.Tensor],
-    batch: List[Dict],
-    max_len_context_seq: int,
-    padding_idx: int,
-    prefix_len: int = 0
-) -> None:
-
-    concepts = [item["external_knowledge"]["concepts"] for item in batch]
-    context_emo_intensity = [item["external_knowledge"]["context_emo_intensity"] for item in batch]
-    concept_emo_intensity = [item["external_knowledge"]["concept_emo_intensity"] for item in batch]
-    concept_mask = [item["external_knowledge"]["concept_mask"] for item in batch]
-    max_len_concept_seq = max([len(seq) for seq in concepts])
-
-    concepts = pad_seq_and_convert_to_tensor(
-        concepts, max_len_concept_seq, padding_idx=padding_idx)
-    context_emo_intensity = pad_seq_and_convert_to_tensor(
-        context_emo_intensity, max_len_context_seq, padding_idx=0, dtype=torch.float32)
-    concept_emo_intensity = pad_seq_and_convert_to_tensor(
-        concept_emo_intensity, max_len_concept_seq, padding_idx=0, dtype=torch.float32)
-    adjacency_mask = create_adjacency_mask(
-        concept_mask, max_len_context_seq, max_len_concept_seq, prefix_len)
-
-    collated_batch["external_knowledge"] = {
-        "concepts": concepts,
-        "adjacency_mask": adjacency_mask,
-        "context_emo_intensity": context_emo_intensity,
-        "concept_emo_intensity": concept_emo_intensity
-    }
 
 # -----------------------------------------------------------------------------

@@ -6,6 +6,9 @@ import torch.nn as nn
 
 from typing import List, Tuple, Union, Optional
 
+# User-Defined Modules
+from data_classes import ConceptNetRawData
+
 # ------------------------- IMPLEMENTATION -----------------------------------
 
 class TokenizerBase:
@@ -16,10 +19,6 @@ class TokenizerBase:
 
         # No start of sentence tokens will be used for target responses by default
         self.SOS_IDX = None
-
-        # Dialog state indices
-        self.DS_SPEAKER_IDX = 0
-        self.DS_LISTENER_IDX = 1
         
         # Emotion label map
         self.emo_map = {
@@ -35,29 +34,19 @@ class TokenizerBase:
         self.rev_emo_map = {v : k for k, v in self.emo_map.items()}
         self.num_emo_labels = len(self.emo_map)
 
-    @property
-    def supports_dialogue_states(self) -> bool:
-        return False
-    
-    @property
-    def supports_external_knowledge(self) -> bool:
-        return False
-
     def encode_text(
-        self, 
-        text: Union[str, List[str]], 
+        self,
+        text: Union[str, List[str]],
         text_type: str
-    ) -> Tuple[Optional[Union[List[int], List[List[int]]]]]:
+    ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
         pass
 
     def decode_to_text(self, sequence: List[int]) -> str:
-        if len(sequence) == 0:
-            return ""
-        for i in range(len(sequence)):
-            if sequence[i] == self.PAD_IDX:
-                break
+        sequence = sequence.copy()
+        while len(sequence) > 0 and sequence[0] == self.PAD_IDX:
+            sequence.pop(0)
         decoded_text = self.tokenizer.decode(
-            sequence[:i],
+            sequence,
             skip_special_tokens=True
         )
         return decoded_text
@@ -78,6 +67,10 @@ class DialogueModelBase(nn.Module):
         
     @property
     def requires_emotion_label(self) -> bool:
+        return False
+    
+    @property
+    def requires_concept_net_data(self) -> bool:
         return False
 
     def create_padding_mask(self, batch_seq) -> Tuple[torch.Tensor]:

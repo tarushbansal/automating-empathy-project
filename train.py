@@ -48,9 +48,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max_epochs", type=int, default=5)
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--initial_lr", type=float, default=0.0001)
-    parser.add_argument("--pred_beam_width", type=int, default=1)
-    parser.add_argument("--max_pred_seq_len", type=int, default=200)
-    parser.add_argument("--pred_n_grams", type=int, default=4)
     parser.add_argument("--pretrained_model_dir", type=str, default=None)
 
     cli_args = parser.parse_args()
@@ -132,11 +129,7 @@ def main():
         tokenizer=tokenizer,
         model=model,
         batch_size=cli_args.batch_size,
-        initial_lr=cli_args.initial_lr,
-        test_output_dir=logger.log_dir,
-        pred_beam_width=cli_args.pred_beam_width,
-        max_pred_seq_len=cli_args.max_pred_seq_len,
-        pred_n_grams=cli_args.pred_n_grams
+        initial_lr=cli_args.initial_lr
     )
 
     # Set up data module

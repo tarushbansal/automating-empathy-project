@@ -19,9 +19,14 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dataset_dir", type=str, default=None, required=True)
     parser.add_argument("--pretrained_model_dir", type=str, default=None, required=True)
-    parser.add_argument("--pred_beam_width", type=int, default=1)
-    parser.add_argument("--max_pred_seq_len", type=int, default=200)
-    parser.add_argument("--pred_n_grams", type=int, default=4)
+    parser.add_argument("--batch_size", type=int, default=32)
+    parser.add_argument("--bleu_n_grams", type=int, default=4)
+    parser.add_argument("--beam_width", type=int, default=1)
+    parser.add_argument("--sample", action="store_true")
+    parser.add_argument("--temperature", type=float, default=1.0)
+    parser.add_argument("--top_p", type=float, default=1.0)
+    parser.add_argument("--top_k", type=int, default=50)
+    parser.add_argument("--max_new_tokens", type=int, default=100)
     cli_args, _ = parser.parse_known_args()
 
     if not os.path.isdir(cli_args.dataset_dir):
@@ -41,11 +46,16 @@ def main():
         ckpt_path, 
         tokenizer=tokenizer, 
         model=model,
-        batch_size=1,
+        batch_size=cli_args.batch_size,
         test_output_dir=os.path.abspath(cli_args.pretrained_model_dir), 
-        pred_beam_width=cli_args.pred_beam_width,
-        max_pred_seq_len=cli_args.max_pred_seq_len,
-        pred_n_grams=cli_args.pred_n_grams
+        bleu_n_grams=cli_args.bleu_n_grams,
+        generation_kwargs={
+            "beam_width": cli_args.beam_width,
+            "sample": cli_args.sample,
+            "temperature": cli_args.temperature,
+            "top_p": cli_args.top_p,
+            "top_k": cli_args.top_k,
+        }
     )
 
     # Set up data module

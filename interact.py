@@ -94,7 +94,7 @@ def main():
             "emotion": emotion
         }], tokenizer)
 
-        response = model_supervisor.beam_search(batch)
+        response = model_supervisor.generate(batch)
         decoded_reponse = tokenizer.decode_to_text(response)
         print(f"Dialogue Model: {decoded_reponse}")
         print("")

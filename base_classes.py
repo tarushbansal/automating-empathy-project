@@ -36,8 +36,7 @@ class TokenizerBase:
 
     def encode_text(
         self,
-        text: Union[str, List[str]],
-        text_type: str
+        text: Union[str, List[str]]
     ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
         pass
 

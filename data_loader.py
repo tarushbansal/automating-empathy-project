@@ -51,13 +51,11 @@ class EncoderDecoderDataset(data.Dataset):
             emotion = self.tokenizer.emo_map[self.emotions[idx]]
 
         # Tokenize dialogue context
-        context, concept_net_data = self.tokenizer.encode_text(
-            self.contexts[idx], "context"
-        )
+        context, concept_net_data = self.tokenizer.encode_text(self.contexts[idx])
+
         # Tokenize response utterance
-        target, _ = self.tokenizer.encode_text(
-            self.targets[idx], "target"
-        )
+        target, _ = self.tokenizer.encode_text(self.targets[idx])
+
         return EncoderDecoderModelRawData(
             context=context,
             target=target,
@@ -94,15 +92,13 @@ class DecoderDataset(data.Dataset):
             emotion = self.tokenizer.emo_map[self.emotions[idx]]
 
         # Tokenize dialogue context
-        dialogue = self.tokenizer.encode_text(
-            self.dialogues[idx], "dialogue"
-        )
+        dialogue, _ = self.tokenizer.encode_text(self.dialogues[idx])
+
         # Tokenize response utterance
         target = None
         if self.targets is not None:
-            target = self.tokenizer.encode_text(
-                self.targets[idx], "target"
-            )
+            target, _ = self.tokenizer.encode_text(self.targets[idx])
+        
         return DecoderModelRawData(
             dialogue=dialogue,
             target=target,
@@ -157,7 +153,7 @@ class DataModule(pl.LightningDataModule):
             if stage == "test":
                 with open(f"{path_prefix}/contexts.json") as f:
                     dialogues = json.load(f)
-                with open(f"{path_prefix}/targets.json"):
+                with open(f"{path_prefix}/targets.json") as f:
                     targets = json.load(f)
                 emotions_fpath = f"{path_prefix}/emotions.json"
             else:
@@ -184,6 +180,28 @@ class DataModule(pl.LightningDataModule):
             self.val_dataset = self.load_dataset("val")
         if stage == "test":
             self.test_dataset = self.load_dataset("test")
+
+    def transfer_batch_to_device(self, batch, device, dataloader_idx):
+        if isinstance(batch, DecoderModelBatch):
+            batch.dialogues = batch.dialogues.to(device)
+            if batch.targets is not None:
+                batch.targets = batch.targets.to(device)
+            if batch.emotions is not None:
+                batch.emotions = batch.emotions.to(device)
+        elif isinstance(batch, EncoderDecoderModelBatch):
+            batch.contexts = batch.contexts.to(device)
+            batch.targets = batch.targets.to(device)
+            if batch.emotions is not None:
+                batch.emotions = batch.emotions.to(device)
+            data = batch.concept_net_data
+            if data is not None:
+                data.concepts = data.concepts.to(device)
+                data.adjacency_mask = data.adjacency_mask.to(device)
+                data.context_emo_intensity = data.context_emo_intensity.to(device)
+                data.concept_emo_intensity = data.concept_emo_intensity.to(device)
+        else:
+            batch = super().transfer_batch_to_device(data, device, dataloader_idx)
+        return batch
 
     def train_dataloader(self) -> data.DataLoader:
         return data.DataLoader(

@@ -52,11 +52,10 @@ class GODELTokenizer(TokenizerBase):
 
     def encode_text(
         self,
-        text: Union[str, List[str]],
-        text_type: str
+        text: Union[str, List[str]]
     ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
 
-        if text_type == "context":
+        if type(text) == list:
             dialog_history = f' EOS '.join(text)
             tokens = self.tokenizer.tokenize(dialog_history)
             token_ids = self.prefix + self.tokenizer.convert_tokens_to_ids(tokens)
@@ -65,12 +64,10 @@ class GODELTokenizer(TokenizerBase):
                 tokens = [token[1:] if token[0] == "▁" else token for token in tokens]
                 external_knowledge = self.concept_net.query(tokens)
 
-        elif text_type == "target":
+        else:
             token_ids = self.tokenizer(
                 f"{self.tokenizer.bos_token} {text} {self.tokenizer.eos_token}",
                 add_special_tokens=False)["input_ids"]
-        else:
-            raise ValueError("Unsupported text type for EncoderDecoderModel!")
 
         return token_ids, external_knowledge
 
@@ -79,23 +76,19 @@ class GPT2Tokenizer(TokenizerBase):
     def __init__(self) -> None:
 
         super().__init__()
-        self.tokenizer = AutoTokenizer.from_pretrained("gpt2-large")
+        self.tokenizer = AutoTokenizer.from_pretrained("gpt2")
         self.EOS_IDX = self.tokenizer.eos_token_id
         self.vocab_size = len(self.tokenizer)
 
     def encode_text(
         self,
-        text: Union[str, List[str]],
-        text_type: str
+        text: Union[str, List[str]]
     ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
 
-        if text_type == "dialogue":
-            input_ = f' {self.tokenizer.eos_token} '.join(text)
-            input_ = f"{input_} {self.tokenizer.eos_token}"
-        elif text_type == "target":
-            input_ = f"{input_} {self.tokenizer.eos_token}"
+        if type(text) == list:
+            input_ = f"{f' {self.tokenizer.eos_token} '.join(text)} {self.tokenizer.eos_token}"
         else:
-            raise ValueError("Unsupported text type for DecoderModel!")
+            input_ = f"{text} {self.tokenizer.eos_token}"
 
         token_ids = self.tokenizer(
             input_, add_special_tokens=False)["input_ids"]

@@ -79,7 +79,7 @@ class DecoderModelBatch:
     def __init__(
         self,
         dialogues: torch.LongTensor,
-        targets: Optional[List[List[int]]],
+        targets: Optional[torch.LongTensor],
         emotions: Optional[torch.LongTensor],
     ) -> None:
 

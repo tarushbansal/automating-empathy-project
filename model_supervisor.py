@@ -131,11 +131,13 @@ class ModelSupervisor(pl.LightningModule):
         _
     ) -> None:
 
+        contexts = batch.contexts if self.model.has_encoder else batch.dialogues
         self.contexts.extend([self.tokenizer.decode_to_text(context)
-                              for context in batch.contexts.tolist()])
-        targets = [self.tokenizer.decode_to_text(target) for target in batch.targets.tolist()]
+                              for context in contexts.tolist()])
+        targets = [self.tokenizer.decode_to_text(target)
+                   for target in batch.targets.tolist()]
         self.targets.extend(targets)
-        self.enc_targets.extend([self.tokenizer.encode_to_text(target)[0]
+        self.enc_targets.extend([self.tokenizer.encode_text(target)[0]
                                  for target in targets])
 
         enc_predictions = self.generate(batch).tolist()
@@ -151,7 +153,7 @@ class ModelSupervisor(pl.LightningModule):
         if batch.emotions is not None:
             self.emotions.extend([self.tokenizer.rev_emo_map[emo_idx]
                                 for emo_idx in batch.emotions.tolist()])
-        if batch.concept_net_data is not None:
+        if self.model.has_encoder and batch.concept_net_data is not None:
             self.concepts.extend([self.tokenizer.decode_to_text(concepts)
                                   for concepts in batch.concept_net_data.tolist()])
         
@@ -216,7 +218,7 @@ class ModelSupervisor(pl.LightningModule):
     ) -> torch.LongTensor:
 
         return generate(
-            forward_fn=self.forward, 
+            forward_fn=lambda x: self.forward(x)[0], 
             batch=copy.deepcopy(batch), 
             start_token=self.tokenizer.SOS_IDX,
             stop_token=self.tokenizer.EOS_IDX,

@@ -1,7 +1,7 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
-from typing import Union, Optional
+from typing import Union, Optional, Callable
 
 import torch
 import torch.nn.functional as F
@@ -28,7 +28,7 @@ def warp_logits(
         remove_logits = remove_sorted_logits.scatter(-1, sorted_ind, remove_sorted_logits)
         logits = logits.masked_fill(remove_logits, float("-inf"))
     if top_k < vocab_size:
-        remove_logits = logits < torch.topk(logits, top_k, dim=-1)[0][:, -1:]
+        remove_logits = logits < torch.topk(logits, top_k, dim=-1)[0][:, :, -1:]
         logits = logits.masked_fill(remove_logits, float("-inf"))
 
     return logits
@@ -36,7 +36,7 @@ def warp_logits(
 
 @torch.no_grad()
 def generate(
-    forward_fn: function,
+    forward_fn: Callable,
     model_has_encoder: bool,
     batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
     stop_token: int,
@@ -49,7 +49,6 @@ def generate(
     start_token: Optional[int] = None,
 ) -> torch.LongTensor:
 
-    
     if model_has_encoder:
         N = batch.contexts.size(dim=0)
         device = batch.contexts.device
@@ -68,16 +67,17 @@ def generate(
     
     beam_scores = torch.zeros(N, beam_width, device=device)
     beam_scores[:, 1:] = beam_scores[:, 1:].fill_(float("-inf"))
+    stop_detected = torch.zeros(N, beam_width, dtype=torch.bool, device=device)
 
     while True:
         # Run all beams through model and process output logits
-        logits = torch.empty(N, 0, 0, device=device, dtype=torch.long)
         for i in range(beam_width):
             if model_has_encoder:
                 batch.targets = beams[:, i, :]
             else:
                 batch.dialogues = torch.cat((dialogues, beams[:, i, :]), dim=-1)
-            logits = torch.cat((logits, forward_fn(batch)[0][:, -1, :].unsqueeze(1)), dim=1)
+            new_logits = forward_fn(batch)[:, -1, :].unsqueeze(1)
+            logits = torch.cat((logits, new_logits), dim=1) if i != 0 else new_logits
         warped_logits = warp_logits(logits, temperature, top_p, top_k)
         if sample:
             new_tokens = torch.multinomial(
@@ -96,13 +96,14 @@ def generate(
         # Choose {beam_width} number of sequences with highest probabilities
         new_tokens = new_tokens.view(N, beam_width ** 2).unsqueeze(-1)
         sequences = torch.cat(
-            (beams.repeat_interleave(-1, beam_width, -1), new_tokens), dim=-1)
+            (beams.repeat_interleave(beam_width, dim=1), new_tokens), dim=-1)
         scores = (new_scores + beam_scores.unsqueeze(-1)).view(N, beam_width ** 2)
         beam_scores, top_indices = torch.topk(scores, beam_width, dim=-1)
-        beams = torch.gather(sequences, -1, top_indices)
+        beams = torch.gather(sequences, 1, top_indices.unsqueeze(-1))
 
         # Break out of loop if stopping criteria is met
-        stop_detected = torch.tensor([[stop_token in seq for seq in beam] for beam in beams])
+        stop_detected = torch.tensor([
+            [stop_token in seq for seq in beam] for beam in beams]).to(device)
         stop = torch.all(stop_detected) or (beams.size(dim=-1) >= max_new_tokens)
         if stop:
             break

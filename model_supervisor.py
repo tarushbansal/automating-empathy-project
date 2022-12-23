@@ -144,7 +144,7 @@ class ModelSupervisor(pl.LightningModule):
         self.enc_predictions.extend(enc_predictions)
         self.predictions.extend([self.tokenizer.decode_to_text(enc) 
                                  for enc in enc_predictions])
-
+    
         if hasattr(self.model, "emo_logits"):
             self.emo_predictions.extend(
                 [self.tokenizer.rev_emo_map[emo_idx]
@@ -161,11 +161,13 @@ class ModelSupervisor(pl.LightningModule):
             batch.dialogues = batch.targets
 
         logits, target_seq = self.forward(batch)
-        self.cross_entropy.append(F.cross_entropy(
-            logits[:, :-1, :].permute(0, 2, 1),
-            target_seq,
-            ignore_index=self.tokenizer.PAD_IDX
-        ))
+        self.cross_entropy.extend(
+            [val != 0 for val in F.cross_entropy(
+                logits[:, :-1, :].permute(0, 2, 1),
+                target_seq,
+                reduction="none",
+                ignore_index=self.tokenizer.PAD_IDX
+            ).flatten()])
 
     def test_epoch_end(self, _) -> None:
         N = len(self.contexts)

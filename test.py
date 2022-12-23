@@ -62,7 +62,8 @@ def main():
     data_module = DataModule(dataset_dir=cli_args.dataset_dir,
                              batch_size=cli_args.batch_size,
                              tokenizer=tokenizer,
-                             num_workers=max(1, os.cpu_count() // 4))
+                             num_workers=max(1, os.cpu_count() // 4),
+                             model_has_encoder=model.has_encoder)
 
     # Set up trainer
     trainer = pl.Trainer(

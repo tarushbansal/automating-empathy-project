@@ -113,7 +113,7 @@ class DataModule(pl.LightningDataModule):
         batch_size: int,
         tokenizer: TokenizerBase,
         num_workers: int,
-        model_has_encoder: Optional[bool] = None,
+        model_has_encoder: bool,
     ) -> None:
 
         super().__init__()
@@ -131,7 +131,8 @@ class DataModule(pl.LightningDataModule):
         path_prefix = f"{self.dataset_dir}/{stage}"
 
         if self.model_has_encoder:
-            path_prefix += "/encoderdecoder"
+            if stage != "test":
+                path_prefix += "/encoderdecoder"
             with open(f"{path_prefix}/contexts.json") as f:
                 contexts = json.load(f)
             with open(f"{path_prefix}/targets.json") as f:
@@ -274,7 +275,7 @@ def collate_encoder_decoder_batch(
         targets, max_len_target_seq, padding_idx=tokenizer.PAD_IDX)
     
     emotions =  None 
-    if batch[0]["emotion"] is not None:
+    if batch[0].emotion is not None:
         emotions = torch.LongTensor([item.emotion for item in batch])
 
     concept_net_data = None

@@ -97,11 +97,18 @@ def main():
         model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
         model_kwargs = config["model"]["kwargs"]
         model = model_cls(tokenizer=tokenizer, **model_kwargs)
+        model_supervisor = ModelSupervisor.load_from_checkpoint(
+            load_val_ckpt_path(cli_args.pretrained_model_dir),
+            tokenizer=tokenizer,
+            model=model,
+            batch_size=cli_args.batch_size,
+            initial_lr=cli_args.initial_lr
+        )
 
     else:
         if cli_args.dialogue_model is None:
             raise ValueError(
-                "Either a new or pretrained dialogue model must be specified!")
+                "Either a pretrained model directory or dialogue model must be specified for training!")
 
         dirname = os.path.dirname(os.path.abspath(__file__))
         with open(f"{dirname}/configs.json") as f:
@@ -122,15 +129,12 @@ def main():
 
         model_kwargs = model_config.get("model_kwargs", {})
         model = model_cls(tokenizer=tokenizer, **model_kwargs)
-
-    # Set up model supervisor
-    model_supervisor = ModelSupervisor.load_from_checkpoint(
-        load_val_ckpt_path(cli_args.pretrained_model_dir),
-        tokenizer=tokenizer,
-        model=model,
-        batch_size=cli_args.batch_size,
-        initial_lr=cli_args.initial_lr
-    )
+        model_supervisor = ModelSupervisor(
+            tokenizer=tokenizer,
+            model=model,
+            batch_size=cli_args.batch_size,
+            initial_lr=cli_args.initial_lr
+        )
 
     # Set up data module
     data_module = DataModule(dataset_dir=cli_args.dataset_dir,

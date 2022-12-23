@@ -55,11 +55,11 @@ class GODELTokenizer(TokenizerBase):
         text: Union[str, List[str]]
     ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
 
+        external_knowledge = None
         if type(text) == list:
             dialog_history = f' EOS '.join(text)
             tokens = self.tokenizer.tokenize(dialog_history)
             token_ids = self.prefix + self.tokenizer.convert_tokens_to_ids(tokens)
-            external_knowledge = None
             if self.query_concept_net:
                 tokens = [token[1:] if token[0] == "▁" else token for token in tokens]
                 external_knowledge = self.concept_net.query(tokens)
@@ -84,7 +84,7 @@ class GPT2Tokenizer(TokenizerBase):
         self,
         text: Union[str, List[str]]
     ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
-
+    
         if type(text) == list:
             input_ = f"{f' {self.tokenizer.eos_token} '.join(text)} {self.tokenizer.eos_token}"
         else:

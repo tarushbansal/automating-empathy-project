@@ -121,9 +121,11 @@ class ModelSupervisor(pl.LightningModule):
         return avg_val_loss
 
     def on_test_start(self) -> None:
+        self.sum_cross_entropy = 0
+        self.num_tokens = 0
         (self.contexts, self.targets, self.emotions,
          self.predictions, self.enc_targets, self.enc_predictions,
-         self.emo_predictions, self.concepts, self.cross_entropy) = ([] for _ in range(9))
+         self.emo_predictions, self.concepts) = ([] for _ in range(8))
 
     def test_step(
         self, 
@@ -158,16 +160,22 @@ class ModelSupervisor(pl.LightningModule):
                                   for concepts in batch.concept_net_data.tolist()])
         
         if not self.model.has_encoder:
-            batch.dialogues = batch.targets
+            insert_idx = torch.sum(batch.dialogues != self.tokenizer.PAD_IDX, dim=1)
+            unstacked_sequences = tuple(torch.cat((
+                    batch.dialogues[i, :insert_idx[i]], 
+                    batch.targets[i], 
+                    batch.dialogues[i, insert_idx[i]:]), dim=-1) 
+                for i in range(batch.dialogues.size(dim=0)))
+            batch.dialogues = torch.stack(unstacked_sequences)
 
         logits, target_seq = self.forward(batch)
-        self.cross_entropy.extend(
-            [val != 0 for val in F.cross_entropy(
-                logits[:, :-1, :].permute(0, 2, 1),
-                target_seq,
-                reduction="none",
-                ignore_index=self.tokenizer.PAD_IDX
-            ).flatten()])
+        self.num_tokens += torch.sum(target_seq != self.tokenizer.PAD_IDX)
+        self.sum_cross_entropy += F.cross_entropy(
+            logits[:, :-1, :].permute(0, 2, 1),
+            target_seq,
+            reduction="sum",
+            ignore_index=self.tokenizer.PAD_IDX
+        )
 
     def test_epoch_end(self, _) -> None:
         N = len(self.contexts)
@@ -203,7 +211,7 @@ class ModelSupervisor(pl.LightningModule):
             self.metric_n_grams,
         )
 
-        test_metrics["ppl"] = math.exp(sum(self.cross_entropy) / len(self.cross_entropy))
+        test_metrics["ppl"] = math.exp(self.sum_cross_entropy / self.num_tokens)
 
         if log_emo_accuracy:
             test_metrics["emo_accuracy"] = accurate_emo_labels / N

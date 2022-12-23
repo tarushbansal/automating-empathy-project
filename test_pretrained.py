@@ -35,7 +35,7 @@ def main():
     # Set appropriate device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    gen_cls = getattr(__import__("generation"), cli_args.dialogue_model)
+    gen_cls = getattr(__import__("pretrained_gen"), cli_args.dialogue_model)
     model_generation = gen_cls(
         device,
         cli_args.beam_width,

@@ -41,13 +41,13 @@ class TokenizerBase:
         pass
 
     def decode_to_text(self, sequence: List[int]) -> str:
-        sequence = sequence.copy()
-        while len(sequence) > 0 and sequence[0] == self.PAD_IDX:
-            sequence.pop(0)
+        try:
+            i = sequence.index(self.PAD_IDX)
+        except ValueError:
+            i = len(sequence)
         decoded_text = self.tokenizer.decode(
-            sequence,
-            skip_special_tokens=True
-        )
+            sequence[:i],
+            skip_special_tokens=True).strip()
         return decoded_text
 
 

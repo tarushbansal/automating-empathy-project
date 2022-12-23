@@ -142,7 +142,6 @@ class GPT2(DecoderModel):
 
     def forward(self, input_seq: torch.LongTensor, **_) -> torch.Tensor:
         input_seq, input_mask = self.create_padding_mask(input_seq)
-
         out = self.model(
             input_ids=input_seq,
             attention_mask=input_mask,

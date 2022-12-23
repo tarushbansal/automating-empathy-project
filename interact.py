@@ -2,7 +2,6 @@
 
 # System Modules
 import os
-import math
 import argparse
 
 import torch
@@ -64,6 +63,7 @@ def main():
 
     model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
     model = model_cls(tokenizer=tokenizer, **config["model"]["kwargs"])
+    model.eval()
     model_supervisor = ModelSupervisor.load_from_checkpoint(
         ckpt_path,
         tokenizer=tokenizer,

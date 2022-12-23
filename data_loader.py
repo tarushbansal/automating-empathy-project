@@ -301,7 +301,7 @@ def pad_seq_and_convert_to_tensor(
     dtype: torch.dtype = torch.long
 ) -> torch.Tensor:
 
-    sequences = [[padding_idx] * (max_len - len(seq)) + seq for seq in sequences]
+    sequences = [seq + [padding_idx] * (max_len - len(seq)) for seq in sequences]
 
     return torch.tensor(sequences, dtype=dtype)
 

@@ -4,7 +4,6 @@
 import os
 import argparse
 
-import torch
 import pytorch_lightning as pl
 
 # User-defined Modules

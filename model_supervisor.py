@@ -16,7 +16,7 @@ from transformers.optimization import get_linear_schedule_with_warmup
 from base_classes import DialogueModelBase, TokenizerBase
 from data_classes import EncoderDecoderModelBatch, DecoderModelBatch
 from metric_utils import compute_test_metrics
-from gen_utils import generate
+from generation import generate
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -144,7 +144,7 @@ class ModelSupervisor(pl.LightningModule):
         self.enc_predictions.extend(enc_predictions)
         self.predictions.extend([self.tokenizer.decode_to_text(enc) 
                                  for enc in enc_predictions])
-        
+
         if hasattr(self.model, "emo_logits"):
             self.emo_predictions.extend(
                 [self.tokenizer.rev_emo_map[emo_idx]
@@ -216,12 +216,15 @@ class ModelSupervisor(pl.LightningModule):
         self, 
         batch: Union[EncoderDecoderModelBatch, DecoderModelBatch]
     ) -> torch.LongTensor:
-
+        
+        self.model.eval()
         return generate(
             forward_fn=lambda x: self.forward(x)[0], 
             batch=copy.deepcopy(batch), 
             start_token=self.tokenizer.SOS_IDX,
             stop_token=self.tokenizer.EOS_IDX,
+            pad_token=self.tokenizer.PAD_IDX,
+            vocab_size=self.tokenizer.vocab_size,
             model_has_encoder=self.model.has_encoder,
             **self.generation_kwargs
         )

@@ -87,4 +87,22 @@ class DecoderModelBatch:
         self.targets = targets
         self.emotions = emotions
 
+class GenerationConfig:
+    def __init__(
+        self,
+        max_new_tokens: int,
+        beam_width: int,
+        sample: bool,
+        temperature: float,
+        top_p: float,
+        top_k: int
+    ) -> None:
+        
+        self.max_new_tokens = max_new_tokens
+        self.beam_width = beam_width
+        self.sample = sample
+        self.temperature = temperature
+        self.top_p = top_p
+        self.top_k = top_k
+
 # ---------------------------------------------------------------------------------

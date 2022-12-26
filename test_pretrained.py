@@ -12,6 +12,7 @@ import torch
 
 # User-defined Modules
 from metric_utils import compute_test_metrics
+from data_classes import GenerationConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -23,9 +24,13 @@ def main():
     parser.add_argument("--dialogue_model", type=str, default=None, required=True)
     parser.add_argument("--output_dir", type=str, default=None, required=True)
     parser.add_argument("--batch_size", type=int, default=32)
+    parser.add_argument("--metric_n_grams", type=int, default=4)
     parser.add_argument("--beam_width", type=int, default=1)
-    parser.add_argument("--max_new_tokens", type=int, default=200)
-    parser.add_argument("--bleu_n_grams", type=int, default=4)
+    parser.add_argument("--sample", action="store_true")
+    parser.add_argument("--temperature", type=float, default=1.0)
+    parser.add_argument("--top_p", type=float, default=1.0)
+    parser.add_argument("--top_k", type=int, default=50)
+    parser.add_argument("--max_new_tokens", type=int, default=100)
     cli_args, _ = parser.parse_known_args()
 
     dataset_dir = os.path.abspath(cli_args.dataset_dir)
@@ -38,8 +43,14 @@ def main():
     gen_cls = getattr(__import__("pretrained_gen"), cli_args.dialogue_model)
     model_generation = gen_cls(
         device,
-        cli_args.beam_width,
-        cli_args.max_new_tokens
+        generation_config=GenerationConfig(
+            max_new_tokens=cli_args.max_new_tokens,
+            beam_width=cli_args.beam_width,
+            sample=cli_args.sample,
+            temperature=cli_args.temperature,
+            top_p=cli_args.top_p,
+            top_k=cli_args.top_k
+        )
     )
     model = model_generation.model
     tokenizer = model_generation.tokenizer
@@ -76,11 +87,13 @@ def main():
     )
 
     print("Generating predictions from pretrained model...")
-    predictions, enc_predictions, cross_entropy = [], [], []
+    predictions, enc_predictions = [], []
+    sum_cross_entropy, num_tokens = 0, 0
     with torch.no_grad():
         for batch in tqdm(test_dataloader):
-            preds, nll = model_generation.generate(batch)
-            cross_entropy.append(nll)
+            preds, sum_ce, num = model_generation.generate(batch)
+            sum_cross_entropy += sum_ce
+            num_tokens += num
             enc_predictions.extend(preds)
             predictions.extend([tokenizer.decode(enc, skip_special_tokens=True) for enc in preds])
     print("Done.")
@@ -114,9 +127,9 @@ def main():
         enc_targets,
         enc_predictions,
         model.get_input_embeddings(),
-        cli_args.bleu_n_grams,
+        cli_args.metric_n_grams,
     )
-    test_metrics["ppl"] = math.exp(sum(cross_entropy) / len(cross_entropy))
+    test_metrics["ppl"] = math.exp(sum_cross_entropy / num_tokens)
     print("Test metrics computed.")
 
     fname = f"{dir}/test_metrics.json"

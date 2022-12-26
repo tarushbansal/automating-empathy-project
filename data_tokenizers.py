@@ -28,7 +28,7 @@ class GODELTokenizer(TokenizerBase):
 
         super().__init__()
         self.tokenizer = AutoTokenizer.from_pretrained(
-            "microsoft/GODEL-v1_1-large-seq2seq"
+            "microsoft/GODEL-v1_1-base-seq2seq"
         )
         self.tokenizer.add_special_tokens({
             "bos_token": "<SOS>"
@@ -76,7 +76,7 @@ class GPT2Tokenizer(TokenizerBase):
     def __init__(self) -> None:
 
         super().__init__()
-        self.tokenizer = AutoTokenizer.from_pretrained("gpt2")
+        self.tokenizer = AutoTokenizer.from_pretrained("gpt2-large")
         self.EOS_IDX = self.tokenizer.eos_token_id
         self.vocab_size = len(self.tokenizer)
 

@@ -10,6 +10,7 @@ import pytorch_lightning as pl
 from data_loader import DataModule
 from model_supervisor import ModelSupervisor
 from utils import load_val_ckpt_path, load_config
+from data_classes import GenerationConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -48,14 +49,14 @@ def main():
         batch_size=cli_args.batch_size,
         test_output_dir=os.path.abspath(cli_args.pretrained_model_dir), 
         metric_n_grams=cli_args.metric_n_grams,
-        generation_kwargs={
-            "max_new_tokens": cli_args.max_new_tokens,
-            "beam_width": cli_args.beam_width,
-            "sample": cli_args.sample,
-            "temperature": cli_args.temperature,
-            "top_p": cli_args.top_p,
-            "top_k": cli_args.top_k,
-        }
+        generation_config=GenerationConfig(
+            max_new_tokens=cli_args.max_new_tokens,
+            beam_width=cli_args.beam_width,
+            sample=cli_args.sample,
+            temperature=cli_args.temperature,
+            top_p=cli_args.top_p,
+            top_k=cli_args.top_k
+        )
     )
 
     # Set up data module

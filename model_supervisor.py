@@ -14,7 +14,7 @@ from transformers.optimization import get_linear_schedule_with_warmup
 
 # User-defined Modules
 from base_classes import DialogueModelBase, TokenizerBase
-from data_classes import EncoderDecoderModelBatch, DecoderModelBatch
+from data_classes import EncoderDecoderModelBatch, DecoderModelBatch, GenerationConfig
 from metric_utils import compute_test_metrics
 from generation import generate
 
@@ -30,18 +30,17 @@ class ModelSupervisor(pl.LightningModule):
         initial_lr: Optional[float] = None,
         metric_n_grams: Optional[int] = None,
         test_output_dir: Optional[str] = None,
-        generation_kwargs: Optional[Dict] = None,
+        generation_config: Optional[GenerationConfig] = None,
     ) -> None:
 
         super().__init__()
-        self.save_hyperparameters(ignore=["tokenizer", "model"])
 
         self.model = model
         self.tokenizer = tokenizer
         self.initial_lr = initial_lr
         self.batch_size = batch_size
         self.test_output_dir = test_output_dir
-        self.generation_kwargs = generation_kwargs
+        self.generation_config = generation_config
         self.metric_n_grams = metric_n_grams
 
     def forward(
@@ -142,7 +141,7 @@ class ModelSupervisor(pl.LightningModule):
         self.enc_targets.extend([self.tokenizer.encode_text(target)[0]
                                  for target in targets])
 
-        enc_predictions = self.generate(batch).tolist()
+        enc_predictions = self.generate(batch)
         self.enc_predictions.extend(enc_predictions)
         self.predictions.extend([self.tokenizer.decode_to_text(enc) 
                                  for enc in enc_predictions])
@@ -236,8 +235,9 @@ class ModelSupervisor(pl.LightningModule):
             pad_token=self.tokenizer.PAD_IDX,
             vocab_size=self.tokenizer.vocab_size,
             model_has_encoder=self.model.has_encoder,
-            **self.generation_kwargs
+            generation_config=self.generation_config
         )
+
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = torch.optim.AdamW(

@@ -7,7 +7,7 @@ import torch
 import torch.nn.functional as F
 
 # User-Defined Modules
-from data_classes import EncoderDecoderModelBatch, DecoderModelBatch
+from data_classes import EncoderDecoderModelBatch, DecoderModelBatch, GenerationConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -42,14 +42,16 @@ def generate(
     stop_token: int,
     pad_token: int,
     vocab_size: int,
-    max_new_tokens: int = 100,
-    beam_width: int = 1,
-    sample: bool = False,
-    temperature: float = 1.0,
-    top_p: float = 1.0,
-    top_k: int = 50,
+    generation_config: GenerationConfig,
     start_token: Optional[int] = None,
 ) -> torch.LongTensor:
+
+    max_new_tokens = generation_config.max_new_tokens
+    beam_width = generation_config.beam_width
+    sample = generation_config.sample
+    temperature = generation_config.temperature
+    top_p = generation_config.top_p
+    top_k = generation_config.top_k
 
     if model_has_encoder:
         N = batch.contexts.size(dim=0)
@@ -124,7 +126,15 @@ def generate(
         if stop:
             break
 
-    # Return most probable sequence and its log probability for each beam in batch
-    return beams[:, 0]
+    # Return most probable sequence for each beam in batch
+    sequences = beams[:, 0].tolist()
+    for i in range(len(sequences)):
+        try:
+            ind = sequences[i].index(stop_token) + 1
+        except ValueError:
+            ind = len(sequences[i])
+        sequences[i] = sequences[i][:ind]
+    
+    return sequences
 
 # -----------------------------------------------------------------------------

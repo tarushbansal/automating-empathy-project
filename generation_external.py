@@ -18,7 +18,7 @@ from data_classes import GenerationConfig
 # ------------------------- IMPLEMENTATION -----------------------------------
 
 
-class PretrainedGenerationBase:
+class GenerationBase:
     def __init__(
         self,
         model: Union[AutoModelForSeq2SeqLM, AutoModelForCausalLM],
@@ -35,7 +35,60 @@ class PretrainedGenerationBase:
         self.generation_config = generation_config
 
 
-class GODEL(PretrainedGenerationBase):
+class BlenderBot(GenerationBase):
+    def __init__(
+        self,
+        device: torch.device,
+        generation_config: GenerationConfig
+    ) -> None:
+
+        model = AutoModelForSeq2SeqLM.from_pretrained("facebook/blenderbot-400M-distill")
+        tokenizer = AutoTokenizer.from_pretrained("facebook/blenderbot-400M-distill")
+        tokenizer.truncation_side = "left"
+        super().__init__(model, tokenizer, device, generation_config)
+
+    def generate(self, batch: Dict[str, Tuple]) -> Tuple[Union[List[List[int]], float, int]]:
+        _input = [f"{'</s> <s> '.join(dialogue)}" for dialogue in batch["contexts"]]
+        _input = self.tokenizer(
+            _input, 
+            return_tensors="pt", 
+            padding=True,
+            truncation=True, 
+            max_length=self.tokenizer.model_max_length).to(self.device)
+        decoder_input = [f"<s> {target}" for target in batch["targets"]]
+        decoder_input = self.tokenizer(
+            decoder_input, 
+            return_tensors="pt", 
+            padding=True).to(self.device)
+        output = self.model(
+            input_ids=_input.input_ids,
+            attention_mask=_input.attention_mask,
+            decoder_input_ids=decoder_input.input_ids,
+            decoder_attention_mask=decoder_input.attention_mask
+        )
+        sum_cross_entropy = F.cross_entropy(
+            output.logits[:, :-1, :].permute(0, 2, 1),
+            decoder_input.input_ids[:, 1:],
+            reduction="sum",
+            ignore_index=self.tokenizer.pad_token_id
+        )
+        num_tokens = torch.sum(decoder_input.input_ids[:, 1:] != self.tokenizer.pad_token_id)
+
+        predictions = self.model.generate(
+            _input.input_ids,
+            pad_token_id=self.tokenizer.pad_token_id,
+            max_new_tokens=self.generation_config.max_new_tokens,
+            num_beams=self.generation_config.beam_width,
+            do_sample=self.generation_config.sample,
+            temperature=self.generation_config.temperature,
+            top_p=self.generation_config.top_p,
+            top_k=self.generation_config.top_k
+        )
+
+        return predictions.tolist(), sum_cross_entropy, num_tokens
+
+
+class GODEL(GenerationBase):
     def __init__(
         self,
         device: torch.device,

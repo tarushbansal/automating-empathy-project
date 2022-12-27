@@ -49,6 +49,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--initial_lr", type=float, default=0.0001)
     parser.add_argument("--pretrained_model_dir", type=str, default=None)
+    parser.add_argument("--few_shot_training", action="store_true")
 
     cli_args = parser.parse_args()
 
@@ -141,7 +142,8 @@ def main():
                              batch_size=cli_args.batch_size,
                              tokenizer=tokenizer,
                              num_workers=max(1, os.cpu_count() // 4),
-                             model_has_encoder=model.has_encoder)
+                             model_has_encoder=model.has_encoder,
+                             few_shot_training=cli_args.few_shot_training)
 
     # Set up model checkpointing
     ckpt_dir = f"{logger.log_dir}/checkpoints"

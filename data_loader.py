@@ -3,7 +3,8 @@
 # System Modules
 import os
 import json
-from typing import Tuple, Optional, List, Union
+import random
+from typing import Optional, List, Union
 
 import torch
 import torch.utils.data as data
@@ -114,6 +115,7 @@ class DataModule(pl.LightningDataModule):
         tokenizer: TokenizerBase,
         num_workers: int,
         model_has_encoder: bool,
+        few_shot_training: Optional[bool] = None
     ) -> None:
 
         super().__init__()
@@ -122,10 +124,20 @@ class DataModule(pl.LightningDataModule):
         self.tokenizer = tokenizer
         self.num_workers = num_workers
         self.model_has_encoder = model_has_encoder
+        self.few_shot_training = few_shot_training
         self.collate_fn = (
             collate_encoder_decoder_batch 
             if self.model_has_encoder else collate_decoder_batch
         )
+
+    def load_data(
+        self, 
+        fpath: str
+    ) -> Union[List[str], List[List[str]]]:
+
+        with open(fpath) as f:
+            data = json.load(f)
+        return data
 
     def load_dataset(self, stage: str):
         path_prefix = f"{self.dataset_dir}/{stage}"
@@ -133,17 +145,23 @@ class DataModule(pl.LightningDataModule):
         if self.model_has_encoder:
             if stage != "test":
                 path_prefix += "/encoderdecoder"
-            with open(f"{path_prefix}/contexts.json") as f:
-                contexts = json.load(f)
-            with open(f"{path_prefix}/targets.json") as f:
-                targets = json.load(f)
+            contexts = self.load_data(f"{path_prefix}/contexts.json")
+            targets = self.load_data(f"{path_prefix}/targets.json")
             
             emotions = None
             emotions_fpath = f"{path_prefix}/emotions.json"
             if os.path.isfile(emotions_fpath):
-                with open(emotions_fpath) as f:
-                    emotions = json.load(f)
+                emotions = self.load_data(emotions_fpath)
             
+            if self.few_shot_training:
+                data = list(zip(contexts, targets, emotions))
+                random.seed(0)
+                if stage == "train":
+                    data = random.choices(data, k=80)
+                elif stage == "val":
+                    data = random.choices(data, k=20)
+                contexts, targets, emotions = zip(*data)
+
             return EncoderDecoderDataset(
                 self.tokenizer,
                 contexts,
@@ -152,22 +170,27 @@ class DataModule(pl.LightningDataModule):
             )
         else:
             if stage == "test":
-                with open(f"{path_prefix}/contexts.json") as f:
-                    dialogues = json.load(f)
-                with open(f"{path_prefix}/targets.json") as f:
-                    targets = json.load(f)
+                dialogues = self.load_data(f"{path_prefix}/contexts.json")
+                targets = self.load_data(f"{path_prefix}/targets.json")
                 emotions_fpath = f"{path_prefix}/emotions.json"
             else:
+                dialogues = self.load_data(f"{path_prefix}/decoder/dialogues.json")
                 targets = None
-                with open(f"{path_prefix}/decoder/dialogues.json") as f:
-                    dialogues = json.load(f)
                 emotions_fpath = f"{path_prefix}/decoder/emotions.json"
             
             emotions = None
             if os.path.isfile(emotions_fpath):
-                with open(emotions_fpath) as f:
-                    emotions = json.load(f)
+                emotions = self.load_data(emotions_fpath)
             
+            if self.few_shot_training:
+                data = list(zip(dialogues, targets, emotions))
+                random.seed(0)
+                if stage == "train":
+                    data = random.choices(data, k=80)
+                elif stage == "val":
+                    data = random.choices(data, k=20)
+                dialogues, targets, emotions = zip(*data)
+
             return DecoderDataset(
                 self.tokenizer,
                 dialogues,

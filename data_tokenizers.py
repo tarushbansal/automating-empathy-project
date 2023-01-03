@@ -37,10 +37,9 @@ class GODELTokenizer(TokenizerBase):
         self.EOS_IDX = self.tokenizer.eos_token_id
         self.vocab_size = len(self.tokenizer)
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
-        instruction = ("Instruction: given a dialog context, "
-                       + "you need to response empathically.")
         self.prefix = self.tokenizer(
-            f"{instruction} [CONTEXT] ",
+            "Instruction: given a dialog context, "
+             + "you need to response empathically. [CONTEXT] ",
             add_special_tokens=False)["input_ids"]
         self.query_concept_net = query_concept_net
         if self.query_concept_net:
@@ -52,11 +51,16 @@ class GODELTokenizer(TokenizerBase):
 
     def encode_text(
         self,
-        text: Union[str, List[str]]
+        text: Union[str, List[str]],
+        instruction: Optional[str] = None
     ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
 
         external_knowledge = None
         if type(text) == list:
+            if instruction is not None:
+                self.prefix = self.tokenizer(
+                    f"Instruction: {instruction} [CONTEXT] ",
+                    add_special_tokens=False)["input_ids"]
             dialog_history = f' EOS '.join(text)
             tokens = self.tokenizer.tokenize(dialog_history)
             token_ids = self.prefix + self.tokenizer.convert_tokens_to_ids(tokens)

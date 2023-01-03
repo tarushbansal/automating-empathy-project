@@ -30,12 +30,14 @@ class EncoderDecoderDataset(data.Dataset):
         tokenizer: TokenizerBase,
         contexts: List[List[str]],
         targets: List[str],
-        emotions: Optional[List[str]] = None,
+        instructions: Optional[str] = None,
+        emotions: Optional[List[str]] = None
     ) -> None:
         
         self.tokenizer = tokenizer
         self.contexts = contexts
         self.targets = targets
+        self.instructions = instructions
         self.emotions = emotions
 
     def __len__(self) -> int:
@@ -52,7 +54,10 @@ class EncoderDecoderDataset(data.Dataset):
             emotion = self.tokenizer.emo_map[self.emotions[idx]]
 
         # Tokenize dialogue context
-        context, concept_net_data = self.tokenizer.encode_text(self.contexts[idx])
+        context, concept_net_data = self.tokenizer.encode_text(
+            self.contexts[idx], 
+            None if self.instructions is None else self.instructions[idx]
+        )
 
         # Tokenize response utterance
         target, _ = self.tokenizer.encode_text(self.targets[idx])
@@ -71,12 +76,14 @@ class DecoderDataset(data.Dataset):
         tokenizer: TokenizerBase,
         dialogues: List[List[str]],
         targets: Optional[List[str]] = None,
+        instructions: Optional[str] = None,
         emotions: Optional[List[str]] = None,
     ) -> None:
         
         self.tokenizer = tokenizer
         self.dialogues = dialogues
         self.targets = targets
+        self.instructions = instructions
         self.emotions = emotions
 
     def __len__(self) -> int:
@@ -93,7 +100,10 @@ class DecoderDataset(data.Dataset):
             emotion = self.tokenizer.emo_map[self.emotions[idx]]
 
         # Tokenize dialogue context
-        dialogue, _ = self.tokenizer.encode_text(self.dialogues[idx])
+        dialogue, _ = self.tokenizer.encode_text(
+            self.dialogues[idx],
+            None if self.instructions is None else self.instructions[idx]
+        )
 
         # Tokenize response utterance
         target = None
@@ -148,53 +158,62 @@ class DataModule(pl.LightningDataModule):
             contexts = self.load_data(f"{path_prefix}/contexts.json")
             targets = self.load_data(f"{path_prefix}/targets.json")
             
+            instructions = None
+            if os.path.isfile(f"{path_prefix}/instructions.json"):
+                instructions = self.load_data(f"{path_prefix}/instructions.json")
+            
             emotions = None
             emotions_fpath = f"{path_prefix}/emotions.json"
             if os.path.isfile(emotions_fpath):
                 emotions = self.load_data(emotions_fpath)
             
             if self.few_shot_training:
-                data = list(zip(contexts, targets, emotions))
+                data = list(zip(contexts, targets, emotions, instructions))
                 random.seed(0)
                 if stage == "train":
                     data = random.choices(data, k=80)
                 elif stage == "val":
                     data = random.choices(data, k=20)
-                contexts, targets, emotions = zip(*data)
+                contexts, targets, emotions, instructions = zip(*data)
 
             return EncoderDecoderDataset(
                 self.tokenizer,
                 contexts,
                 targets,
+                instructions,
                 emotions
             )
         else:
             if stage == "test":
                 dialogues = self.load_data(f"{path_prefix}/contexts.json")
                 targets = self.load_data(f"{path_prefix}/targets.json")
-                emotions_fpath = f"{path_prefix}/emotions.json"
             else:
                 dialogues = self.load_data(f"{path_prefix}/decoder/dialogues.json")
                 targets = None
-                emotions_fpath = f"{path_prefix}/decoder/emotions.json"
+                path_prefix += f"/decoder"
             
             emotions = None
-            if os.path.isfile(emotions_fpath):
-                emotions = self.load_data(emotions_fpath)
+            if os.path.isfile(f"{path_prefix}/emotions.json"):
+                emotions = self.load_data(f"{path_prefix}/emotions.json")
+            
+            instructions = None
+            if os.path.isfile(f"{path_prefix}/instructions.json"):
+                instructions = self.load_data(f"{path_prefix}/instructions.json")
             
             if self.few_shot_training:
-                data = list(zip(dialogues, targets, emotions))
+                data = list(zip(dialogues, targets, emotions, instructions))
                 random.seed(0)
                 if stage == "train":
                     data = random.choices(data, k=80)
                 elif stage == "val":
                     data = random.choices(data, k=20)
-                dialogues, targets, emotions = zip(*data)
+                dialogues, targets, emotions, instructions = zip(*data)
 
             return DecoderDataset(
                 self.tokenizer,
                 dialogues,
                 targets,
+                instructions,
                 emotions
             )
 

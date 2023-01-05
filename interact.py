@@ -54,6 +54,7 @@ def main():
         ckpt_path,
         tokenizer=tokenizer,
         model=model,
+        batch_size=1,
         generation_config=GenerationConfig(
             max_new_tokens=cli_args.max_new_tokens,
             beam_width=cli_args.beam_width,

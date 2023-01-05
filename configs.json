@@ -1,0 +1,50 @@
+{
+    "GPT2_SMALL": {
+        "version": "small",
+        "tokenizer_kwargs": {
+            "version": "small"
+        }
+    },
+    "GPT2_MEDIUM": {
+        "version": "medium",
+        "tokenizer_kwargs": {
+            "version": "medium"
+        }
+    },
+    "GPT2_LARGE": {
+        "version": "small",
+        "tokenizer_kwargs": {
+            "version": "small"
+        }
+    },
+    "GODEL_SMALL": {
+        "version": "base",
+        "tokenizer_kwargs": {
+            "version": "base"
+        }
+    },
+    "GODEL_LARGE": {
+        "version": "large",
+        "tokenizer_kwargs": {
+            "version": "large"
+        }
+    },
+    "KnowledgeBridgedGODEL_SMALL": {
+        "version": "base",
+        "tokenizer_kwargs": {
+            "version": "base",
+            "query_concept_net": true,
+            "num_top_concepts": 5,
+            "max_num_concepts": 10
+        }
+    },
+    "KnowledgeBridgedGODEL_LARGE": {
+        "version": "large",
+        "tokenizer_kwargs": {
+            "version": "large",
+            "query_concept_net": true,
+            "num_top_concepts": 5,
+            "max_num_concepts": 10
+        }
+    }
+}

@@ -54,9 +54,11 @@ class GODEL(EncoderDecoderModel):
 
 
 class KnowledgeBridgedGODEL(EncoderDecoderModel):
-    def __init__(self, tokenizer: TokenizerBase) -> None:
+    def __init__(self, tokenizer: TokenizerBase, version: str) -> None:
         super().__init__(tokenizer)
-        self.model = AutoModelForSeq2SeqLM.from_pretrained("microsoft/GODEL-v1_1-base-seq2seq")
+        if version not in ["base", "large"]:
+            raise ValueError("Model version must be either 'base' or 'large'!")
+        self.model = AutoModelForSeq2SeqLM.from_pretrained(f"microsoft/GODEL-v1_1-{version}-seq2seq")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
         self.model.config.dropout_rate = 0.8
         self.graph_embeddings = nn.Embedding(2, self.model.config.hidden_size)
@@ -128,9 +130,11 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
 
 
 class GPT2(DecoderModel):
-    def __init__(self, tokenizer: TokenizerBase) -> None:
+    def __init__(self, tokenizer: TokenizerBase, version: str) -> None:
         super().__init__(tokenizer)
-        self.model = AutoModelForCausalLM.from_pretrained("gpt2")
+        if version not in ["small", "medium", "large"]:
+            raise ValueError("Model version must be 'small', 'medium' or 'large'!")
+        self.model = AutoModelForCausalLM.from_pretrained(f"gpt2-{version}".replace("gpt2-small", "gpt2"))
         self.model.resize_token_embeddings(tokenizer.vocab_size)
         self.model.config.resid_pdrop = self.model.config.attn_pdrop = self.model.config.embd_pdrop = 0.6
 

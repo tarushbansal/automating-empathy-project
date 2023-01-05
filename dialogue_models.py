@@ -19,9 +19,11 @@ from data_classes import ConceptNetBatchData
 
 
 class GODEL(EncoderDecoderModel):
-    def __init__(self, tokenizer: TokenizerBase) -> None:
+    def __init__(self, tokenizer: TokenizerBase, version: str) -> None:
         super().__init__(tokenizer)
-        self.model = AutoModelForSeq2SeqLM.from_pretrained("microsoft/GODEL-v1_1-base-seq2seq")
+        if version not in ["base", "large"]:
+            raise ValueError("Model version must be either 'base' or 'large'!")
+        self.model = AutoModelForSeq2SeqLM.from_pretrained(f"microsoft/GODEL-v1_1-{version}-seq2seq")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
         self.model.config.dropout_rate = 0.6
 

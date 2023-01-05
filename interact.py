@@ -4,12 +4,9 @@
 import os
 import argparse
 
-import torch
-
 # User-defined Modules
-from base_classes import TokenizerBase
 from model_supervisor import ModelSupervisor
-from data_classes import EncoderDecoderModelRawData, DecoderModelRawData
+from data_classes import EncoderDecoderModelRawData, DecoderModelRawData, GenerationConfig
 from utils import load_val_ckpt_path, load_config
 from data_loader import collate_decoder_batch, collate_encoder_decoder_batch
 
@@ -20,25 +17,14 @@ def initialise_interface():
     os.system("clear")
     print("---- Welcome to this interface to interact with a dialogue model! -------")
     print("")
-    print("Supply an emotion label for the conversation to get started and " +
-          "type a speaker utterance when prompted for a multi-turn dialogue.")
+    print("Supply an instruction to the model to get started.")
+    print("Note that if you leave the instruction prompt empty it defaults to " +
+          "'Instruction: given a dialog context, you need to respond empathetically.'")
     print("")
     print("Command keys:")
-    print("---- <clear> - Clear conversation history and start a new conversation.")
-    print("---- <quit>  - Exit interface")
+    print("---- <new>  - Clear current conversation history and start a new session.")
+    print("---- <quit> - Exit interface")
     print("")
-
-
-def emotion_loop(tokenizer: TokenizerBase) -> torch.Tensor:
-    while True:
-        emotion_label = input("Emotion Label: ")
-        if emotion_label in tokenizer.emo_map:
-            break
-        print("Emotion label not supported! Try again\n")
-
-    print(f"Emotion context set to '{emotion_label}'\n")
-
-    return torch.LongTensor([tokenizer.emo_map[emotion_label]])
 
 
 def main():
@@ -68,52 +54,56 @@ def main():
         ckpt_path,
         tokenizer=tokenizer,
         model=model,
-        generation_kwargs={
-        "max_new_tokens": cli_args.max_new_tokens,
-        "beam_width": cli_args.beam_width,
-        "sample": cli_args.sample,
-        "temperature": cli_args.temperature,
-        "top_p": cli_args.top_p,
-        "top_k": cli_args.top_k,
-        }
+        generation_config=GenerationConfig(
+            max_new_tokens=cli_args.max_new_tokens,
+            beam_width=cli_args.beam_width,
+            sample=cli_args.sample,
+            temperature=cli_args.temperature,
+            top_p=cli_args.top_p,
+            top_k=cli_args.top_k,
+        )
     )
 
     # Run main interface loop
     context = []
     initialise_interface()
-    emotion = emotion_loop(tokenizer)
+    instruction = input("Instruction: ").strip()
 
     while True:
-        speaker_utterance = input(f"Speaker: ")
-        if speaker_utterance.strip() == "<quit>":
+        speaker_utterance = input(f"Speaker: ").strip()
+        if speaker_utterance == "<quit>":
             os.system("clear")
             break
-        if speaker_utterance.strip() == "<clear>":
+        if speaker_utterance == "<new>":
             context = []
             initialise_interface()
-            emotion = emotion_loop(tokenizer)
+            instruction = input("Instruction: ").strip()
             continue
 
         context.append(speaker_utterance)
-        enc_context, concept_net_data = tokenizer.encode_text(context)
+        enc_context, concept_net_data = tokenizer.encode_text(
+            context,
+            None if instruction == "" else instruction
+        )
+
         if model.has_encoder:
             batch = collate_encoder_decoder_batch([
                 EncoderDecoderModelRawData(
                     context=enc_context,
                     target=[],
-                    emotion=emotion,
+                    emotion=None,
                     concept_net_data=concept_net_data
-                )
-            ])
+                )], tokenizer
+            )
         else:
             batch = collate_decoder_batch([
                 DecoderModelRawData(
                     dialogue=context,
                     gen_target=None
-                )
-            ])
+                )], tokenizer
+            )
 
-        response = model_supervisor.generate(batch).tolist()[0]
+        response = model_supervisor.generate(batch)[0]
         decoded_reponse = tokenizer.decode_to_text(response)
         print(f"Dialogue Model: {decoded_reponse}")
         print("")

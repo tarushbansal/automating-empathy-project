@@ -1,7 +1,7 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
-from typing import Union, Optional, Callable
+from typing import Union, Optional, Callable, List
 
 import torch
 import torch.nn.functional as F
@@ -44,7 +44,7 @@ def generate(
     vocab_size: int,
     generation_config: GenerationConfig,
     start_token: Optional[int] = None,
-) -> torch.LongTensor:
+) -> List[List[int]]:
 
     max_new_tokens = generation_config.max_new_tokens
     beam_width = generation_config.beam_width

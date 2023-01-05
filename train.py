@@ -29,6 +29,12 @@ def get_model_cls() -> DialogueModelBase:
     single_arg_parser.add_argument("--dialogue_model", type=str, default=None, required=True)
     args, _ = single_arg_parser.parse_known_args()
 
+    size_suffixes = ["_SMALL", "_MEDIUM", "_LARGE"]
+    for suffix in size_suffixes:
+        if args.dialogue_model.endswith(suffix):
+            args.dialogue_model = args.dialogue_model.replace(suffix, "")
+            break
+
     model_cls = getattr(__import__("dialogue_models"), args.dialogue_model)
 
     if not issubclass(model_cls, DialogueModelBase):
@@ -125,10 +131,10 @@ def main():
         if not issubclass(tokenizer_cls, TokenizerBase):
             raise ValueError(
                 "Tokenizer must be derived from base class 'TokenizerBase'!")
-        tokenizer_kwargs = model_config.get("tokenizer_kwargs", {})
+        tokenizer_kwargs = model_config.pop("tokenizer_kwargs", {})
         tokenizer = tokenizer_cls(**tokenizer_kwargs)
 
-        model_kwargs = model_config.get("model_kwargs", {})
+        model_kwargs = model_config
         model = model_cls(tokenizer=tokenizer, **model_kwargs)
         model_supervisor = ModelSupervisor(
             tokenizer=tokenizer,

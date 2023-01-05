@@ -21,14 +21,17 @@ from data_classes import ConceptNetRawData
 class GODELTokenizer(TokenizerBase):
     def __init__(
         self,
+        version: str,
         query_concept_net: bool = False,
         num_top_concepts: int = 5,
         max_num_concepts: int = 10
     ) -> None:
 
         super().__init__()
+        if version not in ["base", "large"]:
+            raise ValueError("Model version must be either 'base' or 'large'!")
         self.tokenizer = AutoTokenizer.from_pretrained(
-            "microsoft/GODEL-v1_1-base-seq2seq"
+            f"microsoft/GODEL-v1_1-{version}-seq2seq"
         )
         self.tokenizer.add_special_tokens({
             "bos_token": "<SOS>"

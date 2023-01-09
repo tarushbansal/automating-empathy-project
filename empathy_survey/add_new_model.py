@@ -107,55 +107,53 @@ if __name__ == "__main__":
     # Load dialogue contexts
     contexts = json.load(open(f"{dataset_dir}/test/contexts.json"))
     logger.info("Loaded all dialogue contexts")
-
-    # Assign defaults to new model table
-    version = 0
+    
+    # Create new model table
     model_id = str(uuid.uuid4())
+    create_model_table(
+        id=model_id,
+        name=cli_args.model_name,
+        version=len([True for model_table in model_tables
+                     if model_table["name"] == cli_args.model_name]),
+        responses=responses
+    )
 
-    # Create pair-wise samples
-    logger.info("Creating survey sample pairs for new model predictions...")
-    samples = []
-    random.seed(0)
-    for response_id in tqdm(random.sample(list(responses.keys()), k=100)):
-        for model_table in model_tables:
-            if model_table["model_name"] == cli_args.model_name:
-                version = model_table["version"] + 1
-            response_pair = [
-                (model_id, responses[response_id]),
-                (model_table["model_id"], model_table["responses"][str(response_id)])
-            ]
-            random.seed()
-            random.shuffle(response_pair)
-            sample = {
-                "id": str(uuid.uuid4()),
-                "modelA": response_pair[0][0],
-                "modelB": response_pair[1][0],
-                "sample": {
-                    "id": response_id,
-                    "context": contexts[response_id],
-                    "responseA": response_pair[0][1],
-                    "responseB": response_pair[1][1]},
-                "status": PENDING
-            }
-            samples.append(sample)
-    logger.info(f"Created {len(samples)} new survey samples")
+    # Retrieve / Create 'samples' DynamoDB table configured with backend
+    sample_table = retrieve_dynamodb_table("samples")
+    if sample_table is None:
+        table_schema = [{"name": "id", "key_type": "HASH", "type": "S"}]
+        sample_table = create_dynamodb_table("samples", table_schema)
+        pushed_ids = []
+    else:
+        pushed_ids = set([item["sample"]["id"] for item in sample_table.scan()["Items"]])
 
-    if len(samples) != 0:
-        # Retrieve / Create 'samples' DynamoDB table configured with backend
-        sample_table = retrieve_dynamodb_table("samples")
-        if sample_table is None:
-            table_schema = [{"name": "id", "key_type": "HASH", "type": "str"}]
-            sample_table = create_dynamodb_table("samples", table_schema)
+    if len(pushed_ids) != 0:
+        # Create pair-wise samples
+        logger.info("Creating survey sample pairs for new model predictions...")
+        samples = []
+        for id in tqdm(pushed_ids):
+            for model_table in model_tables:
+                response_pair = [
+                    (model_id, responses[id]),
+                    (model_table["model_id"], model_table["responses"][str(id)])
+                ]
+                random.seed()
+                random.shuffle(response_pair)
+                sample = {
+                    "id": str(uuid.uuid4()),
+                    "modelA": response_pair[0][0],
+                    "modelB": response_pair[1][0],
+                    "sample": {
+                        "id": id,
+                        "context": contexts[id],
+                        "responseA": response_pair[0][1],
+                        "responseB": response_pair[1][1]},
+                    "status": PENDING
+                }
+                samples.append(sample)
+        logger.info(f"Created {len(samples)} new survey samples")
 
         # Load new samples into table
         fill_dynamodb_table(sample_table, samples)
-
-        # Create new model table
-        create_model_table(
-            id=model_id,
-            name=cli_args.model_name,
-            version=version,
-            responses=responses
-        )
 
 # ---------------------------------------------------------------------------

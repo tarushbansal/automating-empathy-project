@@ -7,6 +7,7 @@ import uuid
 import random
 import logging
 import argparse
+from tqdm import tqdm
 
 # User-Defined Modules
 from dynamodb_utils import (
@@ -38,6 +39,8 @@ with open(backend_config) as f:
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
+    
     parser = argparse.ArgumentParser()
     parser.add_argument("-n", "--num_per_model", type=int, default=None, required=True)
     cli_args = parser.parse_args()
@@ -61,25 +64,23 @@ if __name__ == "__main__":
     # Retrieve / Create 'samples' DynamoDB table configured with backend
     sample_table = retrieve_dynamodb_table("samples")
     if sample_table is None:
-        table_schema = [{"name": "id", "key_type": "HASH", "type": "str"}]
+        table_schema = [{"name": "id", "key_type": "HASH", "type": "S"}]
         sample_table = create_dynamodb_table("samples", table_schema)
-        new_response_ids = random.sample(range(len(contexts)), k=cli_args.num_per_model)
+        unpushed_ids = range(len(contexts))
     else:
-        new_response_ids = range(len(contexts))
-        for item in sample_table.scan()["Items"]:
-            new_response_ids.pop(item["sample"]["id"])
-        if len(new_response_ids) == 0:
+        pushed_ids = set([item["sample"]["id"] for item in sample_table.scan()["Items"]])
+        unpushed_ids = [id for id in range(len(contexts)) if id not in pushed_ids]
+        if len(unpushed_ids) == 0:
             raise ValueError("All unique model responses have been pushed!")
-        if len(new_response_ids) < cli_args.num_per_model:
+        if len(unpushed_ids) < cli_args.num_per_model:
             logger.info(
-                f"USER WARNING: Only {len(new_response_ids)} unique responses ", 
+                f"USER WARNING: Only {len(unpushed_ids)} unique responses ", 
                 "per model are yet to be pushed!")
-        new_response_ids = random.sample(new_response_ids, k=cli_args.num_per_model)
 
     # Create pair-wise samples
-    logger.info("Creating survey sample pairs for all model predictions...")
+    logger.info("Creating survey sample pairs for model predictions...")
     samples = []
-    for id in new_response_ids:
+    for id in tqdm(random.sample(unpushed_ids, k=min(len(unpushed_ids),cli_args.num_per_model))):
         for i, model_table_A in enumerate(model_tables):
             for model_table_B in model_tables[i+1:]:
                 response_pair = [

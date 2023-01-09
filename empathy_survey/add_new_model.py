@@ -9,7 +9,6 @@ import logging
 import argparse
 from tqdm import tqdm
 from stat import S_IREAD
-from typing import List, Dict
 
 # User-Defined Modules
 from dynamodb_utils import (
@@ -56,21 +55,6 @@ def create_model_table(id, name, version, responses):
     return table
 
 
-def preprocess_test_data(data: List[Dict]):
-    # Set seed important to generate same samples and creat sample pairs
-    # If new seed is set or number of samples are increased, it is
-    # likely model responses will only be compared with 'GOLD' targets
-    random.seed(0)
-    samples = random.sample(data, k=100)
-    data = {
-        sample["id"]: {
-            "context": sample["context"],
-            "response": sample["prediction"]
-        } for sample in samples
-    }
-    return data
-
-
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 
@@ -103,10 +87,10 @@ if __name__ == "__main__":
                 logger.info(f"Discovered model table with id {model_id}")
 
     # Create GOLD table if not present
-    dataset_dir = "/home/tb662/rds/hpc-work/automating-empathy-project/empdial_dataset/test"
+    dataset_dir = "/home/tb662/rds/hpc-work/automating-empathy-project/datasets/empathetic_dialogues"
     if "GOLD" not in [model_table["model_name"] for model_table in model_tables]:
         logger.info("Table for target model 'GOLD' not present! Creating new one...")
-        targets = json.load(open(f"{dataset_dir}/targets.json"))
+        targets = json.load(open(f"{dataset_dir}/test/targets.json"))
         gold_table = create_model_table(
             id=str(uuid.uuid4()),
             name="GOLD",
@@ -117,44 +101,43 @@ if __name__ == "__main__":
 
     # Load model predictions from specified file
     with open(test_data_path) as f:
-        test_data = json.load(f)
-    test_data = preprocess_test_data(test_data)
+        responses = {item["id"]: item["prediction"] for item in json.load(f)}
     logger.info("Loaded and preprocessed new model predictions")
 
     # Load dialogue contexts
-    contexts = json.load(open(f"{dataset_dir}/contexts.json"))
+    contexts = json.load(open(f"{dataset_dir}/test/contexts.json"))
     logger.info("Loaded all dialogue contexts")
 
     # Assign defaults to new model table
-    new_model_version = 0
-    new_model_id = str(uuid.uuid4())
+    version = 0
+    model_id = str(uuid.uuid4())
 
     # Create pair-wise samples
     logger.info("Creating survey sample pairs for new model predictions...")
     samples = []
-    for id in tqdm(test_data):
+    random.seed(0)
+    for response_id in tqdm(random.sample(list(responses.keys()), k=100)):
         for model_table in model_tables:
             if model_table["model_name"] == cli_args.model_name:
-                new_model_version = model_table["version"] + 1
-            if str(id) in model_table["responses"]:
-                response_pair = [
-                    (new_model_id, test_data[id]["response"]),
-                    (model_table["model_id"], model_table["responses"][str(id)])
-                ]
-                random.seed()
-                random.shuffle(response_pair)
-                sample = {
-                    "id": str(uuid.uuid4()),
-                    "modelA": response_pair[0][0],
-                    "modelB": response_pair[1][0],
-                    "sample": {
-                        "id": id,
-                        "context": contexts[id],
-                        "responseA": response_pair[0][1],
-                        "responseB": response_pair[1][1]},
-                    "status": PENDING
-                }
-                samples.append(sample)
+                version = model_table["version"] + 1
+            response_pair = [
+                (model_id, responses[response_id]),
+                (model_table["model_id"], model_table["responses"][str(response_id)])
+            ]
+            random.seed()
+            random.shuffle(response_pair)
+            sample = {
+                "id": str(uuid.uuid4()),
+                "modelA": response_pair[0][0],
+                "modelB": response_pair[1][0],
+                "sample": {
+                    "id": response_id,
+                    "context": contexts[response_id],
+                    "responseA": response_pair[0][1],
+                    "responseB": response_pair[1][1]},
+                "status": PENDING
+            }
+            samples.append(sample)
     logger.info(f"Created {len(samples)} new survey samples")
 
     if len(samples) != 0:
@@ -169,10 +152,10 @@ if __name__ == "__main__":
 
         # Create new model table
         create_model_table(
-            id=new_model_id,
+            id=model_id,
             name=cli_args.model_name,
-            version=new_model_version,
-            responses={str(id): test_data[id]["response"] for id in test_data}
+            version=version,
+            responses=responses
         )
 
 # ---------------------------------------------------------------------------

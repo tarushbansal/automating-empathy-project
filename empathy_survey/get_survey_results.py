@@ -4,7 +4,6 @@
 import os
 import json
 import logging
-from stat import S_IREAD
 from decimal import Decimal
 from boto3.dynamodb.conditions import Attr
 
@@ -39,17 +38,17 @@ if __name__ == "__main__":
 
     samples_table = retrieve_dynamodb_table("samples")
     if samples_table is None:
-        raise NotImplementedError("Failed to get ratings! Table 'samples' does not exist.")
+        raise NotImplementedError("Failed to get results! Table 'samples' does not exist.")
 
-    rated_samples = samples_table.scan(FilterExpression=Attr("status").eq(COMPLETE))["Items"]
-    logger.info(f"{len(rated_samples)} rated survey samples found")
+    results = samples_table.scan(FilterExpression=Attr("status").eq(COMPLETE))["Items"]
+    logger.info(f"{len(results)} rated survey samples found")
 
-    if len(rated_samples) != 0:
+    if len(results) != 0:
         dirname = os.path.dirname(os.path.abspath(__file__))
-        ratings_fpath = os.path.join(dirname, "ratings.json")
-        with open(ratings_fpath, "w") as f:
-            json.dump(rated_samples, f, cls=DecimalEncoder)
-            logger.info(f"Saved ratings at {ratings_fpath}")
-        os.chmod(ratings_fpath, S_IREAD)
+        results_dir = os.path.join(dirname, "results")
+        os.makedirs(results_dir, exist_ok=True)
+        with open(f"{results_dir}/survey_results.json", "w") as f:
+            json.dump(results, f, cls=DecimalEncoder)
+            logger.info(f"Saved results at '{results_dir}/survey_results.json'")
 
 # ----------------------------------------------------------------------------

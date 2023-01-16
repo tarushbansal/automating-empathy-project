@@ -23,7 +23,7 @@ with open(backend_config) as f:
     try:
         COMPLETE = json.load(f)["status_codes"]["COMPLETE"]
     except KeyError:
-        raise KeyError("Status code 'PENDING' not specified in 'backend_config.json'")
+        raise KeyError("Status code 'COMPLETE' not specified in 'backend_config.json'")
 
 
 class DecimalEncoder(json.JSONEncoder):

@@ -40,26 +40,55 @@ if __name__ == "__main__":
     
     # Assign default ratings to all models
     model_ratings = {model_table["model_id"]: [0] * 3 for model_table in model_tables}
+    response_ratings = {}
 
     # Run ELO rating algorithm on all rated samples
-    for sample in results:
+    for item in results:
+        id = item["sample"]["id"]
+        if id not in response_ratings:
+            response_ratings[id] = {"context": item["sample"]["context"], "ratings": {}}
+        if item["modelA"] not in response_ratings[id]["ratings"]:
+            response_ratings[id]["ratings"][item["modelA"]] = (item["sample"]["responseA"], [0] * 3)
+        if item["modelB"] not in response_ratings[id]["ratings"]:
+            response_ratings[id]["ratings"][item["modelB"]] = (item["sample"]["responseB"], [0] * 3)
+
         for i in range(3):
-            modelA_rating = model_ratings[sample["modelA"]][i]
-            modelB_rating = model_ratings[sample["modelB"]][i]
+            # Rate models
+            modelA_rating = model_ratings[item["modelA"]][i]
+            modelB_rating = model_ratings[item["modelB"]][i]
             
-            # With respect to modelA
             expected_score = compute_expected_score(modelA_rating, modelB_rating)
-            model_ratings[sample["modelA"]][i] = update_rating(
+            model_ratings[item["modelA"]][i] = update_rating(
                 modelA_rating, 
-                (2 - sample["ratings"][i]) / 4, 
+                (2 - item["ratings"][i]) / 4, 
                 expected_score,
                 K=cli_args.learning_rate
             )
 
             expected_score = compute_expected_score(modelB_rating, modelA_rating)
-            model_ratings[sample["modelB"]][i] = update_rating(
+            model_ratings[item["modelB"]][i] = update_rating(
                 modelB_rating, 
-                (sample["ratings"][i] + 2) / 4, 
+                (item["ratings"][i] + 2) / 4, 
+                expected_score,
+                K=cli_args.learning_rate
+            )
+
+            # Rate responses
+            responseA_rating = response_ratings[id]["ratings"][item["modelA"]][1][i]
+            responseB_rating = response_ratings[id]["ratings"][item["modelB"]][1][i]
+            
+            expected_score = compute_expected_score(responseA_rating, responseB_rating)
+            response_ratings[id]["ratings"][item["modelA"]][1][i] = update_rating(
+                responseA_rating, 
+                (2 - item["ratings"][i]) / 4, 
+                expected_score,
+                K=cli_args.learning_rate
+            )
+
+            expected_score = compute_expected_score(responseB_rating, responseA_rating)
+            response_ratings[id]["ratings"][item["modelB"]][1][i] = update_rating(
+                responseB_rating, 
+                (item["ratings"][i] + 2) / 4, 
                 expected_score,
                 K=cli_args.learning_rate
             )
@@ -82,3 +111,7 @@ if __name__ == "__main__":
     with open(f"{working_dir}/results/model_ratings.json", "w") as f:
         json.dump(model_ratings, f)
         print(f"All ratings saved at '{working_dir}/results/model_ratings.json'")
+    
+    with open(f"{working_dir}/results/response_ratings.json", "w") as f:
+        json.dump(response_ratings, f)
+        print(f"All ratings saved at '{working_dir}/results/response_ratings.json'")

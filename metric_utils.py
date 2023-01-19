@@ -17,8 +17,8 @@ from nltk.translate.nist_score import corpus_nist
 def compute_test_metrics(
     targets: List[str],
     predictions: List[str],
-    encoded_targets: List[List[int]],
-    encoded_predictions: List[List[int]],
+    encoded_targets: Optional[List[List[int]]] = None,
+    encoded_predictions: Optional[List[List[int]]] = None,
     word_embeddings: Optional[nn.Module] = None,
     metric_n_grams: int = 4,
 ) -> Dict[str, float]:

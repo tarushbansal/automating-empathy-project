@@ -64,7 +64,6 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
         self.graph_embeddings = nn.Embedding(2, self.model.config.hidden_size)
         self.emo_linear = nn.Linear(self.model.config.hidden_size, self.tokenizer.num_emo_labels)
         self.attn_loss = nn.MSELoss()
-        self.requires_concept_net_data = True
 
     @staticmethod
     def tokenizer_cls():
@@ -73,6 +72,10 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
     @property
     def word_embeddings(self):
         return self.model.get_input_embeddings()
+    
+    @property
+    def requires_concept_net_data(self) -> bool:
+        return True
 
     def knowledge_enriched_context(
         self,

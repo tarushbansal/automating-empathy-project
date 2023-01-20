@@ -107,13 +107,12 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
 
         input_embeds, pad_mask = self.knowledge_enriched_context(
             source_seq, concept_net_data.concepts)
-        attention_mask = torch.minimum(pad_mask.unsqueeze(1), concept_net_data.adjacency_mask)
+        # attention_mask = torch.minimum(pad_mask.unsqueeze(1), concept_net_data.adjacency_mask)
         target_seq, target_mask = self.create_padding_mask(target_seq)
 
         out = self.model(
             inputs_embeds=input_embeds,
-            attention_mask=attention_mask,
-            encoder_attention_mask=pad_mask,
+            attention_mask=pad_mask,
             decoder_input_ids=target_seq,
             decoder_attention_mask=target_mask,
             output_attentions=True
@@ -132,12 +131,12 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
         return out.logits
 
 
-class GPT2(DecoderModel):
+class DialoGPT(DecoderModel):
     def __init__(self, tokenizer: TokenizerBase, version: str) -> None:
         super().__init__(tokenizer)
         if version not in ["small", "medium", "large"]:
             raise ValueError("Model version must be 'small', 'medium' or 'large'!")
-        self.model = AutoModelForCausalLM.from_pretrained(f"gpt2-{version}".replace("gpt2-small", "gpt2"))
+        self.model = AutoModelForCausalLM.from_pretrained(f"microsoft/DialoGPT-{version}")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
         self.model.config.resid_pdrop = self.model.config.attn_pdrop = self.model.config.embd_pdrop = 0.6
 
@@ -147,7 +146,7 @@ class GPT2(DecoderModel):
 
     @staticmethod
     def tokenizer_cls():
-        return "GPT2Tokenizer"
+        return "DialoGPTTokenizer"
 
     def forward(self, input_seq: torch.LongTensor, **_) -> torch.Tensor:
         input_seq, input_mask = self.create_padding_mask(input_seq)

@@ -79,12 +79,12 @@ class GODELTokenizer(TokenizerBase):
         return token_ids, external_knowledge
 
 
-class GPT2Tokenizer(TokenizerBase):
+class DialoGPTTokenizer(TokenizerBase):
     def __init__(self, version: str) -> None:
         super().__init__()
         if version not in ["small", "medium", "large"]:
             raise ValueError("Model version must be 'small', 'medium' or 'large'!")
-        self.tokenizer = AutoTokenizer.from_pretrained(f"gpt2-{version}".replace("gpt2-small", "gpt2"))
+        self.tokenizer = AutoTokenizer.from_pretrained(f"microsoft/DialoGPT-{version}")
         self.EOS_IDX = self.tokenizer.eos_token_id
         self.vocab_size = len(self.tokenizer)
 

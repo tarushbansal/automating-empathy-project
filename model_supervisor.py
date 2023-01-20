@@ -81,7 +81,7 @@ class ModelSupervisor(pl.LightningModule):
         if hasattr(self.model, "emo_logits"):
             emo_loss = F.cross_entropy(
                 self.model.emo_logits,
-                batch["emotion"]
+                batch.emotions
             )
             self.log(f"{stage}_emo_loss", emo_loss, prog_bar=True, batch_size=self.batch_size)
             self.logger.experiment.add_scalars('emo_loss', {stage: emo_loss}, self.global_step)

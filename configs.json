@@ -1,20 +1,20 @@
 {
-    "GPT2_SMALL": {
+    "DialoGPT_SMALL": {
         "version": "small",
         "tokenizer_kwargs": {
             "version": "small"
         }
     },
-    "GPT2_MEDIUM": {
+    "DialoGPT_MEDIUM": {
         "version": "medium",
         "tokenizer_kwargs": {
             "version": "medium"
         }
     },
-    "GPT2_LARGE": {
-        "version": "small",
+    "DialoGPT_LARGE": {
+        "version": "large",
         "tokenizer_kwargs": {
-            "version": "small"
+            "version": "large"
         }
     },
     "GODEL_SMALL": {

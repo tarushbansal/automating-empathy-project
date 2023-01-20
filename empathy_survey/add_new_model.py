@@ -121,8 +121,6 @@ if __name__ == "__main__":
     # Retrieve / Create 'samples' DynamoDB table configured with backend
     sample_table = retrieve_dynamodb_table("samples")
     if sample_table is None:
-        table_schema = [{"name": "id", "key_type": "HASH", "type": "S"}]
-        sample_table = create_dynamodb_table("samples", table_schema)
         pushed_ids = []
     else:
         pushed_ids = set([item["sample"]["id"] for item in sample_table.scan()["Items"]])

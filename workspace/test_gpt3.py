@@ -10,7 +10,7 @@ from tqdm import tqdm
 from openai.error import RateLimitError
 
 # User-defined Modules
-from metric_utils import compute_test_metrics
+from utils.metric_utils import compute_test_metrics
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 

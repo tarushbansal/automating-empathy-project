@@ -7,10 +7,10 @@ import argparse
 import pytorch_lightning as pl
 
 # User-defined Modules
-from data_loader import DataModule
-from model_supervisor import ModelSupervisor
-from utils import load_val_ckpt_path, load_config
-from data_classes import GenerationConfig
+from data.data_loader import DataModule
+from data.data_classes import GenerationConfig
+from dialogue_model_supervisor import DialogueModelSupervisor
+from utils.train_utils import load_val_ckpt_path, load_config
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -42,7 +42,7 @@ def main():
 
     model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
     model = model_cls(tokenizer=tokenizer, **config["model"]["kwargs"])
-    model_supervisor = ModelSupervisor.load_from_checkpoint(
+    model_supervisor = DialogueModelSupervisor.load_from_checkpoint(
         ckpt_path, 
         tokenizer=tokenizer, 
         model=model,

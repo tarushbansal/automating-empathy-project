@@ -1,7 +1,7 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
-from typing import Tuple, Dict
+from typing import Tuple
 
 import torch
 import torch.nn as nn
@@ -12,8 +12,8 @@ from transformers import (
 )
 
 # User-Defined Modules
-from base_classes import EncoderDecoderModel, DecoderModel, TokenizerBase
-from data_classes import ConceptNetBatchData
+from base import EncoderDecoderModel, DecoderModel, TokenizerBase
+from data.data_classes import ConceptNetBatchData
 
 # ------------------------- IMPLEMENTATION ------------------------------------
 

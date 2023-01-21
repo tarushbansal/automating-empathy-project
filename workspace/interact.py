@@ -5,10 +5,14 @@ import os
 import argparse
 
 # User-defined Modules
-from model_supervisor import ModelSupervisor
-from data_classes import EncoderDecoderModelRawData, DecoderModelRawData, GenerationConfig
-from utils import load_val_ckpt_path, load_config
-from data_loader import collate_decoder_batch, collate_encoder_decoder_batch
+from dialogue_model_supervisor import DialogueModelSupervisor
+from utils.train_utils import load_val_ckpt_path, load_config
+from data.data_loader import collate_decoder_batch, collate_encoder_decoder_batch
+from data.data_classes import (
+    EncoderDecoderModelRawData, 
+    DecoderModelRawData, 
+    GenerationConfig
+)
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -50,7 +54,7 @@ def main():
     model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
     model = model_cls(tokenizer=tokenizer, **config["model"]["kwargs"])
     model.eval()
-    model_supervisor = ModelSupervisor.load_from_checkpoint(
+    model_supervisor = DialogueModelSupervisor.load_from_checkpoint(
         ckpt_path,
         tokenizer=tokenizer,
         model=model,

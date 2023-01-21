@@ -4,7 +4,7 @@
 import copy
 import json
 import math
-from typing import Dict, List, Tuple, Optional, Union
+from typing import List, Tuple, Optional, Union
 
 import torch
 import torch.nn.functional as F
@@ -13,15 +13,20 @@ import pytorch_lightning as pl
 from transformers.optimization import get_linear_schedule_with_warmup
 
 # User-defined Modules
-from base_classes import DialogueModelBase, TokenizerBase
-from data_classes import EncoderDecoderModelBatch, DecoderModelBatch, GenerationConfig
-from metric_utils import compute_test_metrics
-from generation import generate
+from models.base import DialogueModelBase
+from tokenizers.base import TokenizerBase
+from utils.metric_utils import compute_test_metrics
+from utils.generation_utils import generate
+from data.data_classes import (
+    EncoderDecoderModelBatch, 
+    DecoderModelBatch, 
+    GenerationConfig
+)
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
 
-class ModelSupervisor(pl.LightningModule):
+class DialogueModelSupervisor(pl.LightningModule):
     def __init__(
         self,
         model: DialogueModelBase,

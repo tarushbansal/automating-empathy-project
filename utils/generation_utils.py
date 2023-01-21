@@ -7,7 +7,11 @@ import torch
 import torch.nn.functional as F
 
 # User-Defined Modules
-from data_classes import EncoderDecoderModelBatch, DecoderModelBatch, GenerationConfig
+from data.data_classes import (
+    EncoderDecoderModelBatch, 
+    DecoderModelBatch, 
+    GenerationConfig
+)
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 

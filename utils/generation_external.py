@@ -13,7 +13,7 @@ from transformers import (
 )
 
 # User-Defined Modules
-from data_classes import GenerationConfig
+from data.data_classes import GenerationConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 

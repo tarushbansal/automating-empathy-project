@@ -11,8 +11,8 @@ from typing import List, Dict, Tuple
 import torch
 
 # User-defined Modules
-from metric_utils import compute_test_metrics
-from data_classes import GenerationConfig
+from utils.metric_utils import compute_test_metrics
+from data.data_classes import GenerationConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 

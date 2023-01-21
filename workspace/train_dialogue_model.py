@@ -12,10 +12,11 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
 # User-defined Modules
-from data_loader import DataModule
-from model_supervisor import ModelSupervisor
-from base_classes import DialogueModelBase, TokenizerBase
-from utils import (
+from models.base import DialogueModelBase
+from tokenizers.base import TokenizerBase
+from data.data_loader import DataModule
+from dialogue_model_supervisor import DialogueModelSupervisor
+from utils.train_utils import (
     load_val_ckpt_path,
     load_config,
     SaveConfigCallback
@@ -104,7 +105,7 @@ def main():
         model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
         model_kwargs = config["model"]["kwargs"]
         model = model_cls(tokenizer=tokenizer, **model_kwargs)
-        model_supervisor = ModelSupervisor.load_from_checkpoint(
+        model_supervisor = DialogueModelSupervisor.load_from_checkpoint(
             load_val_ckpt_path(cli_args.pretrained_model_dir),
             tokenizer=tokenizer,
             model=model,
@@ -136,7 +137,7 @@ def main():
 
         model_kwargs = model_config
         model = model_cls(tokenizer=tokenizer, **model_kwargs)
-        model_supervisor = ModelSupervisor(
+        model_supervisor = DialogueModelSupervisor(
             tokenizer=tokenizer,
             model=model,
             batch_size=cli_args.batch_size,

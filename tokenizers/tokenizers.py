@@ -12,8 +12,8 @@ from pattern.text.en import singularize
 from transformers import AutoTokenizer
 
 # User-Defined Modules
-from base_classes import TokenizerBase
-from data_classes import ConceptNetRawData
+from tokenizers.base import TokenizerBase
+from data.data_classes import ConceptNetRawData
 
 # ------------------------- IMPLEMENTATION ----------------------------------------
 
@@ -90,7 +90,8 @@ class DialoGPTTokenizer(TokenizerBase):
 
     def encode_text(
         self,
-        text: Union[str, List[str]]
+        text: Union[str, List[str]],
+        instruction: Optional[str] = None
     ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
     
         if type(text) == list:

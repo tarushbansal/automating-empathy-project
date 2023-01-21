@@ -11,7 +11,7 @@ import torch.utils.data as data
 import pytorch_lightning as pl
 
 # User-defined Modules
-from data_tokenizers import TokenizerBase
+from tokenizers.base import TokenizerBase
 from data_classes import (
     ConceptNetRawData,
     ConceptNetBatchData,

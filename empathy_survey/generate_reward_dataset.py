@@ -14,7 +14,9 @@ if __name__ == "__main__":
 
     working_dir = os.path.dirname(os.path.abspath(__file__))
     output_dir = os.path.abspath(cli_args.output_dir)
-    os.makedirs(output_dir, exist_ok=True)
+    if not os.path.isdir(output_dir):
+        raise FileNotFoundError("Specified output directory does not exist!")
+    os.mkdir(f"{output_dir}/reward_dataset")
 
     response_ratings = json.load(open(f"{working_dir}/results/response_ratings.json"))
 
@@ -25,8 +27,8 @@ if __name__ == "__main__":
             dialogues.append(item["context"] + [response])
             rewards.append(0.8 * ratings[0] + 0.1 * ratings[1] + 0.1 * ratings[2])
             
-    with open(f"{output_dir}/dialogues.json", "w") as f:
+    with open(f"{output_dir}/reward_dataset/dialogues.json", "w") as f:
         json.dump(dialogues, f)
     
-    with open(f"{output_dir}/rewards.json", "w") as f:
+    with open(f"{output_dir}/reward_dataset/rewards.json", "w") as f:
         json.dump(rewards, f)

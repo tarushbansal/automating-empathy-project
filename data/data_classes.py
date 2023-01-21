@@ -60,6 +60,16 @@ class DecoderModelRawData:
         self.emotion = emotion
 
 
+class RewardModelRawData:
+    def __init__(
+        self,
+        dialogue: List[int],
+        reward: float
+    ) -> None:
+
+        self.dialogues = dialogue
+        self.rewards = reward
+
 class EncoderDecoderModelBatch:
     def __init__(
         self,
@@ -86,6 +96,18 @@ class DecoderModelBatch:
         self.dialogues = dialogues
         self.targets = targets
         self.emotions = emotions
+
+
+class RewardModelBatch:
+    def __init__(
+        self,
+        dialogues: torch.LongTensor,
+        rewards: torch.FloatTensor
+    ) -> None:
+
+        self.dialogues = dialogues
+        self.rewards = rewards
+
 
 class GenerationConfig:
     def __init__(

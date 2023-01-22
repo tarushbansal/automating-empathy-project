@@ -64,6 +64,7 @@ class EncoderDecoderDataset(data.Dataset):
 
         return EncoderDecoderModelRawData(
             context=context,
+            raw_context=self.contexts[idx],
             target=target,
             emotion=emotion,
             concept_net_data=concept_net_data
@@ -112,6 +113,7 @@ class DecoderDataset(data.Dataset):
         
         return DecoderModelRawData(
             dialogue=dialogue,
+            raw_dialogue=self.dialogues[idx],
             target=target,
             emotion=emotion
         )
@@ -125,7 +127,8 @@ class DataModule(pl.LightningDataModule):
         tokenizer: TokenizerBase,
         num_workers: int,
         model_has_encoder: bool,
-        few_shot_training: Optional[bool] = None
+        few_shot_training: Optional[bool] = None,
+        ppo_mode: Optional[bool] = None,
     ) -> None:
 
         super().__init__()
@@ -135,6 +138,7 @@ class DataModule(pl.LightningDataModule):
         self.num_workers = num_workers
         self.model_has_encoder = model_has_encoder
         self.few_shot_training = few_shot_training
+        self.ppo_mode = ppo_mode
         self.collate_fn = (
             collate_encoder_decoder_batch 
             if self.model_has_encoder else collate_decoder_batch
@@ -189,6 +193,9 @@ class DataModule(pl.LightningDataModule):
                 targets = self.load_data(f"{path_prefix}/targets.json")
             else:
                 dialogues = self.load_data(f"{path_prefix}/decoder/dialogues.json")
+                if self.ppo_mode:
+                    for dialogue in dialogues:
+                        dialogue.pop(-1)
                 targets = None
                 path_prefix += f"/decoder"
             
@@ -293,8 +300,11 @@ def collate_decoder_batch(
     if batch[0].emotion is not None:
         emotions = torch.LongTensor([item.emotion for item in batch])
 
+    raw_dialogues = [item.raw_dialogue for item in batch]
+
     return DecoderModelBatch(
         dialogues=dialogues,
+        raw_dialogues=raw_dialogues,
         targets=targets,
         emotions=emotions
     )
@@ -329,8 +339,11 @@ def collate_encoder_decoder_batch(
             len(getattr(tokenizer, "prefix", []))
         )
 
+    raw_contexts = [item.raw_context for item in batch]
+
     return EncoderDecoderModelBatch(
         contexts=contexts,
+        raw_contexts=raw_contexts,
         targets=targets,
         emotions=emotions,
         concept_net_data=concept_net_data

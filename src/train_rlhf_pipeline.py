@@ -17,6 +17,7 @@ from reward_model_supervisor import RewardModelSupervisor
 from proximal_policy_optimization import PPOSupervisor
 from transformers import BertModel, BertTokenizer
 from utils.train_utils import load_ckpt_path, load_config
+from data_classes import GenerationConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -34,6 +35,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--initial_lr", type=float, default=0.0001)
     parser.add_argument("--ppo_epsilon", type=float, default=0.1)
+    parser.add_argument("--few_shot_training", action="store_true")
+    parser.add_argument("--beam_width", type=int, default=1)
+    parser.add_argument("--sample", action="store_true")
+    parser.add_argument("--temperature", type=float, default=1.0)
+    parser.add_argument("--top_p", type=float, default=1.0)
+    parser.add_argument("--top_k", type=int, default=50)
+    parser.add_argument("--max_new_tokens", type=int, default=100)
 
     cli_args = parser.parse_args()
 
@@ -86,7 +94,15 @@ def main():
         tokenizer=tokenizer,
         model=model,
         batch_size=cli_args.batch_size,
-        initial_lr=cli_args.initial_lr
+        initial_lr=cli_args.initial_lr,
+        generation_config=GenerationConfig(
+            max_new_tokens=cli_args.max_new_tokens,
+            beam_width=cli_args.beam_width,
+            sample=cli_args.sample,
+            temperature=cli_args.temperature,
+            top_p=cli_args.top_p,
+            top_k=cli_args.top_k
+        )
     )
     reward_model = RewardModelSupervisor.load_from_checkpoint(
         load_ckpt_path(cli_args.pretrained_reward_model_dir),
@@ -104,7 +120,12 @@ def main():
     )
 
     # Set up data module
-    data_module = None # TODO
+    data_module = DataModule(dataset_dir=cli_args.dataset_dir,
+                             batch_size=cli_args.batch_size,
+                             tokenizer=tokenizer,
+                             num_workers=max(1, os.cpu_count() // 4),
+                             model_has_encoder=model.has_encoder,
+                             few_shot_training=cli_args.few_shot_training)
 
     # Set up model checkpointing
     ckpt_dir = f"{logger.log_dir}/checkpoints"

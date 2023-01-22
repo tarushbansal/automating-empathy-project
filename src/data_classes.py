@@ -2,7 +2,7 @@
 
 # System Modules
 import torch
-from typing import List, Optional, Union
+from typing import List, Optional
 
 # ------------------------- IMPLEMENTATION ----------------------------------------
 
@@ -37,12 +37,14 @@ class ConceptNetBatchData:
 class EncoderDecoderModelRawData:
     def __init__(
         self,
-        context: List[List[int]],
+        context: List[int],
+        raw_context: List[List[str]],
         target: List[int],
         emotion: Optional[List[int]],
         concept_net_data: Optional[ConceptNetRawData]
     ):
         self.context = context
+        self.raw_context = raw_context
         self.target = target
         self.emotion = emotion
         self.concept_net_data = concept_net_data
@@ -52,10 +54,12 @@ class DecoderModelRawData:
     def __init__(
         self,
         dialogue: List[List[int]],
+        raw_dialogue: List[List[str]],
         target: Optional[List[int]],
         emotion: Optional[List[int]],
     ):
         self.dialogue = dialogue
+        self.raw_dialogue = raw_dialogue
         self.target = target
         self.emotion = emotion
 
@@ -74,12 +78,14 @@ class EncoderDecoderModelBatch:
     def __init__(
         self,
         contexts: torch.LongTensor,
+        raw_contexts: List[List[str]],
         targets: torch.LongTensor,
         emotions: Optional[torch.LongTensor],
         concept_net_data: Optional[ConceptNetBatchData]
     ) -> None:
 
         self.contexts = contexts
+        self.raw_contexts = raw_contexts
         self.targets = targets
         self.emotions = emotions
         self.concept_net_data = concept_net_data
@@ -89,11 +95,13 @@ class DecoderModelBatch:
     def __init__(
         self,
         dialogues: torch.LongTensor,
+        raw_dialogues: List[List[str]],
         targets: Optional[torch.LongTensor],
         emotions: Optional[torch.LongTensor],
     ) -> None:
 
         self.dialogues = dialogues
+        self.raw_dialogues = raw_dialogues
         self.targets = targets
         self.emotions = emotions
 
@@ -109,17 +117,6 @@ class RewardModelBatch:
         self.dialogues = dialogues
         self.rewards = rewards
         self.mask = mask
-
-
-class PPOBatch:
-    def __init__(
-        self,
-        raw_contexts: List[List[str]],
-        dialogue_model_batch: Union[EncoderDecoderModelBatch, DecoderModelBatch]
-    ) -> None:
-
-        self.raw_contexts = raw_contexts
-        self.dialogue_model_batch = dialogue_model_batch
 
 
 class GenerationConfig:

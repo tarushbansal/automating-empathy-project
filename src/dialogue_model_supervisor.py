@@ -13,11 +13,10 @@ import pytorch_lightning as pl
 from transformers.optimization import get_linear_schedule_with_warmup
 
 # User-defined Modules
-from models.base import DialogueModelBase
-from tokenizers.base import TokenizerBase
+from base_classes import DialogueModelBase, TokenizerBase
 from utils.metric_utils import compute_test_metrics
 from utils.generation_utils import generate
-from data.data_classes import (
+from data_classes import (
     EncoderDecoderModelBatch, 
     DecoderModelBatch, 
     GenerationConfig

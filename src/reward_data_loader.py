@@ -32,7 +32,7 @@ class RewardDataset(data.Dataset):
 
     def __getitem__(self, idx: int) -> RewardModelRawData:
 
-        dialogue = self.tokenizer(self.dialogues[idx])  
+        dialogue = "[CLS] " + " [SEP] ".join(self.dialogues[idx])
         reward = self.rewards[idx]
 
         return RewardModelRawData(
@@ -65,9 +65,9 @@ class RewardDataModule(pl.LightningDataModule):
             data = json.load(f)
         return data
 
-    def load_dataset(self, stage: str):
-        dialogues = self.load_data(f"{self.dataset_dir}/{stage}/dialogues.json")
-        rewards = self.load_data(f"{self.dataset_dir}/{stage}/rewards.json")
+    def load_dataset(self, split: str):
+        dialogues = self.load_data(f"{self.dataset_dir}/{split}/dialogues.json")
+        rewards = self.load_data(f"{self.dataset_dir}/{split}/rewards.json")
         return RewardDataset(
             dialogues=dialogues,
             rewards=rewards,
@@ -93,7 +93,7 @@ class RewardDataModule(pl.LightningDataModule):
             self.train_dataset,
             batch_size=self.batch_size,
             shuffle=True,
-            collate_fn=lambda x: collate_fn(x, self.tokenizer.pad_token_id),
+            collate_fn=lambda x: collate_fn(x, self.tokenizer),
             num_workers=self.num_workers
         )
 
@@ -102,27 +102,18 @@ class RewardDataModule(pl.LightningDataModule):
         return data.DataLoader(
             self.test_dataset,
             batch_size=self.batch_size,
-            collate_fn=lambda x: collate_fn(x, self.tokenizer.pad_token_id),
+            collate_fn=lambda x: collate_fn(x, self.tokenizer),
             num_workers=self.num_workers
         )
 
-def pad_seq_and_convert_to_tensor(
-    sequences: List[int],
-    max_len: int,
-    padding_idx: int,
-    dtype: torch.dtype = torch.long
-) -> torch.Tensor:
 
-    sequences = [seq + [padding_idx] * (max_len - len(seq)) for seq in sequences]
-
-    return torch.tensor(sequences, dtype=dtype)
-
-def collate_fn(batch: List[RewardModelRawData], pad_idx: int):
-    dialogues = [item.dialogue for item in batch]
-    max_len = max([len(seq) for seq in dialogues])
-    dialogues = torch.LongTensor([seq + [pad_idx] * (max_len - len(seq)) for seq in dialogues])
+def collate_fn(batch: List[RewardModelRawData], tokenizer: BertTokenizer):
+    out = tokenizer([item.dialogue for item in batch], return_tensors="pt", padding=True)
+    dialogues = out.input_ids
+    mask = out.attention_mask
     rewards = torch.FloatTensor([item.reward for item in batch])
     return RewardModelBatch(
         dialogues=dialogues,
-        rewards=rewards
+        rewards=rewards,
+        mask=mask
     )

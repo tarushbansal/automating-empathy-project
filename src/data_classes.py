@@ -63,12 +63,12 @@ class DecoderModelRawData:
 class RewardModelRawData:
     def __init__(
         self,
-        dialogue: List[int],
+        dialogue: List[str],
         reward: float
     ) -> None:
 
-        self.dialogues = dialogue
-        self.rewards = reward
+        self.dialogue = dialogue
+        self.reward = reward
 
 class EncoderDecoderModelBatch:
     def __init__(
@@ -102,11 +102,13 @@ class RewardModelBatch:
     def __init__(
         self,
         dialogues: torch.LongTensor,
-        rewards: torch.FloatTensor
+        rewards: torch.FloatTensor,
+        mask: torch.BoolTensor
     ) -> None:
 
         self.dialogues = dialogues
         self.rewards = rewards
+        self.mask = mask
 
 
 class GenerationConfig:

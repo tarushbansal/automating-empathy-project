@@ -11,7 +11,7 @@ import torch.utils.data as data
 import pytorch_lightning as pl
 
 # User-defined Modules
-from tokenizers.base import TokenizerBase
+from base_classes import TokenizerBase
 from data_classes import (
     ConceptNetRawData,
     ConceptNetBatchData,
@@ -149,11 +149,11 @@ class DataModule(pl.LightningDataModule):
             data = json.load(f)
         return data
 
-    def load_dataset(self, stage: str):
-        path_prefix = f"{self.dataset_dir}/{stage}"
+    def load_dataset(self, split: str):
+        path_prefix = f"{self.dataset_dir}/{split}"
 
         if self.model_has_encoder:
-            if stage != "test":
+            if split != "test":
                 path_prefix += "/encoderdecoder"
             contexts = self.load_data(f"{path_prefix}/contexts.json")
             targets = self.load_data(f"{path_prefix}/targets.json")
@@ -170,9 +170,9 @@ class DataModule(pl.LightningDataModule):
             if self.few_shot_training:
                 data = list(zip(contexts, targets, emotions, instructions))
                 random.seed(0)
-                if stage == "train":
+                if split == "train":
                     data = random.choices(data, k=80)
-                elif stage == "val":
+                elif split == "val":
                     data = random.choices(data, k=20)
                 contexts, targets, emotions, instructions = zip(*data)
 
@@ -184,7 +184,7 @@ class DataModule(pl.LightningDataModule):
                 emotions
             )
         else:
-            if stage == "test":
+            if split == "test":
                 dialogues = self.load_data(f"{path_prefix}/contexts.json")
                 targets = self.load_data(f"{path_prefix}/targets.json")
             else:
@@ -203,9 +203,9 @@ class DataModule(pl.LightningDataModule):
             if self.few_shot_training:
                 data = list(zip(dialogues, targets, emotions, instructions))
                 random.seed(0)
-                if stage == "train":
+                if split == "train":
                     data = random.choices(data, k=80)
-                elif stage == "val":
+                elif split == "val":
                     data = random.choices(data, k=20)
                 dialogues, targets, emotions, instructions = zip(*data)
 

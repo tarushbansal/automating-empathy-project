@@ -12,8 +12,8 @@ from pattern.text.en import singularize
 from transformers import AutoTokenizer
 
 # User-Defined Modules
-from tokenizers.base import TokenizerBase
-from data.data_classes import ConceptNetRawData
+from base_classes import TokenizerBase
+from data_classes import ConceptNetRawData
 
 # ------------------------- IMPLEMENTATION ----------------------------------------
 

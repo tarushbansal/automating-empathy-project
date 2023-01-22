@@ -7,8 +7,8 @@ import argparse
 import pytorch_lightning as pl
 
 # User-defined Modules
-from data.data_loader import DataModule
-from data.data_classes import GenerationConfig
+from data_loader import DataModule
+from data_classes import GenerationConfig
 from dialogue_model_supervisor import DialogueModelSupervisor
 from utils.train_utils import load_val_ckpt_path, load_config
 

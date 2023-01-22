@@ -11,7 +11,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.callbacks import ModelCheckpoint
 
 # User-defined Modules
-from data.reward_data_loader import RewardDataModule
+from reward_data_loader import RewardDataModule
 from reward_model_supervisor import RewardModelSupervisor
 from transformers import BertModel, BertTokenizer
 
@@ -62,8 +62,8 @@ def main():
     )
 
     # Initialise model and tokenizer from config
-    tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-    model = BertModel.from_pretrained("bert-base-uncased")
+    tokenizer = BertTokenizer.from_pretrained('bert-large-uncased')
+    model = BertModel.from_pretrained("bert-large-uncased")
     model_supervisor = RewardModelSupervisor(
         model=model,
         batch_size=cli_args.batch_size,
@@ -86,7 +86,7 @@ def main():
         accelerator="auto",
         devices=-1 if torch.cuda.is_available() else 1,
         num_nodes=cli_args.num_nodes,
-        strategy="ddp_find_unused_parameters_false",
+        strategy="ddp",
         max_epochs=cli_args.max_epochs,
         logger=logger,
         callbacks=callbacks,

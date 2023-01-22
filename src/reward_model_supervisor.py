@@ -4,13 +4,14 @@
 from typing import Optional, List
 
 import torch
+import torch.nn as nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
 
 
 # User-defined Modules
 from transformers import BertModel
-from data.data_classes import RewardModelBatch
+from data_classes import RewardModelBatch
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -28,6 +29,15 @@ class RewardModelSupervisor(pl.LightningModule):
         self.model = model
         self.initial_lr = initial_lr
         self.batch_size = batch_size
+        self.linear = nn.Linear(model.config.hidden_size, 1)
+
+    def forward(self, batch: RewardModelBatch) -> torch.FloatTensor:
+        cls_hidden_state = self.model(
+            input_ids=batch.dialogues,
+            attention_mask=batch.mask,
+            output_hidden_states=True).hidden_states[-1][:, 0, :]
+        rewards = self.linear(cls_hidden_state).squeeze(dim=-1)
+        return rewards
 
     def forward_and_log_metrics(
         self, 
@@ -35,8 +45,8 @@ class RewardModelSupervisor(pl.LightningModule):
         stage: str
     ) -> float:
 
-        rewards = self.model(batch.dialogues)
-        loss = F.mse_loss(rewards, batch.rewards)
+        pred_rewards = self.forward(batch)
+        loss = F.mse_loss(pred_rewards, batch.rewards)
         self.log(f"{stage}_loss", loss, prog_bar=True, batch_size=self.batch_size, sync_dist=True)
         self.logger.experiment.add_scalars('loss', {stage: loss}, self.global_step)
         

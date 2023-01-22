@@ -7,8 +7,8 @@ import argparse
 # User-defined Modules
 from dialogue_model_supervisor import DialogueModelSupervisor
 from utils.train_utils import load_val_ckpt_path, load_config
-from data.data_loader import collate_decoder_batch, collate_encoder_decoder_batch
-from data.data_classes import (
+from data_loader import collate_decoder_batch, collate_encoder_decoder_batch
+from data_classes import (
     EncoderDecoderModelRawData, 
     DecoderModelRawData, 
     GenerationConfig

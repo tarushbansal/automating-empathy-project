@@ -12,7 +12,7 @@ import torch
 
 # User-defined Modules
 from utils.metric_utils import compute_test_metrics
-from data.data_classes import GenerationConfig
+from data_classes import GenerationConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 

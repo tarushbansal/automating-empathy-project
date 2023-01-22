@@ -12,8 +12,8 @@ from transformers import (
 )
 
 # User-Defined Modules
-from base import EncoderDecoderModel, DecoderModel, TokenizerBase
-from data.data_classes import ConceptNetBatchData
+from base_classes import EncoderDecoderModel, DecoderModel, TokenizerBase
+from data_classes import ConceptNetBatchData
 
 # ------------------------- IMPLEMENTATION ------------------------------------
 

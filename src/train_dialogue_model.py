@@ -12,9 +12,8 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 
 # User-defined Modules
-from models.base import DialogueModelBase
-from tokenizers.base import TokenizerBase
-from data.data_loader import DataModule
+from base_classes import DialogueModelBase, TokenizerBase
+from data_loader import DataModule
 from dialogue_model_supervisor import DialogueModelSupervisor
 from utils.train_utils import (
     load_val_ckpt_path,
@@ -98,7 +97,7 @@ def main():
     # Initialise model and tokenizer from config
     if cli_args.pretrained_model_dir is not None:
         config = load_config(cli_args.pretrained_model_dir)
-        tokenizer_cls = getattr(__import__("data_tokenizers"), config["tokenizer"]["cls"])
+        tokenizer_cls = getattr(__import__("custom_tokenizers"), config["tokenizer"]["cls"])
         tokenizer_kwargs = config["tokenizer"]["kwargs"]
         tokenizer = tokenizer_cls(**tokenizer_kwargs)
 

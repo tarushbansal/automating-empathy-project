@@ -16,7 +16,7 @@ from base_classes import DialogueModelBase, TokenizerBase
 from data_loader import DataModule
 from dialogue_model_supervisor import DialogueModelSupervisor
 from utils.train_utils import (
-    load_val_ckpt_path,
+    load_ckpt_path,
     load_config,
     SaveConfigCallback
 )
@@ -105,7 +105,7 @@ def main():
         model_kwargs = config["model"]["kwargs"]
         model = model_cls(tokenizer=tokenizer, **model_kwargs)
         model_supervisor = DialogueModelSupervisor.load_from_checkpoint(
-            load_val_ckpt_path(cli_args.pretrained_model_dir),
+            load_ckpt_path(cli_args.pretrained_model_dir),
             tokenizer=tokenizer,
             model=model,
             batch_size=cli_args.batch_size,
@@ -127,7 +127,7 @@ def main():
             raise ValueError(
                 "Must specify the tokenizer associated with the model as a static method!")
 
-        tokenizer_cls = getattr(__import__("data_tokenizers"), tokenizer_name)
+        tokenizer_cls = getattr(__import__("custom_tokenizers"), tokenizer_name)
         if not issubclass(tokenizer_cls, TokenizerBase):
             raise ValueError(
                 "Tokenizer must be derived from base class 'TokenizerBase'!")

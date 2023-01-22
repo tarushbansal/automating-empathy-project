@@ -47,7 +47,7 @@ def load_config(trained_model_dir: str) -> dict:
     return config
 
 
-def load_val_ckpt_path(trained_model_dir: Optional[str]) -> Optional[str]:
+def load_ckpt_path(trained_model_dir: Optional[str]) -> Optional[str]:
     ckpt_path = None
     if trained_model_dir is not None:
         if os.path.isdir(trained_model_dir):

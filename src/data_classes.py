@@ -2,7 +2,7 @@
 
 # System Modules
 import torch
-from typing import List, Optional
+from typing import List, Optional, Union
 
 # ------------------------- IMPLEMENTATION ----------------------------------------
 
@@ -109,6 +109,17 @@ class RewardModelBatch:
         self.dialogues = dialogues
         self.rewards = rewards
         self.mask = mask
+
+
+class PPOBatch:
+    def __init__(
+        self,
+        raw_contexts: List[List[str]],
+        dialogue_model_batch: Union[EncoderDecoderModelBatch, DecoderModelBatch]
+    ) -> None:
+
+        self.raw_contexts = raw_contexts
+        self.dialogue_model_batch = dialogue_model_batch
 
 
 class GenerationConfig:

@@ -98,7 +98,7 @@ class RewardDataModule(pl.LightningDataModule):
         )
 
 
-    def validation_dataloader(self) -> data.DataLoader:
+    def val_dataloader(self) -> data.DataLoader:
         return data.DataLoader(
             self.val_dataset,
             batch_size=self.batch_size,

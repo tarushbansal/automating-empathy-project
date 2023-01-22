@@ -1,7 +1,7 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
-from typing import Optional, List
+from typing import Optional
 
 import torch
 import torch.nn as nn

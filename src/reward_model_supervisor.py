@@ -23,9 +23,7 @@ class RewardModelSupervisor(pl.LightningModule):
         batch_size: int,
         initial_lr: Optional[float] = None
     ) -> None:
-
         super().__init__()
-
         self.model = model
         self.initial_lr = initial_lr
         self.batch_size = batch_size
@@ -44,12 +42,18 @@ class RewardModelSupervisor(pl.LightningModule):
         batch: RewardModelBatch,
         stage: str
     ) -> float:
-
         pred_rewards = self.forward(batch)
         loss = F.mse_loss(pred_rewards, batch.rewards)
-        self.log(f"{stage}_loss", loss, prog_bar=True, batch_size=self.batch_size, sync_dist=True)
+        self.log(
+            f"{stage}_loss", 
+            loss, 
+            prog_bar=True, 
+            on_step=True, 
+            on_epoch=True, 
+            batch_size=self.batch_size, 
+            sync_dist=True
+        )
         self.logger.experiment.add_scalars('loss', {stage: loss}, self.global_step)
-        
         return loss
 
     def training_step(
@@ -60,20 +64,14 @@ class RewardModelSupervisor(pl.LightningModule):
         train_loss = self.forward_and_log_metrics(batch, "train")
         return train_loss
 
-    def test_step(
+    def validation_step(
         self, 
         batch: RewardModelBatch,
         _
     ) -> float:
 
-        test_loss = self.forward_and_log_metrics(batch, "test")
-        return test_loss
-    
-    def test_step_end(self, test_losses: List[float]) -> float:
-        avg_test_loss = sum(test_losses) / len(test_losses)
-        self.log(f"avg_test_loss", avg_test_loss, prog_bar=True, batch_size=self.batch_size, sync_dist=True)
-        self.logger.experiment.add_scalars('loss', {"avg_test": avg_test_loss}, self.global_step)
-        return avg_test_loss
+        val_loss = self.forward_and_log_metrics(batch, "val")
+        return val_loss
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = torch.optim.AdamW(

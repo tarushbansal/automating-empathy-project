@@ -36,9 +36,7 @@ class DialogueModelSupervisor(pl.LightningModule):
         test_output_dir: Optional[str] = None,
         generation_config: Optional[GenerationConfig] = None,
     ) -> None:
-
         super().__init__()
-
         self.model = model
         self.tokenizer = tokenizer
         self.initial_lr = initial_lr
@@ -51,7 +49,6 @@ class DialogueModelSupervisor(pl.LightningModule):
         self, 
         batch: Union[EncoderDecoderModelBatch, DecoderModelBatch]
     ) -> Tuple[torch.Tensor]:
-
         input_kwargs = {}
         if self.model.requires_emotion_label:
             input_kwargs["emotion_label"] = batch.emotions
@@ -74,7 +71,6 @@ class DialogueModelSupervisor(pl.LightningModule):
         batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
         stage: str
     ) -> float:
-
         logits, target_seq = self.forward(batch)
         loss = F.cross_entropy(
             logits[:, :-1, :].permute(0, 2, 1),
@@ -135,7 +131,6 @@ class DialogueModelSupervisor(pl.LightningModule):
         batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
         _
     ) -> None:
-
         contexts = batch.contexts if self.model.has_encoder else batch.dialogues
         self.contexts.extend([self.tokenizer.decode_to_text(context)
                               for context in contexts.tolist()])
@@ -229,7 +224,6 @@ class DialogueModelSupervisor(pl.LightningModule):
         self, 
         batch: Union[EncoderDecoderModelBatch, DecoderModelBatch]
     ) -> torch.LongTensor:
-        
         self.model.eval()
         return generate(
             forward_fn=lambda x: self.forward(x)[0], 
@@ -244,15 +238,17 @@ class DialogueModelSupervisor(pl.LightningModule):
 
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
-        optimizer = torch.optim.AdamW(
-            self.parameters(),
-            lr=self.initial_lr
-        )
-        scheduler = get_linear_schedule_with_warmup(
-            optimizer,
-            num_warmup_steps=0,
-            num_training_steps=self.trainer.max_epochs
-        )
+        optimizer = torch.optim.SGD(self.parameters(), lr=self.initial_lr, momentum=0.9)
+        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1, 0.8)
+        # optimizer = torch.optim.AdamW(
+        #     self.parameters(),
+        #     lr=self.initial_lr
+        # )
+        # scheduler = get_linear_schedule_with_warmup(
+        #     optimizer,
+        #     num_warmup_steps=0,
+        #     num_training_steps=self.trainer.max_epochs
+        # )
         return ([optimizer], [{"scheduler": scheduler, "interval": "epoch"}])
 
 # -----------------------------------------------------------------------------

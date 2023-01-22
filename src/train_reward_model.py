@@ -40,10 +40,16 @@ def get_model_checkpoints(ckpt_dir: str) -> Optional[List[ModelCheckpoint]]:
 
     return [
         ModelCheckpoint(
-            monitor="train_loss",
+            monitor="train_loss_epoch",
             dirpath=ckpt_dir,
-            filename="{train_loss:.2f}-{epoch}",
-            every_n_train_steps=1
+            filename="{train_loss_epoch:.2f}-{epoch}",
+            every_n_epochs=1
+        ),
+        ModelCheckpoint(
+            monitor="val_loss_epoch",
+            dirpath=ckpt_dir,
+            filename="{val_loss_epoch:.2f}-{epoch}",
+            every_n_epochs=1
         )
     ]
 
@@ -95,12 +101,6 @@ def main():
     # Train the model
     trainer.fit(
         model_supervisor,
-        data_module
-    )
-
-    # Test the model
-    trainer.test(
-        model_supervisor, 
         data_module
     )
 

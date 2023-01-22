@@ -77,12 +77,12 @@ class RewardDataModule(pl.LightningDataModule):
     def setup(self, stage: str) -> None:
         if stage == "fit":
             self.train_dataset = self.load_dataset("train")
-        if stage == "test":
-            self.test_dataset = self.load_dataset("test")
+            self.val_dataset = self.load_dataset("val")
 
     def transfer_batch_to_device(self, batch, device, dataloader_idx):
         if isinstance(batch, RewardModelBatch):
             batch.dialogues = batch.dialogues.to(device)
+            batch.mask = batch.mask.to(device)
             batch.rewards = batch.rewards.to(device)
         else:
             batch = super().transfer_batch_to_device(data, device, dataloader_idx)
@@ -98,9 +98,9 @@ class RewardDataModule(pl.LightningDataModule):
         )
 
 
-    def test_dataloader(self) -> data.DataLoader:
+    def validation_dataloader(self) -> data.DataLoader:
         return data.DataLoader(
-            self.test_dataset,
+            self.val_dataset,
             batch_size=self.batch_size,
             collate_fn=lambda x: collate_fn(x, self.tokenizer),
             num_workers=self.num_workers

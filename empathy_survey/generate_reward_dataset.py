@@ -17,13 +17,13 @@ if __name__ == "__main__":
     if not os.path.isdir(output_dir):
         raise FileNotFoundError("Specified output directory does not exist!")
     os.makedirs(f"{output_dir}/reward_dataset/train", exist_ok=True)
-    os.makedirs(f"{output_dir}/reward_dataset/test", exist_ok=True)
+    os.makedirs(f"{output_dir}/reward_dataset/val", exist_ok=True)
 
     responses = list(json.load(open(f"{working_dir}/results/response_ratings.json")).values())
     split_idx = int(0.9 * len(responses))
     data_split = {
         "train": responses[:split_idx],
-        "test": responses[split_idx:]
+        "val": responses[split_idx:]
     }
 
     for split, responses in data_split.items():

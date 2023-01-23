@@ -42,6 +42,18 @@ class PPOSupervisor(pl.LightningModule):
         for param in self.initial_model.model.parameters():
             param.requires_grad = False
 
+    def log_prob_from_logits(self, logits, labels):
+        logp = torch.sum(
+            -F.nll_loss(
+                F.log_softmax(logits, dim=-1).permute(0, 2, 1),
+                labels,
+                ignore_index=self.ppo_tuned_model.tokenizer.PAD_IDX,
+                reduction="none"
+            ), 
+            dim=-1
+        )
+        return logp
+
     def forward_and_log_metrics(
         self,
         batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
@@ -49,8 +61,10 @@ class PPOSupervisor(pl.LightningModule):
     ) -> float:
 
         contexts = batch.raw_contexts if self.ppo_tuned_model.model.has_encoder else batch.raw_dialogues
+        device = batch.contexts.device if self.ppo_tuned_model.model.has_encoder else batch.dialogues.device
         enc_predictions = self.ppo_tuned_model.generate(batch)
         predictions = [self.ppo_tuned_model.tokenizer.decode_to_text(enc) for enc in enc_predictions]
+        
         dialogues = [context + [prediction] for context, prediction in zip(contexts, predictions)]
         reward_model_inputs = self.reward_model.tokenizer(
             ["[CLS] " + " [SEP] ".join(dialogue) for dialogue in dialogues], 
@@ -60,34 +74,31 @@ class PPOSupervisor(pl.LightningModule):
         with torch.no_grad():
             reward = self.reward_model.forward(
                 RewardModelBatch(
-                    dialogues=reward_model_inputs.input_ids,
+                    dialogues=reward_model_inputs.input_ids.to(device),
                     rewards=None,
-                    mask=reward_model_inputs.attention_mask
+                    mask=reward_model_inputs.attention_mask.to(device)
                 )
             )
+        
         if self.ppo_tuned_model.model.has_encoder:
             max_len = max([len(seq) for seq in enc_predictions])
             batch.targets = torch.LongTensor(
                 [seq + [self.ppo_tuned_model.tokenizer.PAD_IDX] * (max_len - len(seq)) for seq in enc_predictions])
+            batch.targets = batch.targets.to(device)
         else:
             dialogues = [self.ppo_tuned_model.tokenizer.encode_text(dialogue) for dialogue in dialogues]
             max_len = max([len(seq) for seq in dialogues])
             batch.dialogues = torch.LongTensor(
                 [seq + [self.ppo_tuned_model.tokenizer.PAD_IDX] * (max_len - len(seq)) for seq in dialogues])
-        logits, target_seq = self.ppo_tuned_model.forward(batch)
-        ppo_model_log_prob = -torch.sum(F.nll_loss(
-            logits[:, :-1, :].permute(0, 2, 1),
-            target_seq,
-            ignore_index=self.ppo_tuned_model.tokenizer.PAD_IDX,
-            reduction="none"), dim=-1)
-        logits, target_seq = self.initial_model.forward(batch)
-        initial_model_log_prob = -torch.sum(F.nll_loss(
-            logits[:, :-1, :].permute(0, 2, 1),
-            target_seq,
-            ignore_index=self.initial_model.tokenizer.PAD_IDX,
-            reduction="none"), dim=-1)
+            batch.dialogues = batch.dialogues.to(device)
+        
+        logits, target = self.ppo_tuned_model.forward(batch)
+        ppo_model_log_prob = self.log_prob_from_logits(logits[:, :-1, :], target)
+        logits, target = self.initial_model.forward(batch)
+        initial_model_log_prob = self.log_prob_from_logits(logits[:, :-1, :], target)
         ratio = torch.exp(ppo_model_log_prob - initial_model_log_prob)
-        loss = -torch.mean(torch.min(ratio * reward, torch.clip(ratio, 1 - self.ppo_epsilon, 1 + self.ppo_epsilon) * reward))
+        
+        loss = torch.mean(torch.maximum(-ratio * reward, -torch.clip(ratio, 1 - self.ppo_epsilon, 1 + self.ppo_epsilon) * reward))
         self.log(f"{stage}_loss", loss, prog_bar=True, batch_size=self.batch_size, sync_dist=True)
         self.logger.experiment.add_scalars('loss', {stage: loss}, self.global_step)
         return loss

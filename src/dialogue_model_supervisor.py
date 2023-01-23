@@ -238,17 +238,15 @@ class DialogueModelSupervisor(pl.LightningModule):
 
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
-        optimizer = torch.optim.SGD(self.parameters(), lr=self.initial_lr, momentum=0.9)
-        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1, 0.8)
-        # optimizer = torch.optim.AdamW(
-        #     self.parameters(),
-        #     lr=self.initial_lr
-        # )
-        # scheduler = get_linear_schedule_with_warmup(
-        #     optimizer,
-        #     num_warmup_steps=0,
-        #     num_training_steps=self.trainer.max_epochs
-        # )
+        optimizer = torch.optim.AdamW(
+            self.parameters(),
+            lr=self.initial_lr
+        )
+        scheduler = get_linear_schedule_with_warmup(
+            optimizer,
+            num_warmup_steps=0,
+            num_training_steps=self.trainer.max_epochs
+        )
         return ([optimizer], [{"scheduler": scheduler, "interval": "epoch"}])
 
 # -----------------------------------------------------------------------------

@@ -137,4 +137,22 @@ class GenerationConfig:
         self.top_p = top_p
         self.top_k = top_k
 
+
+class PPOConfig:
+    def __init__(
+        self,
+        clip_epsilon: Optional[float] = None,
+        value_clip_range: Optional[float] = None,
+        kl_penalty: Optional[float] = None,
+        gamma: Optional[float] = None,
+        _lambda: Optional[float] = None,
+        vf_coeff: Optional[float] = None,     
+    ) -> None:
+        self.clip_epsilon = clip_epsilon
+        self.value_clip_range = value_clip_range
+        self.kl_penalty = kl_penalty
+        self.gamma = gamma
+        self._lambda = _lambda
+        self.vf_coeff = vf_coeff
+
 # ---------------------------------------------------------------------------------

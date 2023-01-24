@@ -35,6 +35,10 @@ class GODEL(EncoderDecoderModel):
     def word_embeddings(self):
         return self.model.get_input_embeddings()
 
+    @property
+    def hidden_size(self) -> int:
+        return self.model.config.hidden_size
+
     def forward(
         self,
         source_seq: torch.LongTensor,
@@ -61,7 +65,7 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
         self.model = AutoModelForSeq2SeqLM.from_pretrained(f"microsoft/GODEL-v1_1-{version}-seq2seq")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
         self.model.config.dropout_rate = 0.8
-        self.graph_embeddings = nn.Embedding(2, self.model.config.hidden_size)
+        self.graph_embeddings = nn.Embedding(2, self.hidden_size)
         self.emo_linear = nn.Linear(self.model.config.hidden_size, self.tokenizer.num_emo_labels)
         self.attn_loss = nn.MSELoss()
 
@@ -72,6 +76,10 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
     @property
     def word_embeddings(self):
         return self.model.get_input_embeddings()
+    
+    @property
+    def hidden_size(self) -> int:
+        return self.model.config.hidden_size
     
     @property
     def requires_concept_net_data(self) -> bool:
@@ -143,7 +151,11 @@ class DialoGPT(DecoderModel):
     @property
     def word_embeddings(self):
         return self.model.get_input_embeddings()
-
+    
+    @property
+    def hidden_size(self) -> int:
+        return self.model.config.hidden_size
+    
     @staticmethod
     def tokenizer_cls():
         return "DialoGPTTokenizer"

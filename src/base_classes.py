@@ -39,7 +39,7 @@ class TokenizerBase:
         text: Union[str, List[str]],
         instruction: Optional[str] = None
     ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
-        pass
+        raise NotImplementedError
 
     def decode_to_text(self, sequence: List[int]) -> str:
         try:
@@ -58,11 +58,19 @@ class DialogueModelBase(nn.Module):
     
     @staticmethod
     def tokenizer_cls():
-        return None
+        raise NotImplementedError
 
     @property
+    def has_encoder(self) -> bool:
+        raise NotImplementedError
+    
+    @property
+    def hidden_size(self) -> int:
+        raise NotImplementedError
+    
+    @property
     def word_embeddings(self):
-        return None
+        raise NotImplementedError
         
     @property
     def requires_emotion_label(self) -> bool:
@@ -101,7 +109,7 @@ class EncoderDecoderModel(DialogueModelBase):
         target_dialogue_state: torch.Tensor,
         emotion_label: torch.Tensor
     ) -> torch.Tensor:
-        pass
+        raise NotImplementedError
 
 
 class DecoderModel(DialogueModelBase):
@@ -119,6 +127,6 @@ class DecoderModel(DialogueModelBase):
         input_dialogue_state: torch.Tensor,
         emotion_label: torch.Tensor
     ) -> torch.Tensor:
-        pass
+        raise NotImplementedError
 
 #---------------------------------------------------------------------------

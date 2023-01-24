@@ -17,7 +17,7 @@ from reward_model_supervisor import RewardModelSupervisor
 from proximal_policy_optimization import PPOSupervisor
 from transformers import BertModel, BertTokenizer
 from utils.train_utils import load_ckpt_path, load_config
-from data_classes import GenerationConfig
+from data_classes import GenerationConfig, PPOConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -34,7 +34,6 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max_epochs", type=int, default=5)
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--initial_lr", type=float, default=0.0001)
-    parser.add_argument("--ppo_epsilon", type=float, default=0.1)
     parser.add_argument("--few_shot_training", action="store_true")
     parser.add_argument("--beam_width", type=int, default=1)
     parser.add_argument("--sample", action="store_true")
@@ -42,6 +41,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--top_p", type=float, default=1.0)
     parser.add_argument("--top_k", type=int, default=50)
     parser.add_argument("--max_new_tokens", type=int, default=100)
+    parser.add_argument("--clip_epsilon", type=int, default=0.2)
+    parser.add_argument("--value_clip_range", float, default=0.2)
+    parser.add_argument("--kl_penalty", type=float, default=0.2)
+    parser.add_argument("--gamma", type=float, default=1.0)
+    parser.add_argument("--_lambda", type=float, default=0.95)
+    parser.add_argument("--vf_coeff", type=float, default=0.1)
 
     cli_args = parser.parse_args()
 
@@ -115,7 +120,14 @@ def main():
         dialogue_model=dialogue_model,
         reward_model=reward_model,
         batch_size=cli_args.batch_size,
-        ppo_epsilon=cli_args.ppo_epsilon,
+        ppo_config=PPOConfig(
+            clip_epsilon=cli_args.clip_epsilon,
+            value_clip_range=cli_args.value_clip_range,
+            kl_penalty=cli_args.kl_penalty,
+            gamma=cli_args.gamma,
+            _lambda=cli_args._lambda,
+            vf_coeff=cli_args.vf_coeff 
+        ),
         initial_lr=cli_args.initial_lr
     )
 

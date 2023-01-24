@@ -10,7 +10,7 @@ import pytorch_lightning as pl
 from data_loader import DataModule
 from data_classes import GenerationConfig
 from dialogue_model_supervisor import DialogueModelSupervisor
-from utils.train_utils import load_val_ckpt_path, load_config
+from utils.train_utils import load_ckpt_path, load_config
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -33,7 +33,7 @@ def main():
         raise ValueError(f"Specified dataset directory does not exist!")
 
     # Load checkpoint file path from trained model directory
-    ckpt_path = load_val_ckpt_path(cli_args.pretrained_model_dir)
+    ckpt_path = load_ckpt_path(cli_args.pretrained_model_dir)
 
     # Initialise model and tokenizer from config file
     config = load_config(cli_args.pretrained_model_dir)
@@ -76,8 +76,7 @@ def main():
     # Test the model
     trainer.test(
         model_supervisor, 
-        data_module, 
-        ckpt_path=load_val_ckpt_path(cli_args.pretrained_model_dir)    
+        data_module
     )
 
 if __name__ == "__main__":

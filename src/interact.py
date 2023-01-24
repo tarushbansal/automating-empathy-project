@@ -6,7 +6,7 @@ import argparse
 
 # User-defined Modules
 from dialogue_model_supervisor import DialogueModelSupervisor
-from utils.train_utils import load_val_ckpt_path, load_config
+from utils.train_utils import load_ckpt_path, load_config
 from data_loader import collate_decoder_batch, collate_encoder_decoder_batch
 from data_classes import (
     EncoderDecoderModelRawData, 
@@ -44,7 +44,7 @@ def main():
     cli_args, _ = parser.parse_known_args()
 
     # Load checkpoint file path from trained model directory
-    ckpt_path = load_val_ckpt_path(cli_args.pretrained_model_dir)
+    ckpt_path = load_ckpt_path(cli_args.pretrained_model_dir)
 
     # Initialise model and tokenizer from config file
     config = load_config(cli_args.pretrained_model_dir)

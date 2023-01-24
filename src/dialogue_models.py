@@ -43,7 +43,7 @@ class GODEL(EncoderDecoderModel):
         self,
         source_seq: torch.LongTensor,
         target_seq: torch.LongTensor
-    ) -> torch.Tensor:
+    ) -> Tuple[torch.FloatTensor]:
 
         source_seq, source_mask = self.create_padding_mask(source_seq)
         target_seq, target_mask = self.create_padding_mask(target_seq)
@@ -52,9 +52,10 @@ class GODEL(EncoderDecoderModel):
             input_ids=source_seq,
             attention_mask=source_mask,
             decoder_input_ids=target_seq,
-            decoder_attention_mask=target_mask
+            decoder_attention_mask=target_mask,
+            output_hidden_states=True
         )
-        return out.logits
+        return (out.logits, out.decoder_hidden_states[-1])
 
 
 class KnowledgeBridgedGODEL(EncoderDecoderModel):
@@ -95,13 +96,12 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
         concepts, concept_mask = self.create_padding_mask(concepts)
         pad_mask = torch.cat((context_mask, concept_mask), dim=1)
 
-        model_embeddings = self.model.get_input_embeddings()
         context_graph_embeds = self.graph_embeddings(
             torch.zeros(context.size(), dtype=torch.long, device=context.device))
-        context_embeds = model_embeddings(context) + context_graph_embeds
+        context_embeds = self.word_embeddings(context) + context_graph_embeds
         concept_graph_embeds = self.graph_embeddings(
             torch.ones(concepts.size(), dtype=torch.long, device=concepts.device))
-        concept_embeds = model_embeddings(concepts) + concept_graph_embeds
+        concept_embeds = self.word_embeddings(concepts) + concept_graph_embeds
         embeddings = torch.cat((context_embeds, concept_embeds), dim=1)
 
         return embeddings, pad_mask
@@ -111,7 +111,7 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
         source_seq: torch.LongTensor,
         target_seq: torch.LongTensor,
         concept_net_data: ConceptNetBatchData
-    ) -> torch.Tensor:
+    ) -> Tuple[torch.FloatTensor]:
 
         input_embeds, pad_mask = self.knowledge_enriched_context(
             source_seq, concept_net_data.concepts)
@@ -123,7 +123,8 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
             attention_mask=pad_mask,
             decoder_input_ids=target_seq,
             decoder_attention_mask=target_mask,
-            output_attentions=True
+            output_attentions=True,
+            output_hidden_states=True
         )
 
         emo_intensities = torch.cat(
@@ -136,7 +137,7 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
         average_attn_weights = torch.stack(out.cross_attentions).mean((0, 2, 3))
         self.emo_attn_loss = self.attn_loss(emo_intensities, average_attn_weights)
 
-        return out.logits
+        return (out.logits, out.decoder_hidden_states[-1])
 
 
 class DialoGPT(DecoderModel):
@@ -160,12 +161,13 @@ class DialoGPT(DecoderModel):
     def tokenizer_cls():
         return "DialoGPTTokenizer"
 
-    def forward(self, input_seq: torch.LongTensor, **_) -> torch.Tensor:
+    def forward(self, input_seq: torch.LongTensor) -> Tuple[torch.FloatTensor]:
         input_seq, input_mask = self.create_padding_mask(input_seq)
         out = self.model(
             input_ids=input_seq,
             attention_mask=input_mask,
+            output_hidden_states=True
         )
-        return out.logits
+        return (out.logits, out.decoder_hidden_states[-1])
 
 # -----------------------------------------------------------------------------

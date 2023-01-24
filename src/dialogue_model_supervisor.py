@@ -57,21 +57,21 @@ class DialogueModelSupervisor(pl.LightningModule):
         if self.model.has_encoder:
             input_kwargs["source_seq"] = batch.contexts
             input_kwargs["target_seq"] = batch.targets
-            logits = self.model(**input_kwargs)
+            logits, last_hidden_states = self.model(**input_kwargs)
             target_seq = batch.targets[:, 1:]
         else:
             input_kwargs["input_seq"] = batch.dialogues
-            logits = self.model(**input_kwargs)
+            logits, last_hidden_states = self.model(**input_kwargs)
             target_seq = batch.dialogues[:, 1:]
         
-        return logits, target_seq
+        return logits, last_hidden_states, target_seq
 
     def forward_and_log_metrics(
         self, 
         batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
         stage: str
     ) -> float:
-        logits, target_seq = self.forward(batch)
+        logits, _, target_seq = self.forward(batch)
         loss = F.cross_entropy(
             logits[:, :-1, :].permute(0, 2, 1),
             target_seq,
@@ -220,6 +220,7 @@ class DialogueModelSupervisor(pl.LightningModule):
             with open(f"{self.test_output_dir}/test_metrics.json", "w") as f:
                 json.dump(test_metrics, f)
 
+    @torch.no_grad
     def generate(
         self, 
         batch: Union[EncoderDecoderModelBatch, DecoderModelBatch]

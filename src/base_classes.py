@@ -103,12 +103,9 @@ class EncoderDecoderModel(DialogueModelBase):
 
     def forward(
         self,
-        source_seq: torch.Tensor,
-        target_seq: torch.Tensor,
-        source_dialogue_state: torch.Tensor,
-        target_dialogue_state: torch.Tensor,
-        emotion_label: torch.Tensor
-    ) -> torch.Tensor:
+        source_seq: torch.LongTensor,
+        target_seq: torch.LongTensor,
+    ) -> Tuple[torch.FloatTensor]:
         raise NotImplementedError
 
 
@@ -122,11 +119,9 @@ class DecoderModel(DialogueModelBase):
         return False
 
     def forward(
-        self,
-        input_seq: torch.Tensor,
-        input_dialogue_state: torch.Tensor,
-        emotion_label: torch.Tensor
-    ) -> torch.Tensor:
+        self, 
+        input_seq: torch.LongTensor
+    ) -> Tuple[torch.FloatTensor]:
         raise NotImplementedError
 
 #---------------------------------------------------------------------------

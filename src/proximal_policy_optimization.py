@@ -41,15 +41,6 @@ class PPOSupervisor(pl.LightningModule):
         self.batch_size = batch_size
         self.value_head = nn.Linear(dialogue_model.model.hidden_size, 1)
 
-        for param in self.reward_model.model.parameters():
-            param.requires_grad = False
-        
-        for param in self.reward_model.linear.parameters():
-            param.requires_grad = False
-
-        for param in self.ref_model.model.parameters():
-            param.requires_grad = False
-
     def log_probs(
         self, 
         logits: torch.FloatTensor, 
@@ -61,6 +52,7 @@ class PPOSupervisor(pl.LightningModule):
             labels.unsqueeze(-1)).squeeze(-1)
         return logp
 
+    @torch.no_grad
     def compute_rewards(
         self, 
         scores: torch.FloatTensor, 
@@ -72,6 +64,7 @@ class PPOSupervisor(pl.LightningModule):
         rewards[:, -1] += scores
         return rewards
 
+    @torch.no_grad
     def estimate_advantages(
         self,
         rewards: torch.FloatTensor,
@@ -98,19 +91,19 @@ class PPOSupervisor(pl.LightningModule):
 
         device = batch.contexts.device if self.tuned_model.model.has_encoder else batch.dialogues.device
 
-        # ROLLOUT PHASE
-        contexts = batch.raw_contexts if self.tuned_model.model.has_encoder else batch.raw_dialogues
-        enc_predictions = self.tuned_model.generate(batch)
-        predictions = [self.tuned_model.tokenizer.decode_to_text(enc) for enc in enc_predictions]
-        
-        # EVALUATION PHASE
-        dialogues = [context + [prediction] for context, prediction in zip(contexts, predictions)]
-        reward_model_inputs = self.reward_model.tokenizer(
-            ["[CLS] " + " [SEP] ".join(dialogue) for dialogue in dialogues], 
-            padding=True, 
-            return_tensors="pt"
-        )
         with torch.no_grad():
+            # ROLLOUT PHASE
+            contexts = batch.raw_contexts if self.tuned_model.model.has_encoder else batch.raw_dialogues
+            enc_predictions = self.tuned_model.generate(batch)
+            predictions = [self.tuned_model.tokenizer.decode_to_text(enc) for enc in enc_predictions]
+            
+            # EVALUATION PHASE
+            dialogues = [context + [prediction] for context, prediction in zip(contexts, predictions)]
+            reward_model_inputs = self.reward_model.tokenizer(
+                ["[CLS] " + " [SEP] ".join(dialogue) for dialogue in dialogues], 
+                padding=True, 
+                return_tensors="pt"
+            )
             scores = self.reward_model.forward(
                 RewardModelBatch(
                     dialogues=reward_model_inputs.input_ids.to(device),
@@ -133,12 +126,13 @@ class PPOSupervisor(pl.LightningModule):
             batch.dialogues = batch.dialogues.to(device)
         
         # Compute new and reference log probability and advantage for each generated token
-        logits, target, last_hidden_states = self.tuned_model.forward(batch)
+        logits, last_hidden_states, target = self.tuned_model.forward(batch)
         new_log_probs = self.log_probs(logits[:, :-1, :], target)
         values = self.value_head(last_hidden_states[:, :-1, :])
         pad_mask = (target != self.tuned_model.tokenizer.PAD_IDX)
-        logits, target, _ = self.ref_model.forward(batch)
-        ref_log_probs = self.log_probs(logits[:, :-1, :], target)
+        with torch.no_grad():
+            logits, _, _ = self.ref_model.forward(batch)
+            ref_log_probs = self.log_probs(logits[:, :-1, :], target)
 
         ratios = torch.exp(new_log_probs - ref_log_probs)
         clipped_ratios = torch.clip(ratios, 1 - self.ppo_config.clip_epsilon, 1 + self.ppo_config.clip_epsilon)

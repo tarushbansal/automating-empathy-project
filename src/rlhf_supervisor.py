@@ -23,7 +23,7 @@ from data_classes import (
 # ------------------------- IMPLEMENTATION -----------------------------------
 
 
-class PPOSupervisor(pl.LightningModule):
+class RLHFSupervisor(pl.LightningModule):
     def __init__(
         self,
         dialogue_model: DialogueModelSupervisor,
@@ -40,19 +40,25 @@ class PPOSupervisor(pl.LightningModule):
         self.initial_lr = initial_lr
         self.batch_size = batch_size
         self.value_head = nn.Linear(dialogue_model.model.hidden_size, 1)
+        
+        for param in self.ref_model.parameters():
+            param.requires_grad = False
+        for param in self.reward_model.parameters():
+            param.requires_grad = False
 
     def log_probs(
         self, 
         logits: torch.FloatTensor, 
-        labels: torch.LongTensor
+        labels: torch.LongTensor,
+        pad_mask: torch.BoolTensor
     ) -> torch.FloatTensor:
         logp = torch.gather(
             F.log_softmax(logits, dim=-1), 
             -1, 
-            labels.unsqueeze(-1)).squeeze(-1)
+            labels.masked_fill(pad_mask, 0).unsqueeze(-1)).squeeze(-1)
         return logp
 
-    @torch.no_grad
+    @torch.no_grad()
     def compute_rewards(
         self, 
         scores: torch.FloatTensor, 
@@ -64,7 +70,7 @@ class PPOSupervisor(pl.LightningModule):
         rewards[:, -1] += scores
         return rewards
 
-    @torch.no_grad
+    @torch.no_grad()
     def estimate_advantages(
         self,
         rewards: torch.FloatTensor,
@@ -75,10 +81,12 @@ class PPOSupervisor(pl.LightningModule):
         advantages = torch.zeros_like(values)
         for i in range(rewards.size(dim=0)):
             len = gen_len[i]
+            nextadvantage = 0
             for j in range(len - 1, -1, -1):
                 nextvalue = values[i, j + 1] if j < len - 1 else 0.0
                 delta = rewards[i, j] + self.ppo_config.gamma * nextvalue - values[i, j]
-                advantages[i, j] = delta + self.ppo_config.gamma * self.ppo_config._lambda * advantages[i, j + 1]
+                advantages[i, j] = delta + self.ppo_config.gamma * self.ppo_config._lambda * nextadvantage
+                nextadvantage = advantages[i, j]
             mean, var = torch.mean(advantages[i, :len]), torch.var(advantages[i, :len])
             advantages[i, :len] = (advantages[i, :len] - mean) * torch.rsqrt(var + 1e-8)
         return advantages
@@ -127,12 +135,12 @@ class PPOSupervisor(pl.LightningModule):
         
         # Compute new and reference log probability and advantage for each generated token
         logits, last_hidden_states, target = self.tuned_model.forward(batch)
-        new_log_probs = self.log_probs(logits[:, :-1, :], target)
-        values = self.value_head(last_hidden_states[:, :-1, :])
         pad_mask = (target != self.tuned_model.tokenizer.PAD_IDX)
+        new_log_probs = self.log_probs(logits[:, :-1, :], target, pad_mask)
+        values = self.value_head(last_hidden_states[:, :-1, :])
         with torch.no_grad():
             logits, _, _ = self.ref_model.forward(batch)
-            ref_log_probs = self.log_probs(logits[:, :-1, :], target)
+            ref_log_probs = self.log_probs(logits[:, :-1, :], target, pad_mask)
 
         ratios = torch.exp(new_log_probs - ref_log_probs)
         clipped_ratios = torch.clip(ratios, 1 - self.ppo_config.clip_epsilon, 1 + self.ppo_config.clip_epsilon)

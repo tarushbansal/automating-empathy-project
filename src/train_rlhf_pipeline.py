@@ -14,7 +14,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from data_loader import DataModule
 from dialogue_model_supervisor import DialogueModelSupervisor
 from reward_model_supervisor import RewardModelSupervisor
-from proximal_policy_optimization import PPOSupervisor
+from rlhf_supervisor import RLHFSupervisor
 from transformers import BertModel, BertTokenizer
 from utils.train_utils import load_ckpt_path, load_config
 from data_classes import GenerationConfig, PPOConfig
@@ -42,7 +42,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--top_k", type=int, default=50)
     parser.add_argument("--max_new_tokens", type=int, default=100)
     parser.add_argument("--clip_epsilon", type=int, default=0.2)
-    parser.add_argument("--value_clip_range", float, default=0.2)
+    parser.add_argument("--value_clip_range", type=float, default=0.2)
     parser.add_argument("--kl_penalty", type=float, default=0.2)
     parser.add_argument("--gamma", type=float, default=1.0)
     parser.add_argument("--_lambda", type=float, default=0.95)
@@ -116,7 +116,7 @@ def main():
         initial_lr=cli_args.initial_lr
     )
     reward_model.tokenizer = BertTokenizer.from_pretrained('bert-large-uncased')
-    ppo_supervisor = PPOSupervisor(
+    rlhf_supervisor = RLHFSupervisor(
         dialogue_model=dialogue_model,
         reward_model=reward_model,
         batch_size=cli_args.batch_size,
@@ -159,7 +159,7 @@ def main():
 
     # Train / Validate the model
     trainer.fit(
-        ppo_supervisor,
+        rlhf_supervisor,
         data_module
     )
 

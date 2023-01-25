@@ -220,7 +220,7 @@ class DialogueModelSupervisor(pl.LightningModule):
             with open(f"{self.test_output_dir}/test_metrics.json", "w") as f:
                 json.dump(test_metrics, f)
 
-    @torch.no_grad
+    @torch.no_grad()
     def generate(
         self, 
         batch: Union[EncoderDecoderModelBatch, DecoderModelBatch]

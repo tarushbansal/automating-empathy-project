@@ -55,7 +55,7 @@ class RLHFSupervisor(pl.LightningModule):
         logp = torch.gather(
             F.log_softmax(logits, dim=-1), 
             -1, 
-            labels.masked_fill(pad_mask, 0).unsqueeze(-1)).squeeze(-1)
+            labels.masked_fill(pad_mask == 0, 0).unsqueeze(-1)).squeeze(-1)
         return logp
 
     @torch.no_grad()
@@ -109,7 +109,7 @@ class RLHFSupervisor(pl.LightningModule):
             dialogues = [context + [prediction] for context, prediction in zip(contexts, predictions)]
             reward_model_inputs = self.reward_model.tokenizer(
                 ["[CLS] " + " [SEP] ".join(dialogue) for dialogue in dialogues], 
-                padding=True, 
+                padding=True,
                 return_tensors="pt"
             )
             scores = self.reward_model.forward(

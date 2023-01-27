@@ -68,15 +68,15 @@ def get_model_checkpoints(ckpt_dir: str) -> Optional[List[ModelCheckpoint]]:
 
     return [
         ModelCheckpoint(
-            monitor="train_loss",
+            monitor="train_loss_epoch",
             dirpath=ckpt_dir,
-            filename="{train_loss:.2f}-{epoch}",
+            filename="{train_loss_epoch:.2f}-{epoch}",
             every_n_train_steps=1
         ),
         ModelCheckpoint(
-            monitor="avg_val_loss",
+            monitor="val_loss_epoch",
             dirpath=ckpt_dir,
-            filename="{avg_val_loss:.2f}-{epoch}"
+            filename="{val_loss_epoch:.2f}-{epoch}"
         ),
     ]
 

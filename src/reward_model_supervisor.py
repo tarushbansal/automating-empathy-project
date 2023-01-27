@@ -8,9 +8,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
 
+from transformers.optimization import get_linear_schedule_with_warmup
+
 
 # User-defined Modules
-from transformers import BertModel
+from transformers import GPT2Model
 from data_classes import RewardModelBatch
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -19,7 +21,7 @@ from data_classes import RewardModelBatch
 class RewardModelSupervisor(pl.LightningModule):
     def __init__(
         self,
-        model: BertModel,
+        model: GPT2Model,
         batch_size: int,
         initial_lr: Optional[float] = None
     ) -> None:
@@ -30,11 +32,13 @@ class RewardModelSupervisor(pl.LightningModule):
         self.linear = nn.Linear(model.config.hidden_size, 1)
 
     def forward(self, batch: RewardModelBatch) -> torch.FloatTensor:
-        cls_hidden_state = self.model(
+        last_hidden_state = self.model(
             input_ids=batch.dialogues,
-            attention_mask=batch.mask,
-            output_hidden_states=True).hidden_states[-1][:, 0, :]
-        rewards = self.linear(cls_hidden_state).squeeze(dim=-1)
+            attention_mask=batch.mask).last_hidden_state
+        last_idx = torch.sum(batch.mask, dim=-1, keepdim=True) - 1
+        last_idx = last_idx.unsqueeze(-1).expand(-1, -1, last_hidden_state.size(dim=-1))
+        dialogue_hidden_state = torch.gather(last_hidden_state, 1, last_idx).squeeze(1)
+        rewards = self.linear(dialogue_hidden_state).squeeze(-1)
         return rewards
 
     def forward_and_log_metrics(
@@ -78,10 +82,10 @@ class RewardModelSupervisor(pl.LightningModule):
             self.parameters(),
             lr=self.initial_lr
         )
-        scheduler = torch.optim.lr_scheduler.StepLR(
+        scheduler = get_linear_schedule_with_warmup(
             optimizer,
-            step_size=1,
-            gamma=0.8
+            num_warmup_steps=0,
+            num_training_steps=self.trainer.max_epochs
         )
         return ([optimizer], [{"scheduler": scheduler, "interval": "epoch"}])
 

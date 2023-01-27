@@ -10,6 +10,8 @@ import torch.nn as nn
 import torch.nn.functional as F
 import pytorch_lightning as pl
 
+from transformers.optimization import get_linear_schedule_with_warmup
+
 # User-defined Modules
 from dialogue_model_supervisor import DialogueModelSupervisor
 from reward_model_supervisor import RewardModelSupervisor
@@ -63,11 +65,13 @@ class RLHFSupervisor(pl.LightningModule):
         self, 
         scores: torch.FloatTensor, 
         new_log_probs: torch.FloatTensor, 
-        ref_log_probs: torch.FloatTensor
+        ref_log_probs: torch.FloatTensor,
+        gen_len: torch.LongTensor
     ) -> torch.FloatTensor:
         kl_div = new_log_probs - ref_log_probs
         rewards = -self.ppo_config.kl_penalty * kl_div
-        rewards[:, -1] += scores
+        for i in range(gen_len.size(dim=0)):
+            rewards[i, gen_len[i] - 1] += scores[i]
         return rewards
 
     @torch.no_grad()
@@ -75,9 +79,8 @@ class RLHFSupervisor(pl.LightningModule):
         self,
         rewards: torch.FloatTensor,
         values: torch.FloatTensor,
-        pad_mask: torch.BoolTensor
+        gen_len: torch.LongTensor
     ) -> torch.FloatTensor:
-        gen_len = torch.sum(pad_mask, dim=-1)
         advantages = torch.zeros_like(values)
         for i in range(rewards.size(dim=0)):
             len = gen_len[i]
@@ -106,9 +109,13 @@ class RLHFSupervisor(pl.LightningModule):
             predictions = [self.tuned_model.tokenizer.decode_to_text(enc) for enc in enc_predictions]
             
             # EVALUATION PHASE
-            dialogues = [context + [prediction] for context, prediction in zip(contexts, predictions)]
+            dialogues = [
+                f" {self.tokenizer.eos_token} ".join(context + [prediction])
+                  + f" {self.tokenizer.eos_token}"
+                for context, prediction in zip(contexts, predictions)
+            ]
             reward_model_inputs = self.reward_model.tokenizer(
-                ["[CLS] " + " [SEP] ".join(dialogue) for dialogue in dialogues], 
+                dialogues, 
                 padding=True,
                 return_tensors="pt"
             )
@@ -124,28 +131,33 @@ class RLHFSupervisor(pl.LightningModule):
         if self.tuned_model.model.has_encoder:
             max_len = max([len(seq) for seq in enc_predictions])
             batch.targets = torch.LongTensor(
-                [seq + [self.tuned_model.tokenizer.PAD_IDX] * (max_len - len(seq)) for seq in enc_predictions])
+                [seq + [self.tuned_model.tokenizer.PAD_IDX] * (max_len - len(seq))
+                 for seq in enc_predictions])
             batch.targets = batch.targets.to(device)
         else:
-            dialogues = [self.tuned_model.tokenizer.encode_text(dialogue) for dialogue in dialogues]
+            dialogues = [self.tuned_model.tokenizer.encode_text(dialogue) 
+                         for dialogue in dialogues]
             max_len = max([len(seq) for seq in dialogues])
             batch.dialogues = torch.LongTensor(
-                [seq + [self.tuned_model.tokenizer.PAD_IDX] * (max_len - len(seq)) for seq in dialogues])
+                [seq + [self.tuned_model.tokenizer.PAD_IDX] * (max_len - len(seq)) 
+                 for seq in dialogues])
             batch.dialogues = batch.dialogues.to(device)
         
         # Compute new and reference log probability and advantage for each generated token
         logits, last_hidden_states, target = self.tuned_model.forward(batch)
         pad_mask = (target != self.tuned_model.tokenizer.PAD_IDX)
+        gen_len = torch.sum(pad_mask, dim=-1)
         new_log_probs = self.log_probs(logits[:, :-1, :], target, pad_mask)
-        values = self.value_head(last_hidden_states[:, :-1, :])
+        values = self.value_head(last_hidden_states[:, :-1, :]).squeeze(-1)
         with torch.no_grad():
             logits, _, _ = self.ref_model.forward(batch)
             ref_log_probs = self.log_probs(logits[:, :-1, :], target, pad_mask)
 
         ratios = torch.exp(new_log_probs - ref_log_probs)
-        clipped_ratios = torch.clip(ratios, 1 - self.ppo_config.clip_epsilon, 1 + self.ppo_config.clip_epsilon)
-        rewards = self.compute_rewards(scores, new_log_probs, ref_log_probs)
-        advantages = self.estimate_advantages(rewards, values, pad_mask)
+        clipped_ratios = torch.clip(
+            ratios, 1 - self.ppo_config.clip_epsilon, 1 + self.ppo_config.clip_epsilon)
+        rewards = self.compute_rewards(scores, new_log_probs, ref_log_probs, gen_len)
+        advantages = self.estimate_advantages(rewards, values, gen_len)
         returns = advantages + values
         
         # Apply PPO Algorithm (With policy and value function losses)
@@ -157,12 +169,22 @@ class RLHFSupervisor(pl.LightningModule):
         )
         vf_loss_clipped = (clipped_values - returns) ** 2
         vf_loss = torch.sum(
-            torch.max(vf_loss, vf_loss_clipped) * pad_mask) / torch.sum(pad_mask)
+            torch.max(vf_loss, vf_loss_clipped) * pad_mask
+            ) / torch.sum(pad_mask)
         ppo_loss = torch.sum(
-            torch.max(-ratios * advantages, -clipped_ratios * advantages) * pad_mask) / torch.sum(pad_mask)
+            torch.max(-ratios * advantages, -clipped_ratios * advantages) * pad_mask
+            ) / torch.sum(pad_mask)
         
         loss = ppo_loss + self.ppo_config.vf_coeff * vf_loss
-        self.log(f"{stage}_loss", loss, prog_bar=True, batch_size=self.batch_size, sync_dist=True)
+        self.log(
+            f"{stage}_loss", 
+            loss, 
+            prog_bar=True, 
+            on_step=True, 
+            on_epoch=True, 
+            batch_size=self.batch_size, 
+            sync_dist=True
+        )
         self.logger.experiment.add_scalars('loss', {stage: loss}, self.global_step)
         
         return loss
@@ -183,13 +205,6 @@ class RLHFSupervisor(pl.LightningModule):
         val_loss = self.forward_and_log_metrics(batch, "val")
         return val_loss
 
-    def validation_epoch_end(self, val_losses: List[float]) -> float:
-        avg_val_loss = sum(val_losses) / len(val_losses)
-        self.log("avg_val_loss", avg_val_loss, prog_bar=True,
-                 batch_size=self.batch_size, sync_dist=True)
-        self.logger.experiment.add_scalars('loss', {'avg_val': avg_val_loss}, self.global_step)
-        return avg_val_loss
-
     def on_test_start(self) -> None:
         self.tuned_model.on_test_start()
 
@@ -204,13 +219,22 @@ class RLHFSupervisor(pl.LightningModule):
         self.tuned_model.test_epoch_end()
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
-        optimizer = torch.optim.SGD(self.parameters(), lr=self.initial_lr)
-        scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 1, 0.8)
+        optimizer = torch.optim.AdamW(
+            self.parameters(),
+            lr=self.initial_lr
+        )
+        scheduler = get_linear_schedule_with_warmup(
+            optimizer,
+            num_warmup_steps=0,
+            num_training_steps=self.trainer.max_epochs
+        )
         return ([optimizer], [{"scheduler": scheduler, "interval": "epoch"}])
 
     def on_save_checkpoint(self, ckpt: OrderedDict):
         for key in list(ckpt['state_dict'].keys()):
-            if key.startswith("reward_model") or key.startswith("ref_model") or key.startswith("value_head"):
+            if (key.startswith("reward_model") 
+                or key.startswith("ref_model") 
+                or key.startswith("value_head")):
                 del ckpt['state_dict'][key]
             elif key.startswith("tuned_model"):
                 new_key = key.replace("tuned_model.", "", 1)

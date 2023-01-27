@@ -48,7 +48,7 @@ def main():
 
     # Initialise model and tokenizer from config file
     config = load_config(cli_args.pretrained_model_dir)
-    tokenizer_cls = getattr(__import__("data_tokenizers"), config["tokenizer"]["cls"])
+    tokenizer_cls = getattr(__import__("custom_tokenizers"), config["tokenizer"]["cls"])
     tokenizer = tokenizer_cls(**config["tokenizer"]["kwargs"])
 
     model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
@@ -95,6 +95,7 @@ def main():
             batch = collate_encoder_decoder_batch([
                 EncoderDecoderModelRawData(
                     context=enc_context,
+                    raw_context=context,
                     target=[],
                     emotion=None,
                     concept_net_data=concept_net_data
@@ -104,6 +105,7 @@ def main():
             batch = collate_decoder_batch([
                 DecoderModelRawData(
                     dialogue=context,
+                    raw_dialogue=context,
                     gen_target=None
                 )], tokenizer
             )

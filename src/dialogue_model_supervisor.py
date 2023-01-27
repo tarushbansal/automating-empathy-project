@@ -83,15 +83,38 @@ class DialogueModelSupervisor(pl.LightningModule):
                 self.model.emo_logits,
                 batch.emotions
             )
-            self.log(f"{stage}_emo_loss", emo_loss, prog_bar=True, batch_size=self.batch_size)
+            self.log(
+                f"{stage}_emo_loss", 
+                loss, 
+                prog_bar=True, 
+                on_step=True, 
+                on_epoch=True, 
+                batch_size=self.batch_size, 
+                sync_dist=True
+            )
             self.logger.experiment.add_scalars('emo_loss', {stage: emo_loss}, self.global_step)
         if hasattr(self.model, "emo_attn_loss"):
             emo_attn_loss = self.model.emo_attn_loss
-            self.log(f"{stage}_emo_attn_loss", emo_attn_loss,
-                     prog_bar=True, batch_size=self.batch_size)
+            self.log(
+                f"{stage}_emo_attn_loss", 
+                loss, 
+                prog_bar=True, 
+                on_step=True, 
+                on_epoch=True, 
+                batch_size=self.batch_size, 
+                sync_dist=True
+            )
             self.logger.experiment.add_scalars(
                 'emo_attn_loss', {stage: emo_attn_loss}, self.global_step)
-        self.log(f"{stage}_loss", loss, prog_bar=True, batch_size=self.batch_size, sync_dist=True)
+        self.log(
+            f"{stage}_loss", 
+            loss, 
+            prog_bar=True, 
+            on_step=True, 
+            on_epoch=True, 
+            batch_size=self.batch_size, 
+            sync_dist=True
+        )
         self.logger.experiment.add_scalars('loss', {stage: loss}, self.global_step)
         
         return loss + 1 * emo_loss + 0.1 * emo_attn_loss
@@ -111,13 +134,6 @@ class DialogueModelSupervisor(pl.LightningModule):
     ) -> float:
         val_loss = self.forward_and_log_metrics(batch, "val")
         return val_loss
-
-    def validation_epoch_end(self, val_losses: List[float]) -> float:
-        avg_val_loss = sum(val_losses) / len(val_losses)
-        self.log("avg_val_loss", avg_val_loss, prog_bar=True,
-                 batch_size=self.batch_size, sync_dist=True)
-        self.logger.experiment.add_scalars('loss', {'avg_val': avg_val_loss}, self.global_step)
-        return avg_val_loss
 
     def on_test_start(self) -> None:
         self.sum_cross_entropy = 0

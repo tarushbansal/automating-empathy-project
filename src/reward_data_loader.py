@@ -9,7 +9,7 @@ import torch.utils.data as data
 import pytorch_lightning as pl
 
 # User-defined Modules
-from transformers import BertTokenizer
+from transformers import GPT2Tokenizer
 from data_classes import RewardModelRawData, RewardModelBatch
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -20,7 +20,7 @@ class RewardDataset(data.Dataset):
         self,
         dialogues: List[List[str]],
         rewards: List[float],
-        tokenizer: BertTokenizer
+        tokenizer: GPT2Tokenizer
     ) -> None:
         
         self.dialogues = dialogues
@@ -31,8 +31,7 @@ class RewardDataset(data.Dataset):
         return len(self.dialogues)
 
     def __getitem__(self, idx: int) -> RewardModelRawData:
-
-        dialogue = "[CLS] " + " [SEP] ".join(self.dialogues[idx])
+        dialogue = f" {self.tokenizer.eos_token} ".join(self.dialogues[idx]) + f" {self.tokenizer.eos_token}"
         reward = self.rewards[idx]
 
         return RewardModelRawData(
@@ -46,7 +45,7 @@ class RewardDataModule(pl.LightningDataModule):
         self,
         dataset_dir: str,
         batch_size: int,
-        tokenizer: BertTokenizer,
+        tokenizer: GPT2Tokenizer,
         num_workers: int
     ) -> None:
 
@@ -107,7 +106,7 @@ class RewardDataModule(pl.LightningDataModule):
         )
 
 
-def collate_fn(batch: List[RewardModelRawData], tokenizer: BertTokenizer):
+def collate_fn(batch: List[RewardModelRawData], tokenizer: GPT2Tokenizer):
     out = tokenizer([item.dialogue for item in batch], return_tensors="pt", padding=True)
     dialogues = out.input_ids
     mask = out.attention_mask

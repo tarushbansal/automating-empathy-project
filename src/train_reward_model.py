@@ -13,7 +13,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 # User-defined Modules
 from reward_data_loader import RewardDataModule
 from reward_model_supervisor import RewardModelSupervisor
-from transformers import BertModel, BertTokenizer
+from transformers import GPT2Tokenizer, GPT2Model
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -26,7 +26,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output_dir", type=str, default=None, required=True)
     parser.add_argument("--num_nodes", type=int, default=1)
     parser.add_argument("--max_epochs", type=int, default=5)
-    parser.add_argument("--batch_size", type=int, default=8)
+    parser.add_argument("--batch_size", type=int, default=1)
     parser.add_argument("--initial_lr", type=float, default=0.0001)
 
     cli_args = parser.parse_args()
@@ -48,7 +48,7 @@ def get_model_checkpoints(ckpt_dir: str) -> Optional[List[ModelCheckpoint]]:
         ModelCheckpoint(
             monitor="val_loss_epoch",
             dirpath=ckpt_dir,
-            filename="{avg_val_loss:.2f}-{epoch}",
+            filename="{val_loss_epoch:.2f}-{epoch}",
             every_n_epochs=1
         )
     ]
@@ -68,8 +68,9 @@ def main():
     )
 
     # Initialise model and tokenizer from config
-    tokenizer = BertTokenizer.from_pretrained('bert-large-uncased')
-    model = BertModel.from_pretrained("bert-large-uncased")
+    tokenizer = GPT2Tokenizer.from_pretrained('gpt2-large')
+    tokenizer.add_special_tokens({"pad_token": "<PAD>"})
+    model = GPT2Model.from_pretrained("gpt2-large")
     model_supervisor = RewardModelSupervisor(
         model=model,
         batch_size=cli_args.batch_size,
@@ -92,7 +93,7 @@ def main():
         accelerator="auto",
         devices=-1 if torch.cuda.is_available() else 1,
         num_nodes=cli_args.num_nodes,
-        strategy="ddp",
+        strategy="ddp_find_unused_parameters_false",
         max_epochs=cli_args.max_epochs,
         logger=logger,
         callbacks=callbacks,

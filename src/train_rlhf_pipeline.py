@@ -16,7 +16,7 @@ from dialogue_model_supervisor import DialogueModelSupervisor
 from reward_model_supervisor import RewardModelSupervisor
 from rlhf_supervisor import RLHFSupervisor
 from transformers import BertModel, BertTokenizer
-from utils.train_utils import load_ckpt_path, load_config
+from utils.train_utils import load_ckpt_path, load_config, SaveConfigCallback
 from data_classes import GenerationConfig, PPOConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -59,15 +59,15 @@ def get_model_checkpoints(ckpt_dir: str) -> Optional[List[ModelCheckpoint]]:
 
     return [
         ModelCheckpoint(
-            monitor="train_loss",
+            monitor="train_loss_epoch",
             dirpath=ckpt_dir,
-            filename="{train_loss:.2f}-{epoch}",
+            filename="{train_loss_epoch:.2f}-{epoch}",
             every_n_train_steps=1
         ),
         ModelCheckpoint(
-            monitor="avg_val_loss",
+            monitor="val_loss_epoch",
             dirpath=ckpt_dir,
-            filename="{avg_val_loss:.2f}-{epoch}"
+            filename="{val_loss_epoch:.2f}-{epoch}"
         ),
     ]
 
@@ -145,6 +145,27 @@ def main():
     callbacks = []
     if checkpoint_callback is not None:
         callbacks.extend(checkpoint_callback)
+    config = {
+        "model": {
+            "cls": model_cls.__name__,
+            "kwargs": model_kwargs
+        },
+        "tokenizer": {
+            "cls": tokenizer_cls.__name__,
+            "kwargs": tokenizer_kwargs,
+        }
+    }
+    callbacks.extend([
+        SaveConfigCallback(config=config),
+        # EarlyStopping(
+        #     monitor="avg_val_loss",
+        #     min_delta=0.01,
+        #     mode="min",
+        #     patience=1
+        # )
+    ]
+    )
+
 
     # Set up trainer
     trainer = pl.Trainer(

@@ -55,10 +55,10 @@ def load_ckpt_path(trained_model_dir: Optional[str]) -> Optional[str]:
             if os.path.isdir(load_ckpt_dir):
                 files = os.listdir(load_ckpt_dir)
                 for fname in sorted(files):
-                    if fname.startswith("avg_val_loss") and fname.endswith(".ckpt"):
+                    if fname.startswith("val_loss_epoch") and fname.endswith(".ckpt"):
                         ckpt_path = os.path.join(load_ckpt_dir, fname)
                         break
-                    elif fname.startswith("train_loss") and fname.endswith(".ckpt"):
+                    elif fname.startswith("train_loss_epoch") and fname.endswith(".ckpt"):
                         ckpt_path = os.path.join(load_ckpt_dir, fname)
                         break
             if ckpt_path is None:

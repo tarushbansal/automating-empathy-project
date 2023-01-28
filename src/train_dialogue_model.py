@@ -71,12 +71,13 @@ def get_model_checkpoints(ckpt_dir: str) -> Optional[List[ModelCheckpoint]]:
             monitor="train_loss_epoch",
             dirpath=ckpt_dir,
             filename="{train_loss_epoch:.2f}-{epoch}",
-            every_n_train_steps=1
+            every_n_epochs=1
         ),
         ModelCheckpoint(
             monitor="val_loss_epoch",
             dirpath=ckpt_dir,
-            filename="{val_loss_epoch:.2f}-{epoch}"
+            filename="{val_loss_epoch:.2f}-{epoch}",
+            every_n_epochs=1
         ),
     ]
 
@@ -167,16 +168,7 @@ def main():
             "kwargs": tokenizer_kwargs,
         }
     }
-    callbacks.extend([
-        SaveConfigCallback(config=config),
-        # EarlyStopping(
-        #     monitor="avg_val_loss",
-        #     min_delta=0.01,
-        #     mode="min",
-        #     patience=1
-        # )
-    ]
-    )
+    callbacks.extend([SaveConfigCallback(config=config)])
 
     # Set up trainer
     trainer = pl.Trainer(

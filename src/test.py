@@ -37,7 +37,7 @@ def main():
 
     # Initialise model and tokenizer from config file
     config = load_config(cli_args.pretrained_model_dir)
-    tokenizer_cls = getattr(__import__("data_tokenizers"), config["tokenizer"]["cls"])
+    tokenizer_cls = getattr(__import__("custom_tokenizers"), config["tokenizer"]["cls"])
     tokenizer = tokenizer_cls(**config["tokenizer"]["kwargs"])
 
     model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])

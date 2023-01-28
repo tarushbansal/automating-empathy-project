@@ -110,8 +110,8 @@ class RLHFSupervisor(pl.LightningModule):
             
             # EVALUATION PHASE
             dialogues = [
-                f" {self.tokenizer.eos_token} ".join(context + [prediction])
-                  + f" {self.tokenizer.eos_token}"
+                f" {self.reward_model.tokenizer.eos_token} ".join(context + [prediction])
+                  + f" {self.reward_model.tokenizer.eos_token}"
                 for context, prediction in zip(contexts, predictions)
             ]
             reward_model_inputs = self.reward_model.tokenizer(
@@ -134,6 +134,7 @@ class RLHFSupervisor(pl.LightningModule):
                 [seq + [self.tuned_model.tokenizer.PAD_IDX] * (max_len - len(seq))
                  for seq in enc_predictions])
             batch.targets = batch.targets.to(device)
+            labels = batch.targets[:, 1:]
         else:
             dialogues = [self.tuned_model.tokenizer.encode_text(dialogue) 
                          for dialogue in dialogues]
@@ -142,16 +143,22 @@ class RLHFSupervisor(pl.LightningModule):
                 [seq + [self.tuned_model.tokenizer.PAD_IDX] * (max_len - len(seq)) 
                  for seq in dialogues])
             batch.dialogues = batch.dialogues.to(device)
+            labels = batch.dialogues[:, 1:]
         
         # Compute new and reference log probability and advantage for each generated token
-        logits, last_hidden_states, target = self.tuned_model.forward(batch)
-        pad_mask = (target != self.tuned_model.tokenizer.PAD_IDX)
+        out = self.tuned_model.forward(batch)
+        last_hidden_states = (
+            out.decoder_hidden_states[-1][:, :-1, :] 
+            if self.tuned_model.model.has_encoder 
+            else out.hidden_states[-1][:, :-1, :]
+        )
+        pad_mask = (labels != self.tuned_model.tokenizer.PAD_IDX)
         gen_len = torch.sum(pad_mask, dim=-1)
-        new_log_probs = self.log_probs(logits[:, :-1, :], target, pad_mask)
-        values = self.value_head(last_hidden_states[:, :-1, :]).squeeze(-1)
+        new_log_probs = self.log_probs(out.logits[:, :-1, :], labels, pad_mask)
+        values = self.value_head(last_hidden_states).squeeze(-1)
         with torch.no_grad():
-            logits, _, _ = self.ref_model.forward(batch)
-            ref_log_probs = self.log_probs(logits[:, :-1, :], target, pad_mask)
+            logits = self.ref_model.forward(batch).logits
+            ref_log_probs = self.log_probs(logits[:, :-1, :], labels, pad_mask)
 
         ratios = torch.exp(new_log_probs - ref_log_probs)
         clipped_ratios = torch.clip(
@@ -204,19 +211,6 @@ class RLHFSupervisor(pl.LightningModule):
     ) -> float:
         val_loss = self.forward_and_log_metrics(batch, "val")
         return val_loss
-
-    def on_test_start(self) -> None:
-        self.tuned_model.on_test_start()
-
-    def test_step(
-        self, 
-        batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
-        _
-    ) -> None:
-        self.tuned_model.test_step(batch)
-
-    def test_epoch_end(self, _) -> None:
-        self.tuned_model.test_epoch_end()
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = torch.optim.AdamW(

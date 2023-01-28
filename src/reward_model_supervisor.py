@@ -33,7 +33,7 @@ class RewardModelSupervisor(pl.LightningModule):
 
     def forward(self, batch: RewardModelBatch) -> torch.FloatTensor:
         last_hidden_state = self.model(
-            input_ids=batch.dialogues,
+            input_ids=batch.dialogues.masked_fill(batch.mask == 0, 0),
             attention_mask=batch.mask).last_hidden_state
         last_idx = torch.sum(batch.mask, dim=-1, keepdim=True) - 1
         last_idx = last_idx.unsqueeze(-1).expand(-1, -1, last_hidden_state.size(dim=-1))

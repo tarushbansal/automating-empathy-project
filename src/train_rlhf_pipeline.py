@@ -15,7 +15,7 @@ from data_loader import DataModule
 from dialogue_model_supervisor import DialogueModelSupervisor
 from reward_model_supervisor import RewardModelSupervisor
 from rlhf_supervisor import RLHFSupervisor
-from transformers import BertModel, BertTokenizer
+from transformers import GPT2Model, GPT2Tokenizer
 from utils.train_utils import load_ckpt_path, load_config, SaveConfigCallback
 from data_classes import GenerationConfig, PPOConfig
 
@@ -62,12 +62,13 @@ def get_model_checkpoints(ckpt_dir: str) -> Optional[List[ModelCheckpoint]]:
             monitor="train_loss_epoch",
             dirpath=ckpt_dir,
             filename="{train_loss_epoch:.2f}-{epoch}",
-            every_n_train_steps=1
+            every_n_epochs=1
         ),
         ModelCheckpoint(
             monitor="val_loss_epoch",
             dirpath=ckpt_dir,
-            filename="{val_loss_epoch:.2f}-{epoch}"
+            filename="{val_loss_epoch:.2f}-{epoch}",
+            every_n_epochs=1
         ),
     ]
 
@@ -111,11 +112,12 @@ def main():
     )
     reward_model = RewardModelSupervisor.load_from_checkpoint(
         load_ckpt_path(cli_args.pretrained_reward_model_dir),
-        model=BertModel.from_pretrained("bert-large-uncased"),
+        model=GPT2Model.from_pretrained("gpt2-large"),
         batch_size=cli_args.batch_size,
         initial_lr=cli_args.initial_lr
     )
-    reward_model.tokenizer = BertTokenizer.from_pretrained('bert-large-uncased')
+    reward_model.tokenizer = GPT2Tokenizer.from_pretrained('gpt2-large')
+    reward_model.tokenizer.add_special_tokens({"pad_token": "<PAD>"})
     rlhf_supervisor = RLHFSupervisor(
         dialogue_model=dialogue_model,
         reward_model=reward_model,
@@ -145,27 +147,7 @@ def main():
     callbacks = []
     if checkpoint_callback is not None:
         callbacks.extend(checkpoint_callback)
-    config = {
-        "model": {
-            "cls": model_cls.__name__,
-            "kwargs": model_kwargs
-        },
-        "tokenizer": {
-            "cls": tokenizer_cls.__name__,
-            "kwargs": tokenizer_kwargs,
-        }
-    }
-    callbacks.extend([
-        SaveConfigCallback(config=config),
-        # EarlyStopping(
-        #     monitor="avg_val_loss",
-        #     min_delta=0.01,
-        #     mode="min",
-        #     patience=1
-        # )
-    ]
-    )
-
+    callbacks.extend([SaveConfigCallback(config=config)])
 
     # Set up trainer
     trainer = pl.Trainer(

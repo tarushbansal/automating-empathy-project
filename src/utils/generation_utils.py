@@ -44,8 +44,6 @@ def generate(
     model_has_encoder: bool,
     batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
     stop_token: int,
-    pad_token: int,
-    vocab_size: int,
     generation_config: GenerationConfig,
     start_token: Optional[int] = None,
 ) -> List[List[int]]:
@@ -64,38 +62,34 @@ def generate(
         N = batch.dialogues.size(dim=0)
         dialogues = batch.dialogues
         device = batch.dialogues.device
-        last_non_masked_idx = torch.sum(batch.dialogues != pad_token, dim=1) - 1
-        start_idx = last_non_masked_idx[:, None, None].expand(-1, -1, vocab_size).clone()
 
-    if start_token is None:
-        beams = torch.empty(N, beam_width, 0, dtype=torch.long, device=device)
-    else:
+    if model_has_encoder:
+        if start_token is None:
+            raise ValueError("Must specify a start token for encoder-decoder models")
         beams = torch.empty(
             N, beam_width, 1, 
             dtype=torch.long, device=device).fill_(start_token)
         max_new_tokens += 1
+    else:
+        beams = torch.empty(N, beam_width, 0, dtype=torch.long, device=device)
     
     beam_scores = torch.zeros(N, beam_width, device=device)
     beam_scores[:, 1:] = beam_scores[:, 1:].fill_(float("-inf"))
     stop_detected = torch.zeros(N, beam_width, dtype=torch.bool, device=device)
+    cache = [None for _ in range(beam_width)]
 
     while True:
         # Run all beams through model and process output logits
         for i in range(beam_width):
             if model_has_encoder:
-                batch.targets = beams[:, i, :]
-                new_logits = forward_fn(batch)[:, -1, :].unsqueeze(1)
+                batch.targets = beams[:, i, :] if cache[i] is None else beams[:, i, -1:]
+                out = forward_fn(batch, cache[i], True)
             else:
-                unstacked_sequences = tuple(torch.cat((
-                    dialogues[j, :last_non_masked_idx[j]+1], 
-                    beams[j, i, :], 
-                    dialogues[j, last_non_masked_idx[j]+1:]), dim=-1) for j in range(N))
-                batch.dialogues = torch.stack(unstacked_sequences)
-                new_logits = forward_fn(batch).gather(1, start_idx)
+                batch.dialogues = dialogues if cache[i] is None else beams[:, i, -1:]
+                out = forward_fn(batch, cache[i], True)
+            new_logits = out.logits[:, -1, :].unsqueeze(1)
+            cache[i] = out.past_key_values
             logits = torch.cat((logits, new_logits), dim=1) if i != 0 else new_logits
-        
-        if not model_has_encoder:
-            start_idx += 1
             
         warped_logits = warp_logits(logits, temperature, top_p, top_k)
         if sample:

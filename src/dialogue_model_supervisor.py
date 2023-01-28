@@ -4,13 +4,14 @@
 import copy
 import json
 import math
-from typing import List, Tuple, Optional, Union
+from typing import Optional, Union, Tuple
 
 import torch
 import torch.nn.functional as F
 import pytorch_lightning as pl
 
 from transformers.optimization import get_linear_schedule_with_warmup
+from transformers.modeling_outputs import Seq2SeqLMOutput, CausalLMOutput
 
 # User-defined Modules
 from base_classes import DialogueModelBase, TokenizerBase
@@ -47,34 +48,35 @@ class DialogueModelSupervisor(pl.LightningModule):
 
     def forward(
         self, 
-        batch: Union[EncoderDecoderModelBatch, DecoderModelBatch]
-    ) -> Tuple[torch.Tensor]:
-        input_kwargs = {}
+        batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
+        past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
+        use_cache: Optional[bool] = None
+    ) -> Union[Seq2SeqLMOutput, CausalLMOutput]:
+        input_kwargs = {"past_key_values": past_key_values, "use_cache": use_cache}
         if self.model.requires_emotion_label:
             input_kwargs["emotion_label"] = batch.emotions
         if self.model.requires_concept_net_data:
             input_kwargs["concept_net_data"] = batch.concept_net_data
         if self.model.has_encoder:
-            input_kwargs["source_seq"] = batch.contexts
-            input_kwargs["target_seq"] = batch.targets
-            logits, last_hidden_states = self.model(**input_kwargs)
-            target_seq = batch.targets[:, 1:]
+            input_kwargs["contexts"] = batch.contexts
+            input_kwargs["targets"] = batch.targets
+            output = self.model(**input_kwargs)
         else:
-            input_kwargs["input_seq"] = batch.dialogues
-            logits, last_hidden_states = self.model(**input_kwargs)
-            target_seq = batch.dialogues[:, 1:]
+            input_kwargs["dialogues"] = batch.dialogues
+            output = self.model(**input_kwargs)
         
-        return logits, last_hidden_states, target_seq
+        return output
 
     def forward_and_log_metrics(
         self, 
         batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
         stage: str
     ) -> float:
-        logits, _, target_seq = self.forward(batch)
+        output = self.forward(batch)
+        labels = batch.targets[:, 1:] if self.model.has_encoder else batch.dialogues[:, 1:]
         loss = F.cross_entropy(
-            logits[:, :-1, :].permute(0, 2, 1),
-            target_seq,
+            output.logits[:, :-1, :].permute(0, 2, 1),
+            labels,
             ignore_index=self.tokenizer.PAD_IDX
         )
         emo_loss, emo_attn_loss = 0, 0
@@ -173,7 +175,9 @@ class DialogueModelSupervisor(pl.LightningModule):
             self.concepts.extend([self.tokenizer.decode_to_text(concepts)
                                   for concepts in batch.concept_net_data.tolist()])
         
-        if not self.model.has_encoder:
+        if self.model.has_encoder:
+            labels = batch.targets[:, 1:]
+        else:
             insert_idx = torch.sum(batch.dialogues != self.tokenizer.PAD_IDX, dim=1)
             unstacked_sequences = tuple(torch.cat((
                     batch.dialogues[i, :insert_idx[i]], 
@@ -181,12 +185,13 @@ class DialogueModelSupervisor(pl.LightningModule):
                     batch.dialogues[i, insert_idx[i]:]), dim=-1) 
                 for i in range(batch.dialogues.size(dim=0)))
             batch.dialogues = torch.stack(unstacked_sequences)
+            labels = batch.dialogues[:, 1:]
 
-        logits, target_seq = self.forward(batch)
-        self.num_tokens += torch.sum(target_seq != self.tokenizer.PAD_IDX)
+        logits = self.forward(batch).logits
+        self.num_tokens += torch.sum(labels != self.tokenizer.PAD_IDX)
         self.sum_cross_entropy += F.cross_entropy(
             logits[:, :-1, :].permute(0, 2, 1),
-            target_seq,
+            labels,
             reduction="sum",
             ignore_index=self.tokenizer.PAD_IDX
         )
@@ -243,12 +248,10 @@ class DialogueModelSupervisor(pl.LightningModule):
     ) -> torch.LongTensor:
         self.model.eval()
         return generate(
-            forward_fn=lambda x: self.forward(x)[0], 
+            forward_fn=self.forward, 
             batch=copy.deepcopy(batch), 
             start_token=self.tokenizer.SOS_IDX,
             stop_token=self.tokenizer.EOS_IDX,
-            pad_token=self.tokenizer.PAD_IDX,
-            vocab_size=self.tokenizer.vocab_size,
             model_has_encoder=self.model.has_encoder,
             generation_config=self.generation_config
         )

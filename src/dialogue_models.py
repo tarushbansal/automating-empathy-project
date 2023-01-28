@@ -1,7 +1,7 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
-from typing import Tuple
+from typing import Tuple, Optional
 
 import torch
 import torch.nn as nn
@@ -10,6 +10,7 @@ from transformers import (
     AutoModelForCausalLM,
     AutoModelForSeq2SeqLM
 )
+from transformers.modeling_outputs import Seq2SeqLMOutput, CausalLMOutput
 
 # User-Defined Modules
 from base_classes import EncoderDecoderModel, DecoderModel, TokenizerBase
@@ -41,21 +42,25 @@ class GODEL(EncoderDecoderModel):
 
     def forward(
         self,
-        source_seq: torch.LongTensor,
-        target_seq: torch.LongTensor
-    ) -> Tuple[torch.FloatTensor]:
+        contexts: torch.LongTensor,
+        targets: torch.LongTensor,
+        past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
+        use_cache: Optional[bool] = None
+    ) -> Seq2SeqLMOutput:
 
-        source_seq, source_mask = self.create_padding_mask(source_seq)
-        target_seq, target_mask = self.create_padding_mask(target_seq)
+        contexts, source_mask = self.create_padding_mask(contexts)
+        targets, target_mask = self.create_padding_mask(targets)
 
         out = self.model(
-            input_ids=source_seq,
+            input_ids=contexts,
             attention_mask=source_mask,
-            decoder_input_ids=target_seq,
+            decoder_input_ids=targets,
             decoder_attention_mask=target_mask,
-            output_hidden_states=True
+            output_hidden_states=True,
+            past_key_values=past_key_values,
+            use_cache=use_cache
         )
-        return (out.logits, out.decoder_hidden_states[-1])
+        return out
 
 
 class KnowledgeBridgedGODEL(EncoderDecoderModel):
@@ -108,23 +113,27 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
 
     def forward(
         self,
-        source_seq: torch.LongTensor,
-        target_seq: torch.LongTensor,
-        concept_net_data: ConceptNetBatchData
-    ) -> Tuple[torch.FloatTensor]:
+        contexts: torch.LongTensor,
+        targets: torch.LongTensor,
+        concept_net_data: ConceptNetBatchData,
+        past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
+        use_cache: Optional[bool] = None
+    ) -> Seq2SeqLMOutput:
 
-        input_embeds, pad_mask = self.knowledge_enriched_context(
-            source_seq, concept_net_data.concepts)
+        context_embeds, pad_mask = self.knowledge_enriched_context(
+            contexts, concept_net_data.concepts)
         # attention_mask = torch.minimum(pad_mask.unsqueeze(1), concept_net_data.adjacency_mask)
-        target_seq, target_mask = self.create_padding_mask(target_seq)
+        targets, target_mask = self.create_padding_mask(targets)
 
         out = self.model(
-            inputs_embeds=input_embeds,
+            inputs_embeds=context_embeds,
             attention_mask=pad_mask,
-            decoder_input_ids=target_seq,
+            decoder_input_ids=targets,
             decoder_attention_mask=target_mask,
             output_attentions=True,
-            output_hidden_states=True
+            output_hidden_states=True,
+            past_key_values=past_key_values,
+            use_cache=use_cache
         )
 
         emo_intensities = torch.cat(
@@ -137,7 +146,7 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
         average_attn_weights = torch.stack(out.cross_attentions).mean((0, 2, 3))
         self.emo_attn_loss = self.attn_loss(emo_intensities, average_attn_weights)
 
-        return (out.logits, out.decoder_hidden_states[-1])
+        return out
 
 
 class DialoGPT(DecoderModel):
@@ -161,13 +170,20 @@ class DialoGPT(DecoderModel):
     def tokenizer_cls():
         return "DialoGPTTokenizer"
 
-    def forward(self, input_seq: torch.LongTensor) -> Tuple[torch.FloatTensor]:
-        input_seq, input_mask = self.create_padding_mask(input_seq)
+    def forward(
+        self, 
+        dialogues: torch.LongTensor,
+        past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
+        use_cache: Optional[bool] = None
+    ) -> CausalLMOutput:
+        dialogues, mask = self.create_padding_mask(dialogues)
         out = self.model(
-            input_ids=input_seq,
-            attention_mask=input_mask,
-            output_hidden_states=True
+            input_ids=dialogues,
+            attention_mask=mask,
+            output_hidden_states=True,
+            use_cache=use_cache,
+            past_key_values=past_key_values
         )
-        return (out.logits, out.decoder_hidden_states[-1])
-
+        return out
+    
 # -----------------------------------------------------------------------------

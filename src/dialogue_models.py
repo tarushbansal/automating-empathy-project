@@ -44,6 +44,7 @@ class GODEL(EncoderDecoderModel):
         self,
         contexts: torch.LongTensor,
         targets: torch.LongTensor,
+        encoder_outputs: Optional[Tuple[torch.FloatTensor]] = None,
         past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
         use_cache: Optional[bool] = None
     ) -> Seq2SeqLMOutput:
@@ -54,6 +55,7 @@ class GODEL(EncoderDecoderModel):
         out = self.model(
             input_ids=contexts,
             attention_mask=source_mask,
+            encoder_outputs=encoder_outputs,
             decoder_input_ids=targets,
             decoder_attention_mask=target_mask,
             output_hidden_states=True,
@@ -116,6 +118,7 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
         contexts: torch.LongTensor,
         targets: torch.LongTensor,
         concept_net_data: ConceptNetBatchData,
+        encoder_outputs: Optional[Tuple[torch.FloatTensor]] = None,
         past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
         use_cache: Optional[bool] = None
     ) -> Seq2SeqLMOutput:
@@ -128,6 +131,7 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
         out = self.model(
             inputs_embeds=context_embeds,
             attention_mask=pad_mask,
+            encoder_outputs=encoder_outputs,
             decoder_input_ids=targets,
             decoder_attention_mask=target_mask,
             output_attentions=True,

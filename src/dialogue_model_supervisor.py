@@ -49,6 +49,7 @@ class DialogueModelSupervisor(pl.LightningModule):
     def forward(
         self, 
         batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
+        encoder_outputs: Optional[Tuple[torch.FloatTensor]] = None,
         past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
         use_cache: Optional[bool] = None
     ) -> Union[Seq2SeqLMOutput, CausalLMOutput]:
@@ -58,6 +59,7 @@ class DialogueModelSupervisor(pl.LightningModule):
         if self.model.requires_concept_net_data:
             input_kwargs["concept_net_data"] = batch.concept_net_data
         if self.model.has_encoder:
+            input_kwargs["encoder_outputs"] = encoder_outputs
             input_kwargs["contexts"] = batch.contexts
             input_kwargs["targets"] = batch.targets
             output = self.model(**input_kwargs)

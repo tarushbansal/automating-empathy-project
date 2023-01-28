@@ -76,21 +76,34 @@ def generate(
     beam_scores = torch.zeros(N, beam_width, device=device)
     beam_scores[:, 1:] = beam_scores[:, 1:].fill_(float("-inf"))
     stop_detected = torch.zeros(N, beam_width, dtype=torch.bool, device=device)
-    cache = [None for _ in range(beam_width)]
+    decoder_cache = [None for _ in range(beam_width)]
 
     while True:
+        if model_has_encoder:
+            encoder_cache = None
+
         # Run all beams through model and process output logits
         for i in range(beam_width):
             if model_has_encoder:
-                batch.targets = beams[:, i, :] if cache[i] is None else beams[:, i, -1:]
-                out = forward_fn(batch, cache[i], True)
+                batch.targets = beams[:, i, :] if decoder_cache[i] is None else beams[:, i, -1:]
+                out = forward_fn(
+                    batch=batch,
+                    encoder_outputs=encoder_cache,
+                    past_key_values=decoder_cache[i],
+                    use_cache=True
+                )
+                encoder_cache = (out.encoder_last_hidden_state,)
             else:
-                batch.dialogues = dialogues if cache[i] is None else beams[:, i, -1:]
-                out = forward_fn(batch, cache[i], True)
+                batch.dialogues = dialogues if decoder_cache[i] is None else beams[:, i, -1:]
+                out = forward_fn(
+                    batch=batch,
+                    past_key_values=decoder_cache[i],
+                    use_cache=True
+                )
             new_logits = out.logits[:, -1, :].unsqueeze(1)
-            cache[i] = out.past_key_values
+            decoder_cache[i] = out.past_key_values
             logits = torch.cat((logits, new_logits), dim=1) if i != 0 else new_logits
-            
+
         warped_logits = warp_logits(logits, temperature, top_p, top_k)
         if sample:
             new_tokens = torch.multinomial(

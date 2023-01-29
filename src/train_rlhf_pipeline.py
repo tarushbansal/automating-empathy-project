@@ -42,11 +42,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--top_k", type=int, default=50)
     parser.add_argument("--max_new_tokens", type=int, default=100)
     parser.add_argument("--clip_epsilon", type=int, default=0.2)
-    parser.add_argument("--value_clip_range", type=float, default=0.2)
-    parser.add_argument("--kl_penalty", type=float, default=0.2)
-    parser.add_argument("--gamma", type=float, default=1.0)
+    parser.add_argument("--kl_penalty", type=int, default=0)
+    parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--_lambda", type=float, default=0.95)
-    parser.add_argument("--vf_coeff", type=float, default=0.1)
+    parser.add_argument("--vf_coeff", type=float, default=1)
+    parser.add_argument("--entropy_coeff", type=float, default=0.01)
 
     cli_args = parser.parse_args()
 
@@ -124,11 +124,11 @@ def main():
         batch_size=cli_args.batch_size,
         ppo_config=PPOConfig(
             clip_epsilon=cli_args.clip_epsilon,
-            value_clip_range=cli_args.value_clip_range,
             kl_penalty=cli_args.kl_penalty,
             gamma=cli_args.gamma,
             _lambda=cli_args._lambda,
-            vf_coeff=cli_args.vf_coeff 
+            vf_coeff=cli_args.vf_coeff,
+            entropy_coeff=cli_args.entropy_coeff
         ),
         initial_lr=cli_args.initial_lr
     )
@@ -157,7 +157,7 @@ def main():
         strategy="ddp_find_unused_parameters_false",
         max_epochs=cli_args.max_epochs,
         logger=logger,
-        callbacks=callbacks,
+        callbacks=callbacks
     )
 
     # Train / Validate the model

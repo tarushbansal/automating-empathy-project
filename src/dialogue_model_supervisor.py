@@ -76,7 +76,7 @@ class DialogueModelSupervisor(pl.LightningModule):
     ) -> float:
         output = self.forward(batch)
         labels = batch.targets[:, 1:] if self.model.has_encoder else batch.dialogues[:, 1:]
-        loss = F.cross_entropy(
+        lm_loss = F.cross_entropy(
             output.logits[:, :-1, :].permute(0, 2, 1),
             labels,
             ignore_index=self.tokenizer.PAD_IDX
@@ -89,39 +89,42 @@ class DialogueModelSupervisor(pl.LightningModule):
             )
             self.log(
                 f"{stage}_emo_loss", 
-                loss, 
-                prog_bar=True, 
-                on_step=True, 
+                emo_loss,
                 on_epoch=True, 
                 batch_size=self.batch_size, 
                 sync_dist=True
             )
-            self.logger.experiment.add_scalars('emo_loss', {stage: emo_loss}, self.global_step)
         if hasattr(self.model, "emo_attn_loss"):
             emo_attn_loss = self.model.emo_attn_loss
             self.log(
                 f"{stage}_emo_attn_loss", 
-                loss, 
-                prog_bar=True, 
-                on_step=True, 
+                emo_attn_loss,
                 on_epoch=True, 
                 batch_size=self.batch_size, 
                 sync_dist=True
             )
-            self.logger.experiment.add_scalars(
-                'emo_attn_loss', {stage: emo_attn_loss}, self.global_step)
+        
+        loss = lm_loss + 1 * emo_loss + 0.1 * emo_attn_loss
+
         self.log(
             f"{stage}_loss", 
             loss, 
             prog_bar=True, 
-            on_step=True, 
-            on_epoch=True, 
+            on_epoch=True,
             batch_size=self.batch_size, 
             sync_dist=True
         )
-        self.logger.experiment.add_scalars('loss', {stage: loss}, self.global_step)
-        
-        return loss + 1 * emo_loss + 0.1 * emo_attn_loss
+
+        if loss != lm_loss:
+            self.log(
+                f"{stage}_lm_loss", 
+                loss,
+                on_epoch=True,
+                batch_size=self.batch_size, 
+                sync_dist=True
+            )
+
+        return loss
 
     def training_step(
         self, 

@@ -27,8 +27,7 @@ class SaveConfigCallback(pl.Callback):
             raise ValueError("No log directory specified to save config file!")
         
         if not os.path.isdir(trainer.log_dir):
-            print("WARNING: Log directory doesn't exist! Aborting model config save!")
-            return
+            os.makedirs(trainer.log_dir)
         
         output_fpath = f"{trainer.log_dir}/config.json"
         with open(output_fpath, "w") as f:

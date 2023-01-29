@@ -126,6 +126,13 @@ class RLHFSupervisor(pl.LightningModule):
                     mask=reward_model_inputs.attention_mask.to(device)
                 )
             )
+            self.log(
+                f"{stage}_reward", 
+                torch.mean(scores), 
+                on_epoch=True, 
+                batch_size=self.batch_size, 
+                sync_dist=True
+            )
         
         # OPTIMIZATION PHASE
         if self.tuned_model.model.has_encoder:
@@ -155,6 +162,9 @@ class RLHFSupervisor(pl.LightningModule):
         pad_mask = (labels != self.tuned_model.tokenizer.PAD_IDX)
         gen_len = torch.sum(pad_mask, dim=-1)
         new_log_probs = self.log_probs(out.logits[:, :-1, :], labels, pad_mask)
+        entropy = -torch.sum(
+            torch.softmax(out.logits[:, :-1, :], dim=-1) * 
+                torch.log_softmax(out.logits[:, :-1, :], dim=-1), dim=-1)
         values = self.value_head(last_hidden_states).squeeze(-1)
         with torch.no_grad():
             logits = self.ref_model.forward(batch).logits
@@ -166,33 +176,25 @@ class RLHFSupervisor(pl.LightningModule):
         rewards = self.compute_rewards(scores, new_log_probs, ref_log_probs, gen_len)
         advantages = self.estimate_advantages(rewards, values, gen_len)
         returns = advantages + values
-        
+
         # Apply PPO Algorithm (With policy and value function losses)
-        vf_loss = (values - returns) ** 2
-        clipped_values = torch.max(torch.min(
-                values, 
-                values + self.ppo_config.value_clip_range), 
-            values - self.ppo_config.value_clip_range
-        )
-        vf_loss_clipped = (clipped_values - returns) ** 2
-        vf_loss = torch.sum(
-            torch.max(vf_loss, vf_loss_clipped) * pad_mask
-            ) / torch.sum(pad_mask)
+        num_tokens = torch.sum(pad_mask)
+        vf_loss = torch.sum(((values - returns) ** 2) * pad_mask) / num_tokens
+        entropy_loss = -torch.sum(entropy * pad_mask) / num_tokens
         ppo_loss = torch.sum(
-            torch.max(-ratios * advantages, -clipped_ratios * advantages) * pad_mask
-            ) / torch.sum(pad_mask)
-        
-        loss = ppo_loss + self.ppo_config.vf_coeff * vf_loss
-        self.log(
-            f"{stage}_loss", 
-            loss, 
-            prog_bar=True, 
-            on_step=True, 
-            on_epoch=True, 
-            batch_size=self.batch_size, 
-            sync_dist=True
+            torch.max(-ratios * advantages, 
+                      -clipped_ratios * advantages) * pad_mask
+                ) / num_tokens
+        loss = (
+            ppo_loss + 
+            self.ppo_config.vf_coeff * vf_loss + 
+            self.ppo_config.entropy_coeff * entropy_loss
         )
-        self.logger.experiment.add_scalars('loss', {stage: loss}, self.global_step)
+        
+        self.log(f"{stage}_ppo_loss", ppo_loss, on_epoch=True, batch_size=self.batch_size, sync_dist=True)
+        self.log(f"{stage}_vf_loss", vf_loss, on_epoch=True, batch_size=self.batch_size, sync_dist=True)
+        self.log(f"{stage}_entropy_loss", entropy_loss, on_epoch=True, batch_size=self.batch_size, sync_dist=True)
+        self.log(f"{stage}_loss", loss, prog_bar=True, on_epoch=True, batch_size=self.batch_size, sync_dist=True)
         
         return loss
 

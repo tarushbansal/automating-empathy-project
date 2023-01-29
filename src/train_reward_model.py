@@ -73,7 +73,6 @@ def main():
     model = GPT2Model.from_pretrained("gpt2-large")
     model_supervisor = RewardModelSupervisor(
         model=model,
-        batch_size=cli_args.batch_size,
         initial_lr=cli_args.initial_lr
     )
 

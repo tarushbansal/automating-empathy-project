@@ -46,7 +46,6 @@ def main():
         ckpt_path, 
         tokenizer=tokenizer, 
         model=model,
-        batch_size=cli_args.batch_size,
         test_output_dir=os.path.abspath(cli_args.pretrained_model_dir), 
         metric_n_grams=cli_args.metric_n_grams,
         generation_config=GenerationConfig(

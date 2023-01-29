@@ -109,7 +109,6 @@ def main():
             load_ckpt_path(cli_args.pretrained_model_dir),
             tokenizer=tokenizer,
             model=model,
-            batch_size=cli_args.batch_size,
             initial_lr=cli_args.initial_lr
         )
 
@@ -140,7 +139,6 @@ def main():
         model_supervisor = DialogueModelSupervisor(
             tokenizer=tokenizer,
             model=model,
-            batch_size=cli_args.batch_size,
             initial_lr=cli_args.initial_lr
         )
 

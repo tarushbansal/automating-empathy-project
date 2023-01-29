@@ -22,13 +22,11 @@ class RewardModelSupervisor(pl.LightningModule):
     def __init__(
         self,
         model: GPT2Model,
-        batch_size: int,
         initial_lr: Optional[float] = None
     ) -> None:
         super().__init__()
         self.model = model
         self.initial_lr = initial_lr
-        self.batch_size = batch_size
         self.linear = nn.Linear(model.config.hidden_size, 1)
 
     def forward(self, batch: RewardModelBatch) -> torch.FloatTensor:
@@ -48,13 +46,14 @@ class RewardModelSupervisor(pl.LightningModule):
     ) -> float:
         pred_rewards = self.forward(batch)
         loss = F.mse_loss(pred_rewards, batch.rewards)
+        N = batch.dialogues.size(dim=0)
         self.log(
             f"{stage}_loss", 
             loss, 
             prog_bar=True, 
             on_step=True, 
             on_epoch=True, 
-            batch_size=self.batch_size, 
+            batch_size=N, 
             sync_dist=True
         )
         self.logger.experiment.add_scalars('loss', {stage: loss}, self.global_step)

@@ -31,7 +31,6 @@ class DialogueModelSupervisor(pl.LightningModule):
         self,
         model: DialogueModelBase,
         tokenizer: TokenizerBase,
-        batch_size: int,
         initial_lr: Optional[float] = None,
         metric_n_grams: Optional[int] = None,
         test_output_dir: Optional[str] = None,
@@ -41,7 +40,6 @@ class DialogueModelSupervisor(pl.LightningModule):
         self.model = model
         self.tokenizer = tokenizer
         self.initial_lr = initial_lr
-        self.batch_size = batch_size
         self.test_output_dir = test_output_dir
         self.generation_config = generation_config
         self.metric_n_grams = metric_n_grams
@@ -75,6 +73,7 @@ class DialogueModelSupervisor(pl.LightningModule):
         stage: str
     ) -> float:
         output = self.forward(batch)
+        N = batch.contexts.size(dim=0) if self.model.has_encoder else batch.dialogues.size(dim=0)
         labels = batch.targets[:, 1:] if self.model.has_encoder else batch.dialogues[:, 1:]
         lm_loss = F.cross_entropy(
             output.logits[:, :-1, :].permute(0, 2, 1),
@@ -91,7 +90,7 @@ class DialogueModelSupervisor(pl.LightningModule):
                 f"{stage}_emo_loss", 
                 emo_loss,
                 on_epoch=True, 
-                batch_size=self.batch_size, 
+                batch_size=N, 
                 sync_dist=True
             )
         if hasattr(self.model, "emo_attn_loss"):
@@ -100,7 +99,7 @@ class DialogueModelSupervisor(pl.LightningModule):
                 f"{stage}_emo_attn_loss", 
                 emo_attn_loss,
                 on_epoch=True, 
-                batch_size=self.batch_size, 
+                batch_size=N, 
                 sync_dist=True
             )
         
@@ -111,7 +110,7 @@ class DialogueModelSupervisor(pl.LightningModule):
             loss, 
             prog_bar=True, 
             on_epoch=True,
-            batch_size=self.batch_size, 
+            batch_size=N, 
             sync_dist=True
         )
 
@@ -120,7 +119,7 @@ class DialogueModelSupervisor(pl.LightningModule):
                 f"{stage}_lm_loss", 
                 loss,
                 on_epoch=True,
-                batch_size=self.batch_size, 
+                batch_size=N, 
                 sync_dist=True
             )
 

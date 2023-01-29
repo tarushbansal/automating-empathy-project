@@ -99,7 +99,6 @@ def main():
         load_ckpt_path(cli_args.pretrained_dialogue_model_dir),
         tokenizer=tokenizer,
         model=model,
-        batch_size=cli_args.batch_size,
         initial_lr=cli_args.initial_lr,
         generation_config=GenerationConfig(
             max_new_tokens=cli_args.max_new_tokens,
@@ -113,7 +112,6 @@ def main():
     reward_model = RewardModelSupervisor.load_from_checkpoint(
         load_ckpt_path(cli_args.pretrained_reward_model_dir),
         model=GPT2Model.from_pretrained("gpt2-large"),
-        batch_size=cli_args.batch_size,
         initial_lr=cli_args.initial_lr
     )
     reward_model.tokenizer = GPT2Tokenizer.from_pretrained('gpt2-large')
@@ -121,7 +119,6 @@ def main():
     rlhf_supervisor = RLHFSupervisor(
         dialogue_model=dialogue_model,
         reward_model=reward_model,
-        batch_size=cli_args.batch_size,
         ppo_config=PPOConfig(
             clip_epsilon=cli_args.clip_epsilon,
             kl_penalty=cli_args.kl_penalty,

@@ -30,7 +30,6 @@ class RLHFSupervisor(pl.LightningModule):
         self,
         dialogue_model: DialogueModelSupervisor,
         reward_model: RewardModelSupervisor,
-        batch_size: int,
         ppo_config: Optional[PPOConfig] = None,   
         initial_lr: Optional[float] = None
     ) -> None:
@@ -40,7 +39,6 @@ class RLHFSupervisor(pl.LightningModule):
         self.tuned_model = copy.deepcopy(dialogue_model)
         self.ppo_config = ppo_config
         self.initial_lr = initial_lr
-        self.batch_size = batch_size
         self.value_head = nn.Linear(dialogue_model.model.hidden_size, 1)
         
         for param in self.ref_model.parameters():
@@ -100,6 +98,7 @@ class RLHFSupervisor(pl.LightningModule):
         stage: str
     ) -> float:
 
+        N = batch.contexts.size(dim=0) if self.tuned_model.model.has_encoder else batch.dialogues.size(dim=0)
         device = batch.contexts.device if self.tuned_model.model.has_encoder else batch.dialogues.device
 
         with torch.no_grad():
@@ -130,7 +129,7 @@ class RLHFSupervisor(pl.LightningModule):
                 f"{stage}_reward", 
                 torch.mean(scores), 
                 on_epoch=True, 
-                batch_size=self.batch_size, 
+                batch_size=N, 
                 sync_dist=True
             )
         
@@ -191,10 +190,10 @@ class RLHFSupervisor(pl.LightningModule):
             self.ppo_config.entropy_coeff * entropy_loss
         )
         
-        self.log(f"{stage}_ppo_loss", ppo_loss, on_epoch=True, batch_size=self.batch_size, sync_dist=True)
-        self.log(f"{stage}_vf_loss", vf_loss, on_epoch=True, batch_size=self.batch_size, sync_dist=True)
-        self.log(f"{stage}_entropy_loss", entropy_loss, on_epoch=True, batch_size=self.batch_size, sync_dist=True)
-        self.log(f"{stage}_loss", loss, prog_bar=True, on_epoch=True, batch_size=self.batch_size, sync_dist=True)
+        self.log(f"{stage}_ppo_loss", ppo_loss, on_epoch=True, batch_size=N, sync_dist=True)
+        self.log(f"{stage}_vf_loss", vf_loss, on_epoch=True, batch_size=N, sync_dist=True)
+        self.log(f"{stage}_entropy_loss", entropy_loss, on_epoch=True, batch_size=N, sync_dist=True)
+        self.log(f"{stage}_loss", loss, prog_bar=True, on_epoch=True, batch_size=N, sync_dist=True)
         
         return loss
 

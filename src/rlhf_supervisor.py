@@ -2,7 +2,7 @@
 
 # System Modules
 import copy
-from typing import List, Optional, Union
+from typing import Tuple, Optional, Union
 from collections import OrderedDict
 
 import torch
@@ -39,7 +39,13 @@ class RLHFSupervisor(pl.LightningModule):
         self.tuned_model = copy.deepcopy(dialogue_model)
         self.ppo_config = ppo_config
         self.initial_lr = initial_lr
+        self.dropout = nn.Dropout()
         self.value_head = nn.Linear(dialogue_model.model.hidden_size, 1)
+        self.default_log_config = {
+            "on_step": True,
+            "on_epoch": True,
+            "sync_dist": True
+        }
         
         for param in self.ref_model.parameters():
             param.requires_grad = False
@@ -73,12 +79,12 @@ class RLHFSupervisor(pl.LightningModule):
         return rewards
 
     @torch.no_grad()
-    def estimate_advantages(
+    def estimate_advantages_and_returns(
         self,
         rewards: torch.FloatTensor,
         values: torch.FloatTensor,
         gen_len: torch.LongTensor
-    ) -> torch.FloatTensor:
+    ) -> Tuple[torch.FloatTensor]:
         advantages = torch.zeros_like(values)
         for i in range(rewards.size(dim=0)):
             len = gen_len[i]
@@ -86,11 +92,12 @@ class RLHFSupervisor(pl.LightningModule):
             for j in range(len - 1, -1, -1):
                 nextvalue = values[i, j + 1] if j < len - 1 else 0.0
                 delta = rewards[i, j] + self.ppo_config.gamma * nextvalue - values[i, j]
-                advantages[i, j] = delta + self.ppo_config.gamma * self.ppo_config._lambda * nextadvantage
+                advantages[i, j] = delta + self.ppo_config.gamma * self.ppo_config.lam * nextadvantage
                 nextadvantage = advantages[i, j]
             mean, var = torch.mean(advantages[i, :len]), torch.var(advantages[i, :len])
             advantages[i, :len] = (advantages[i, :len] - mean) * torch.rsqrt(var + 1e-8)
-        return advantages
+        returns = advantages + values
+        return advantages, returns
 
     def forward_and_log_metrics(
         self,
@@ -125,13 +132,7 @@ class RLHFSupervisor(pl.LightningModule):
                     mask=reward_model_inputs.attention_mask.to(device)
                 )
             )
-            self.log(
-                f"{stage}_reward", 
-                torch.mean(scores), 
-                on_epoch=True, 
-                batch_size=N, 
-                sync_dist=True
-            )
+            self.log(f"{stage}_reward", torch.mean(scores), batch_size=N, **self.default_log_config)
         
         # OPTIMIZATION PHASE
         if self.tuned_model.model.has_encoder:
@@ -164,7 +165,8 @@ class RLHFSupervisor(pl.LightningModule):
         entropy = -torch.sum(
             torch.softmax(out.logits[:, :-1, :], dim=-1) * 
                 torch.log_softmax(out.logits[:, :-1, :], dim=-1), dim=-1)
-        values = self.value_head(last_hidden_states).squeeze(-1)
+        values = self.value_head(self.dropout(last_hidden_states)).squeeze(-1)
+
         with torch.no_grad():
             logits = self.ref_model.forward(batch).logits
             ref_log_probs = self.log_probs(logits[:, :-1, :], labels, pad_mask)
@@ -173,27 +175,26 @@ class RLHFSupervisor(pl.LightningModule):
         clipped_ratios = torch.clip(
             ratios, 1 - self.ppo_config.clip_epsilon, 1 + self.ppo_config.clip_epsilon)
         rewards = self.compute_rewards(scores, new_log_probs, ref_log_probs, gen_len)
-        advantages = self.estimate_advantages(rewards, values, gen_len)
-        returns = advantages + values
+        advantages, returns = self.estimate_advantages_and_returns(rewards, values, gen_len)
 
-        # Apply PPO Algorithm (With policy and value function losses)
+        # Apply PPO Algorithm (With ppo clip, value function and entropy losses)
         num_tokens = torch.sum(pad_mask)
         vf_loss = torch.sum(((values - returns) ** 2) * pad_mask) / num_tokens
         entropy_loss = -torch.sum(entropy * pad_mask) / num_tokens
         ppo_loss = torch.sum(
             torch.max(-ratios * advantages, 
                       -clipped_ratios * advantages) * pad_mask
-                ) / num_tokens
+            ) / num_tokens
         loss = (
             ppo_loss + 
             self.ppo_config.vf_coeff * vf_loss + 
             self.ppo_config.entropy_coeff * entropy_loss
         )
         
-        self.log(f"{stage}_ppo_loss", ppo_loss, on_epoch=True, batch_size=N, sync_dist=True)
-        self.log(f"{stage}_vf_loss", vf_loss, on_epoch=True, batch_size=N, sync_dist=True)
-        self.log(f"{stage}_entropy_loss", entropy_loss, on_epoch=True, batch_size=N, sync_dist=True)
-        self.log(f"{stage}_loss", loss, prog_bar=True, on_epoch=True, batch_size=N, sync_dist=True)
+        self.log(f"{stage}_ppo_loss", ppo_loss, batch_size=N, **self.default_log_config)
+        self.log(f"{stage}_vf_loss", vf_loss, batch_size=N, **self.default_log_config)
+        self.log(f"{stage}_entropy_loss", entropy_loss, batch_size=N, **self.default_log_config)
+        self.log(f"{stage}_loss", loss, prog_bar=True, batch_size=N, **self.default_log_config)
         
         return loss
 

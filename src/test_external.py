@@ -29,7 +29,7 @@ def main():
     parser.add_argument("--sample", action="store_true")
     parser.add_argument("--temperature", type=float, default=1.0)
     parser.add_argument("--top_p", type=float, default=1.0)
-    parser.add_argument("--top_k", type=int, default=50)
+    parser.add_argument("--top_k", type=int, default=20)
     parser.add_argument("--max_new_tokens", type=int, default=100)
     cli_args, _ = parser.parse_known_args()
 
@@ -40,7 +40,7 @@ def main():
     # Set appropriate device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-    gen_cls = getattr(__import__("generation_external"), cli_args.dialogue_model)
+    gen_cls = getattr(__import__("utils.generation_external", fromlist=['object']), cli_args.dialogue_model)
     model_generation = gen_cls(
         device,
         generation_config=GenerationConfig(

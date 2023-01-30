@@ -142,35 +142,34 @@ class DialoGPT(GenerationBase):
     ) -> None:
 
         model = AutoModelForCausalLM.from_pretrained("microsoft/DialoGPT-large")
-        tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-large")
+        tokenizer = AutoTokenizer.from_pretrained("microsoft/DialoGPT-large", padding_side='left')
+        tokenizer.add_special_tokens({"pad_token": "<PAD>"})
+        model.resize_token_embeddings(len(tokenizer))
         super().__init__(model, tokenizer, device, generation_config)
 
     def generate(self, batch: Dict[str, Tuple]) -> Tuple[Union[List[List[int]], float, int]]:
-        context = [f"{self.tokenizer.eos_token.join(context)} {self.tokenizer.eos_token}" 
-                   for context in batch["contexts"]]
-        context = self.tokenizer(
-            context, 
-            return_tensors="pt", 
-            padding=True).to(self.device)
-        target = [f"{target} {self.tokenizer.eos_token}" for target in batch["targets"]]
-        target = self.tokenizer(
-            target, 
-            return_tensors="pt", 
-            padding=True).to(self.device)
-        output = self.model(
-            input_ids=torch.cat((context.input_ids, target.input_ids), dim=-1),
-            attention_mask=torch.cat((context.attention_mask, target.attention_mask), dim=-1),
-        )
+        contexts = [f"{self.tokenizer.eos_token.join(context)} {self.tokenizer.eos_token}" 
+                    for context in batch["contexts"]]
+        contexts = self.tokenizer(contexts, return_tensors="pt", padding=True).to(self.device)
+        targets = [f"{target} {self.tokenizer.eos_token}"
+                   for target in batch["targets"]]
+        targets = self.tokenizer(targets, return_tensors="pt", padding=True).to(self.device)
+        
+        input_kwargs = {
+            "input_ids": torch.cat((contexts.input_ids, targets.input_ids), dim=-1),
+            "attention_mask": torch.cat((contexts.attention_mask, targets.attention_mask), dim=-1)
+        }
+        output = self.model(**input_kwargs)
         sum_cross_entropy = F.cross_entropy(
-            output.logits[:, context.input_ids.size(dim=-1):-1, :].permute(0, 2, 1),
-            target.input_ids[:, 1:],
+            output.logits[:, contexts.input_ids.size(dim=-1):-1, :].permute(0, 2, 1),
+            targets.input_ids[:, 1:],
             reduction="sum",
             ignore_index=self.tokenizer.pad_token_id
         )
-        num_tokens = torch.sum(target.input_ids[:, 1:] != self.tokenizer.pad_token_id)
+        num_tokens = torch.sum(targets.attention_mask[:, 1:])
 
         predictions = self.model.generate(
-            context.input_ids,
+            contexts.input_ids,
             pad_token_id=self.tokenizer.pad_token_id,
             max_new_tokens=self.generation_config.max_new_tokens,
             num_beams=self.generation_config.beam_width,
@@ -178,7 +177,7 @@ class DialoGPT(GenerationBase):
             temperature=self.generation_config.temperature,
             top_p=self.generation_config.top_p,
             top_k=self.generation_config.top_k
-        )[:, context.input_ids.size(dim=-1):]
+        )[:, contexts.input_ids.size(dim=-1):]
 
         return predictions.tolist(), sum_cross_entropy, num_tokens
 

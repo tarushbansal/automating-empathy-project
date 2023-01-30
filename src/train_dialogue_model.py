@@ -9,7 +9,7 @@ from typing import Optional, List
 import torch
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
-from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
+from pytorch_lightning.callbacks import ModelCheckpoint
 
 # User-defined Modules
 from base_classes import DialogueModelBase, TokenizerBase
@@ -51,9 +51,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output_dir", type=str, default=None, required=True)
     parser.add_argument("--dialogue_model", type=str, default=None)
     parser.add_argument("--num_nodes", type=int, default=1)
-    parser.add_argument("--max_epochs", type=int, default=5)
+    parser.add_argument("--max_epochs", type=int, default=10)
     parser.add_argument("--batch_size", type=int, default=8)
-    parser.add_argument("--initial_lr", type=float, default=0.0001)
+    parser.add_argument("--initial_lr", type=float, default=0.00001)
     parser.add_argument("--pretrained_model_dir", type=str, default=None)
     parser.add_argument("--few_shot_training", action="store_true")
 
@@ -115,7 +115,7 @@ def main():
     else:
         if cli_args.dialogue_model is None:
             raise ValueError(
-                "Either a pretrained model directory or dialogue model must be specified for training!")
+                "Either a pretrained or new dialogue model must be specified for training!")
 
         dirname = os.path.dirname(os.path.abspath(__file__))
         with open(f"{dirname}/configs.json") as f:
@@ -166,7 +166,7 @@ def main():
             "kwargs": tokenizer_kwargs,
         }
     }
-    callbacks.extend([SaveConfigCallback(config=config)])
+    callbacks.append(SaveConfigCallback(config=config))
 
     # Set up trainer
     trainer = pl.Trainer(

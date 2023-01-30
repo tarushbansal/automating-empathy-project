@@ -19,6 +19,51 @@ from data_classes import ConceptNetBatchData
 # ------------------------- IMPLEMENTATION ------------------------------------
 
 
+class BlenderBot(EncoderDecoderModel):
+    def __init__(self, tokenizer: TokenizerBase) -> None:
+        super().__init__(tokenizer)
+        self.model = AutoModelForSeq2SeqLM.from_pretrained("facebook/blenderbot-400M-distill")
+        self.model.resize_token_embeddings(tokenizer.vocab_size)
+
+    @staticmethod
+    def tokenizer_cls():
+        return "BlenderBotTokenizer"
+
+    @property
+    def word_embeddings(self):
+        return self.model.get_input_embeddings()
+
+    @property
+    def hidden_size(self) -> int:
+        return self.model.config.hidden_size
+
+    def forward(
+        self,
+        contexts: torch.LongTensor,
+        targets: torch.LongTensor,
+        encoder_outputs: Optional[Tuple[torch.FloatTensor]] = None,
+        past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
+        use_cache: Optional[bool] = None
+    ) -> Seq2SeqLMOutput:
+
+        contexts, context_mask = self.create_padding_mask(contexts)
+        target_mask = None
+        if past_key_values is None:
+            targets, target_mask = self.create_padding_mask(targets)
+
+        out = self.model(
+            input_ids=contexts,
+            attention_mask=context_mask,
+            encoder_outputs=encoder_outputs,
+            decoder_input_ids=targets,
+            decoder_attention_mask=target_mask,
+            output_hidden_states=True,
+            past_key_values=past_key_values,
+            use_cache=use_cache
+        )
+        return out
+
+
 class GODEL(EncoderDecoderModel):
     def __init__(self, tokenizer: TokenizerBase, version: str) -> None:
         super().__init__(tokenizer)
@@ -49,12 +94,12 @@ class GODEL(EncoderDecoderModel):
         use_cache: Optional[bool] = None
     ) -> Seq2SeqLMOutput:
 
-        contexts, source_mask = self.create_padding_mask(contexts)
+        contexts, context_mask = self.create_padding_mask(contexts)
         targets, target_mask = self.create_padding_mask(targets)
 
         out = self.model(
             input_ids=contexts,
-            attention_mask=source_mask,
+            attention_mask=context_mask,
             encoder_outputs=encoder_outputs,
             decoder_input_ids=targets,
             decoder_attention_mask=target_mask,

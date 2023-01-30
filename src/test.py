@@ -25,7 +25,7 @@ def main():
     parser.add_argument("--sample", action="store_true")
     parser.add_argument("--temperature", type=float, default=1.0)
     parser.add_argument("--top_p", type=float, default=1.0)
-    parser.add_argument("--top_k", type=int, default=50)
+    parser.add_argument("--top_k", type=int, default=20)
     parser.add_argument("--max_new_tokens", type=int, default=100)
     cli_args, _ = parser.parse_known_args()
 

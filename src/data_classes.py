@@ -141,17 +141,17 @@ class GenerationConfig:
 class PPOConfig:
     def __init__(
         self,
-        clip_epsilon: Optional[float] = None,
-        kl_penalty: Optional[float] = None,
-        gamma: Optional[float] = None,
-        _lambda: Optional[float] = None,
-        vf_coeff: Optional[float] = None, 
-        entropy_coeff: Optional[float] = None, 
+        clip_epsilon: float,
+        kl_penalty: float,
+        gamma: float,
+        lam: float,
+        vf_coeff: float, 
+        entropy_coeff: float, 
     ) -> None:
         self.clip_epsilon = clip_epsilon
         self.kl_penalty = kl_penalty
         self.gamma = gamma
-        self._lambda = _lambda
+        self.lam = lam
         self.vf_coeff = vf_coeff
         self.entropy_coeff = entropy_coeff
 

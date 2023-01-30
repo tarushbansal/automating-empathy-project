@@ -18,6 +18,37 @@ from data_classes import ConceptNetRawData
 # ------------------------- IMPLEMENTATION ----------------------------------------
 
 
+class BlenderBotTokenizer(TokenizerBase):
+    def __init__(self) -> None:
+        super().__init__()
+        self.tokenizer = AutoTokenizer.from_pretrained("facebook/blenderbot-400M-distill")
+        self.tokenizer.truncation_side = "left"
+        self.SOS_IDX = self.tokenizer.bos_token_id
+        self.EOS_IDX = self.tokenizer.eos_token_id
+        self.vocab_size = len(self.tokenizer)
+
+    def encode_text(
+        self,
+        text: Union[str, List[str]],
+        *_
+    ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
+
+        if type(text) == list:
+            dialogue = " ".join([f"{self.tokenizer.bos_token} {utt} {self.tokenizer.eos_token}" for utt in text])
+            token_ids = self.tokenizer(
+                dialogue,
+                add_special_tokens=False,
+                truncation=True,
+                max_length=self.tokenizer.model_max_length)["input_ids"]
+
+        else:
+            token_ids = self.tokenizer(
+                f"{self.tokenizer.bos_token} {text} {self.tokenizer.eos_token}",
+                add_special_tokens=False)["input_ids"]
+
+        return token_ids, None
+
+
 class GODELTokenizer(TokenizerBase):
     def __init__(
         self,
@@ -91,7 +122,7 @@ class DialoGPTTokenizer(TokenizerBase):
     def encode_text(
         self,
         text: Union[str, List[str]],
-        instruction: Optional[str] = None
+        *_
     ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
     
         if type(text) == list:

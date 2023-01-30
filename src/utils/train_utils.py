@@ -19,8 +19,7 @@ class SaveConfigCallback(pl.Callback):
     def on_train_start(
         self, 
         trainer: pl.Trainer, 
-        pl_module: pl.LightningModule, 
-        stage: Optional[str] = None
+        *_
     ) -> None:
 
         if trainer.log_dir is None:
@@ -41,7 +40,7 @@ def load_config(trained_model_dir: str) -> dict:
         with open(config_fpath) as f:
             config = json.load(f)
     else:
-        raise ValueError("Specified directory doesn't have a config.json file!")
+        raise ValueError("Specified directory does not have a 'config.json' file!")
     
     return config
 
@@ -62,7 +61,8 @@ def load_ckpt_path(trained_model_dir: Optional[str]) -> Optional[str]:
                         break
             if ckpt_path is None:
                 raise ValueError(
-            "No checkpoint files found in the specified model directory!")
+            "No valid checkpoint files found in the specified model directory! " + 
+            "Valid formats are 'val_loss_epoch*.ckpt' or 'train_loss_epoch*.ckpt'")
         else:
             raise ValueError("Specified model directory does not exist!")
     

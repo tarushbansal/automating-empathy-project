@@ -325,7 +325,7 @@ def collate_encoder_decoder_batch(
         contexts, max_len_context_seq, padding_idx=tokenizer.PAD_IDX)
     targets = pad_seq_and_convert_to_tensor(
         targets, max_len_target_seq, padding_idx=tokenizer.PAD_IDX)
-    
+
     emotions =  None 
     if batch[0].emotion is not None:
         emotions = torch.LongTensor([item.emotion for item in batch])

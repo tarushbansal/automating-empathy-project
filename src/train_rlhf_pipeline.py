@@ -111,6 +111,7 @@ def main():
         model = model_cls(tokenizer=tokenizer, **model_kwargs)
         dialogue_model = DialogueModelSupervisor.load_from_checkpoint(
             load_ckpt_path(cli_args.pretrained_dialogue_model_dir),
+            strict=False,
             tokenizer=tokenizer,
             model=model,
             initial_lr=cli_args.initial_lr,
@@ -174,7 +175,6 @@ def main():
                              batch_size=cli_args.batch_size,
                              tokenizer=tokenizer,
                              num_workers=max(1, os.cpu_count() // 4),
-                             model_has_encoder=model.has_encoder,
                              few_shot_training=cli_args.few_shot_training)
 
     # Set up model checkpointing

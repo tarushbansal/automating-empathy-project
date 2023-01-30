@@ -2,7 +2,7 @@
 
 # System Modules
 import copy
-from typing import Tuple, Optional, Union
+from typing import Tuple, Optional
 from collections import OrderedDict
 
 import torch
@@ -15,12 +15,7 @@ from transformers.optimization import get_linear_schedule_with_warmup
 # User-defined Modules
 from dialogue_model_supervisor import DialogueModelSupervisor
 from reward_model_supervisor import RewardModelSupervisor
-from data_classes import (
-    DecoderModelBatch, 
-    EncoderDecoderModelBatch, 
-    RewardModelBatch, 
-    PPOConfig
-)
+from data_classes import ModelBatch, RewardModelBatch, PPOConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -101,18 +96,19 @@ class RLHFSupervisor(pl.LightningModule):
 
     def forward_and_log_metrics(
         self,
-        batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
+        batch: ModelBatch,
         stage: str
     ) -> float:
 
-        N = batch.contexts.size(dim=0) if self.tuned_model.model.has_encoder else batch.dialogues.size(dim=0)
-        device = batch.contexts.device if self.tuned_model.model.has_encoder else batch.dialogues.device
+        N = batch.contexts.size(dim=0)
+        device = batch.contexts.device
 
         with torch.no_grad():
             # ROLLOUT PHASE
-            contexts = batch.raw_contexts if self.tuned_model.model.has_encoder else batch.raw_dialogues
+            contexts = batch.raw_contexts
             enc_predictions = self.tuned_model.generate(batch)
-            predictions = [self.tuned_model.tokenizer.decode_to_text(enc) for enc in enc_predictions]
+            predictions = [self.tuned_model.tokenizer.decode_to_text(enc)
+                           for enc in enc_predictions]
             
             # EVALUATION PHASE
             dialogues = [
@@ -135,41 +131,33 @@ class RLHFSupervisor(pl.LightningModule):
             self.log(f"{stage}_reward", torch.mean(scores), batch_size=N, **self.default_log_config)
         
         # OPTIMIZATION PHASE
-        if self.tuned_model.model.has_encoder:
-            max_len = max([len(seq) for seq in enc_predictions])
-            batch.targets = torch.LongTensor(
-                [seq + [self.tuned_model.tokenizer.PAD_IDX] * (max_len - len(seq))
-                 for seq in enc_predictions])
-            batch.targets = batch.targets.to(device)
-            labels = batch.targets[:, 1:]
-        else:
-            dialogues = [self.tuned_model.tokenizer.encode_text(dialogue) 
-                         for dialogue in dialogues]
-            max_len = max([len(seq) for seq in dialogues])
-            batch.dialogues = torch.LongTensor(
-                [seq + [self.tuned_model.tokenizer.PAD_IDX] * (max_len - len(seq)) 
-                 for seq in dialogues])
-            batch.dialogues = batch.dialogues.to(device)
-            labels = batch.dialogues[:, 1:]
+        max_len = max([len(seq) for seq in enc_predictions])
+        batch.targets = torch.LongTensor(
+            [seq + [self.tuned_model.tokenizer.PAD_IDX] * (max_len - len(seq))
+             for seq in enc_predictions])
+        batch.targets = batch.targets.to(device)
         
         # Compute new and reference log probability and advantage for each generated token
-        out = self.tuned_model.forward(batch)
-        last_hidden_states = (
-            out.decoder_hidden_states[-1][:, :-1, :] 
-            if self.tuned_model.model.has_encoder 
-            else out.hidden_states[-1][:, :-1, :]
-        )
+        labels = batch.targets[:, 1:]
+        output, target_logits, _ = self.tuned_model.forward(batch)
+        if self.tuned_model.model.has_encoder:
+            last_hidden_states = output.decoder_hidden_states[-1][:, :-1, :] 
+        else:
+            target_len = batch.targets.size(dim=1)
+            insert_idx = torch.sum(batch.contexts != self.tuned_model.tokenizer.PAD_IDX, dim=1)
+            last_hidden_states = torch.stack(
+                tuple(output.hidden_states[-1][i, insert_idx[i]:insert_idx[i]+target_len-1, :] 
+                      for i in range(N)))
         pad_mask = (labels != self.tuned_model.tokenizer.PAD_IDX)
         gen_len = torch.sum(pad_mask, dim=-1)
-        new_log_probs = self.log_probs(out.logits[:, :-1, :], labels, pad_mask)
-        entropy = -torch.sum(
-            torch.softmax(out.logits[:, :-1, :], dim=-1) * 
-                torch.log_softmax(out.logits[:, :-1, :], dim=-1), dim=-1)
+        new_log_probs = self.log_probs(target_logits[:, :-1, :], labels, pad_mask)
+        entropy = -torch.sum(torch.softmax(target_logits[:, :-1, :], dim=-1) * 
+                             torch.log_softmax(target_logits[:, :-1, :], dim=-1), dim=-1)
         values = self.value_head(self.dropout(last_hidden_states)).squeeze(-1)
 
         with torch.no_grad():
-            logits = self.ref_model.forward(batch).logits
-            ref_log_probs = self.log_probs(logits[:, :-1, :], labels, pad_mask)
+            _, target_logits, _ = self.ref_model.forward(batch)
+            ref_log_probs = self.log_probs(target_logits[:, :-1, :], labels, pad_mask)
 
         ratios = torch.exp(new_log_probs - ref_log_probs)
         clipped_ratios = torch.clip(
@@ -200,7 +188,7 @@ class RLHFSupervisor(pl.LightningModule):
 
     def training_step(
         self, 
-        batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
+        batch: ModelBatch,
         _
     ) -> float:
         train_loss = self.forward_and_log_metrics(batch, "train")
@@ -208,7 +196,7 @@ class RLHFSupervisor(pl.LightningModule):
 
     def validation_step(
         self, 
-        batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
+        batch: ModelBatch,
         _
     ) -> float:
         val_loss = self.forward_and_log_metrics(batch, "val")

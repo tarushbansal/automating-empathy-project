@@ -1,17 +1,13 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
-from typing import Union, Optional, Callable, List
+from typing import Optional, Callable, List
 
 import torch
 import torch.nn.functional as F
 
 # User-Defined Modules
-from data_classes import (
-    EncoderDecoderModelBatch, 
-    DecoderModelBatch, 
-    GenerationConfig
-)
+from data_classes import ModelBatch, GenerationConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -42,8 +38,9 @@ def warp_logits(
 def generate(
     forward_fn: Callable,
     model_has_encoder: bool,
-    batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
+    batch: ModelBatch,
     stop_token: int,
+    pad_token: int,
     generation_config: GenerationConfig,
     start_token: Optional[int] = None,
 ) -> List[List[int]]:
@@ -55,13 +52,8 @@ def generate(
     top_p = generation_config.top_p
     top_k = generation_config.top_k
 
-    if model_has_encoder:
-        N = batch.contexts.size(dim=0)
-        device = batch.contexts.device
-    else:
-        N = batch.dialogues.size(dim=0)
-        dialogues = batch.dialogues
-        device = batch.dialogues.device
+    N = batch.contexts.size(dim=0)
+    device = batch.contexts.device
 
     if model_has_encoder:
         if start_token is None:
@@ -77,31 +69,32 @@ def generate(
     beam_scores[:, 1:] = beam_scores[:, 1:].fill_(float("-inf"))
     stop_detected = torch.zeros(N, beam_width, dtype=torch.bool, device=device)
     decoder_cache = [None for _ in range(beam_width)]
+    encoder_cache = None
 
     while True:
-        if model_has_encoder:
-            encoder_cache = None
-
         # Run all beams through model and process output logits
         for i in range(beam_width):
-            if model_has_encoder:
-                batch.targets = beams[:, i, :] if decoder_cache[i] is None else beams[:, i, -1:]
-                out = forward_fn(
-                    batch=batch,
-                    encoder_outputs=encoder_cache,
-                    past_key_values=decoder_cache[i],
-                    use_cache=True
-                )
-                encoder_cache = (out.encoder_last_hidden_state,)
+            if decoder_cache[i] is not None:
+                batch.targets = beams[:, i, -1:]
+                if not model_has_encoder:
+                    batch.contexts = torch.empty(N, 0, dtype=torch.long, device=device)
             else:
-                batch.dialogues = dialogues if decoder_cache[i] is None else beams[:, i, -1:]
-                out = forward_fn(
-                    batch=batch,
-                    past_key_values=decoder_cache[i],
-                    use_cache=True
-                )
-            new_logits = out.logits[:, -1, :].unsqueeze(1)
-            decoder_cache[i] = out.past_key_values
+                batch.targets = beams[:, i, :]
+            input_kwargs = {
+                "batch": batch,
+                "encoder_outputs": encoder_cache,
+                "past_key_values": decoder_cache[i],
+                "use_cache": True
+            }
+            output, target_logits, _ = forward_fn(**input_kwargs)
+            if model_has_encoder:
+                encoder_cache = (output.encoder_last_hidden_state,)
+            if batch.targets.size(dim=-1) == 0:
+                insert_idx = torch.sum(batch.contexts != pad_token, dim=1, keepdim=True)
+                new_logits = torch.gather(output.logits, 1, (insert_idx - 1).unsqueeze(-1))
+            else:
+                new_logits = target_logits[:, -1:, :]
+            decoder_cache[i] = output.past_key_values
             logits = torch.cat((logits, new_logits), dim=1) if i != 0 else new_logits
 
         warped_logits = warp_logits(logits, temperature, top_p, top_k)

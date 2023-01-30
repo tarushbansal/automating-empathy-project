@@ -15,16 +15,14 @@ from base_classes import TokenizerBase
 from data_classes import (
     ConceptNetRawData,
     ConceptNetBatchData,
-    EncoderDecoderModelRawData,
-    EncoderDecoderModelBatch,
-    DecoderModelRawData,
-    DecoderModelBatch
+    ModelRawData,
+    ModelBatch
 )
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
 
-class EncoderDecoderDataset(data.Dataset):
+class Dataset(data.Dataset):
     def __init__(
         self,
         tokenizer: TokenizerBase,
@@ -46,7 +44,7 @@ class EncoderDecoderDataset(data.Dataset):
     def __getitem__(
         self, 
         idx: int
-    ) -> EncoderDecoderModelRawData:
+    ) -> ModelRawData:
 
         # Map emotion label to token
         emotion = None
@@ -62,60 +60,12 @@ class EncoderDecoderDataset(data.Dataset):
         # Tokenize response utterance
         target, _ = self.tokenizer.encode_text(self.targets[idx])
 
-        return EncoderDecoderModelRawData(
+        return ModelRawData(
             context=context,
             raw_context=self.contexts[idx],
             target=target,
             emotion=emotion,
             concept_net_data=concept_net_data
-        )
-
-
-class DecoderDataset(data.Dataset):
-    def __init__(
-        self,
-        tokenizer: TokenizerBase,
-        dialogues: List[List[str]],
-        targets: Optional[List[str]] = None,
-        instructions: Optional[str] = None,
-        emotions: Optional[List[str]] = None,
-    ) -> None:
-        
-        self.tokenizer = tokenizer
-        self.dialogues = dialogues
-        self.targets = targets
-        self.instructions = instructions
-        self.emotions = emotions
-
-    def __len__(self) -> int:
-        return len(self.dialogues)
-
-    def __getitem__(
-        self, 
-        idx: int
-    ) -> DecoderModelRawData:
-
-        # Map emotion label to token
-        emotion = None
-        if self.emotions is not None:
-            emotion = self.tokenizer.emo_map[self.emotions[idx]]
-
-        # Tokenize dialogue context
-        dialogue, _ = self.tokenizer.encode_text(
-            self.dialogues[idx],
-            None if self.instructions is None else self.instructions[idx]
-        )
-
-        # Tokenize response utterance
-        target = None
-        if self.targets is not None:
-            target, _ = self.tokenizer.encode_text(self.targets[idx])
-        
-        return DecoderModelRawData(
-            dialogue=dialogue,
-            raw_dialogue=self.dialogues[idx],
-            target=target,
-            emotion=emotion
         )
 
 
@@ -126,7 +76,6 @@ class DataModule(pl.LightningDataModule):
         batch_size: int,
         tokenizer: TokenizerBase,
         num_workers: int,
-        model_has_encoder: bool,
         few_shot_training: Optional[bool] = None,
         ppo_mode: Optional[bool] = None,
     ) -> None:
@@ -136,13 +85,8 @@ class DataModule(pl.LightningDataModule):
         self.batch_size = batch_size
         self.tokenizer = tokenizer
         self.num_workers = num_workers
-        self.model_has_encoder = model_has_encoder
         self.few_shot_training = few_shot_training
         self.ppo_mode = ppo_mode
-        self.collate_fn = (
-            collate_encoder_decoder_batch 
-            if self.model_has_encoder else collate_decoder_batch
-        )
 
     def load_data(
         self, 
@@ -156,73 +100,34 @@ class DataModule(pl.LightningDataModule):
     def load_dataset(self, split: str):
         path_prefix = f"{self.dataset_dir}/{split}"
 
-        if self.model_has_encoder:
-            if split != "test":
-                path_prefix += "/encoderdecoder"
-            contexts = self.load_data(f"{path_prefix}/contexts.json")
-            targets = self.load_data(f"{path_prefix}/targets.json")
+        contexts = self.load_data(f"{path_prefix}/contexts.json")
+        targets = self.load_data(f"{path_prefix}/targets.json")
             
-            instructions = None
-            if os.path.isfile(f"{path_prefix}/instructions.json"):
-                instructions = self.load_data(f"{path_prefix}/instructions.json")
-            
-            emotions = None
-            emotions_fpath = f"{path_prefix}/emotions.json"
-            if os.path.isfile(emotions_fpath):
-                emotions = self.load_data(emotions_fpath)
-            
-            if self.few_shot_training:
-                data = list(zip(contexts, targets, emotions, instructions))
-                random.seed(0)
-                if split == "train":
-                    data = random.choices(data, k=80)
-                elif split == "val":
-                    data = random.choices(data, k=20)
-                contexts, targets, emotions, instructions = zip(*data)
+        instructions = None
+        if os.path.isfile(f"{path_prefix}/instructions.json"):
+            instructions = self.load_data(f"{path_prefix}/instructions.json")
+        
+        emotions = None
+        emotions_fpath = f"{path_prefix}/emotions.json"
+        if os.path.isfile(emotions_fpath):
+            emotions = self.load_data(emotions_fpath)
+        
+        if self.few_shot_training:
+            data = list(zip(contexts, targets, emotions, instructions))
+            random.seed(0)
+            if split == "train":
+                data = random.choices(data, k=80)
+            elif split == "val":
+                data = random.choices(data, k=20)
+            contexts, targets, emotions, instructions = zip(*data)
 
-            return EncoderDecoderDataset(
-                self.tokenizer,
-                contexts,
-                targets,
-                instructions,
-                emotions
-            )
-        else:
-            if split == "test":
-                dialogues = self.load_data(f"{path_prefix}/contexts.json")
-                targets = self.load_data(f"{path_prefix}/targets.json")
-            else:
-                dialogues = self.load_data(f"{path_prefix}/decoder/dialogues.json")
-                if self.ppo_mode:
-                    for dialogue in dialogues:
-                        dialogue.pop(-1)
-                targets = None
-                path_prefix += f"/decoder"
-            
-            emotions = None
-            if os.path.isfile(f"{path_prefix}/emotions.json"):
-                emotions = self.load_data(f"{path_prefix}/emotions.json")
-            
-            instructions = None
-            if os.path.isfile(f"{path_prefix}/instructions.json"):
-                instructions = self.load_data(f"{path_prefix}/instructions.json")
-            
-            if self.few_shot_training:
-                data = list(zip(dialogues, targets, emotions, instructions))
-                random.seed(0)
-                if split == "train":
-                    data = random.choices(data, k=80)
-                elif split == "val":
-                    data = random.choices(data, k=20)
-                dialogues, targets, emotions, instructions = zip(*data)
-
-            return DecoderDataset(
-                self.tokenizer,
-                dialogues,
-                targets,
-                instructions,
-                emotions
-            )
+        return Dataset(
+            self.tokenizer,
+            contexts,
+            targets,
+            instructions,
+            emotions
+        )
 
     def setup(self, stage: str) -> None:
         if stage == "fit":
@@ -232,13 +137,7 @@ class DataModule(pl.LightningDataModule):
             self.test_dataset = self.load_dataset("test")
 
     def transfer_batch_to_device(self, batch, device, dataloader_idx):
-        if isinstance(batch, DecoderModelBatch):
-            batch.dialogues = batch.dialogues.to(device)
-            if batch.targets is not None:
-                batch.targets = batch.targets.to(device)
-            if batch.emotions is not None:
-                batch.emotions = batch.emotions.to(device)
-        elif isinstance(batch, EncoderDecoderModelBatch):
+        if isinstance(batch, ModelBatch):
             batch.contexts = batch.contexts.to(device)
             batch.targets = batch.targets.to(device)
             if batch.emotions is not None:
@@ -258,7 +157,7 @@ class DataModule(pl.LightningDataModule):
             self.train_dataset,
             batch_size=self.batch_size,
             shuffle=True,
-            collate_fn=lambda x: self.collate_fn(x, self.tokenizer),
+            collate_fn=lambda x: collate_batch(x, self.tokenizer),
             num_workers=self.num_workers
         )
 
@@ -266,7 +165,7 @@ class DataModule(pl.LightningDataModule):
         return data.DataLoader(
             self.val_dataset,
             batch_size=self.batch_size,
-            collate_fn=lambda x: self.collate_fn(x, self.tokenizer),
+            collate_fn=lambda x: collate_batch(x, self.tokenizer),
             num_workers=self.num_workers
         )
 
@@ -274,46 +173,15 @@ class DataModule(pl.LightningDataModule):
         return data.DataLoader(
             self.test_dataset,
             batch_size=self.batch_size,
-            collate_fn=lambda x: self.collate_fn(x, self.tokenizer),
+            collate_fn=lambda x: collate_batch(x, self.tokenizer),
             num_workers=self.num_workers
         )
 
 
-def collate_decoder_batch(
-    batch: List[DecoderModelRawData],
+def collate_batch(
+    batch: List[ModelRawData],
     tokenizer: TokenizerBase
-) -> DecoderModelBatch:
-
-    dialogues = [item.dialogue for item in batch]
-    max_len_dialogue_seq = max([len(seq) for seq in dialogues])
-    dialogues = pad_seq_and_convert_to_tensor(
-        dialogues, max_len_dialogue_seq, padding_idx=tokenizer.PAD_IDX)
-    
-    targets = None
-    if batch[0].target is not None:
-        targets = [item.target for item in batch]
-        max_len_target_seq = max([len(seq) for seq in targets])
-        targets = pad_seq_and_convert_to_tensor(
-            targets, max_len_target_seq, padding_idx=tokenizer.PAD_IDX)
-    
-    emotions =  None 
-    if batch[0].emotion is not None:
-        emotions = torch.LongTensor([item.emotion for item in batch])
-
-    raw_dialogues = [item.raw_dialogue for item in batch]
-
-    return DecoderModelBatch(
-        dialogues=dialogues,
-        raw_dialogues=raw_dialogues,
-        targets=targets,
-        emotions=emotions
-    )
-
-
-def collate_encoder_decoder_batch(
-    batch: List[EncoderDecoderModelRawData],
-    tokenizer: TokenizerBase
-) -> EncoderDecoderModelBatch:
+) -> ModelBatch:
 
     contexts = [item.context for item in batch]
     targets = [item.target for item in batch]
@@ -341,7 +209,7 @@ def collate_encoder_decoder_batch(
 
     raw_contexts = [item.raw_context for item in batch]
 
-    return EncoderDecoderModelBatch(
+    return ModelBatch(
         contexts=contexts,
         raw_contexts=raw_contexts,
         targets=targets,

@@ -19,6 +19,9 @@ class TokenizerBase:
 
         # No start of sentence tokens will be used for target responses by default
         self.SOS_IDX = None
+
+        # EOS_IDX property to be set in child class
+        self._EOS_IDX = None
         
         # Emotion label map
         self.emo_map = {
@@ -33,6 +36,18 @@ class TokenizerBase:
         }
         self.rev_emo_map = {v : k for k, v in self.emo_map.items()}
         self.num_emo_labels = len(self.emo_map)
+
+    @property
+    def EOS_IDX(self) -> int:
+        if self._EOS_IDX is None:
+            raise NotImplementedError
+        return self._EOS_IDX
+    
+    @EOS_IDX.setter
+    def EOS_IDX(self, value: int):
+        if type(value) != int:
+            raise TypeError("Property must be of type 'int'!")
+        self._EOS_IDX = value
 
     def encode_text(
         self,
@@ -55,6 +70,11 @@ class DialogueModelBase(nn.Module):
     def __init__(self, tokenizer: TokenizerBase) -> None:
         super().__init__()
         self.tokenizer = tokenizer
+        self._has_encoder = None
+        self._hidden_size = None
+        self._word_embeddings = None
+        self._requires_emotion_label = False
+        self._requires_concept_net_data = False
     
     @staticmethod
     def tokenizer_cls():
@@ -62,23 +82,59 @@ class DialogueModelBase(nn.Module):
 
     @property
     def has_encoder(self) -> bool:
-        raise NotImplementedError
+        if self._has_encoder is None:
+            raise NotImplementedError
+        return self._has_encoder
+    
+    @has_encoder.setter
+    def has_encoder(self, value: bool) -> None:
+        if type(value) != bool:
+            raise TypeError("Property must be of type 'bool'!")
+        self._has_encoder = bool
+
+    @property
+    def hidden_size(self) -> bool:
+        if self._hidden_size is None:
+            raise NotImplementedError
+        return self._hidden_size
+    
+    @hidden_size.setter
+    def hidden_size(self, value: int) -> None:
+        if type(value) != int:
+            raise TypeError("Property must be of type 'int'!")
+        self._hidden_size = value
     
     @property
-    def hidden_size(self) -> int:
-        raise NotImplementedError
+    def word_embeddings(self) -> nn.Embedding:
+        if self._word_embeddings is None:
+            raise NotImplementedError
+        return self._word_embeddings
     
-    @property
-    def word_embeddings(self):
-        raise NotImplementedError
+    @word_embeddings.setter
+    def word_embeddings(self, embeddings: nn.Embedding) -> None:
+        if not isinstance(embeddings, nn.Embedding):
+            raise TypeError("Property must be an instance of 'nn.Embedding'!")
+        self._word_embeddings = embeddings
         
     @property
     def requires_emotion_label(self) -> bool:
-        return False
+        return self._requires_emotion_label
+    
+    @requires_emotion_label.setter
+    def requires_emotion_label(self, value: bool) -> None:
+        if type(value) != bool:
+            raise TypeError("Property must be of type 'bool'!")
+        self._requires_emotion_label = bool
     
     @property
     def requires_concept_net_data(self) -> bool:
-        return False
+        return self._requires_concept_net_data
+    
+    @requires_concept_net_data.setter
+    def requires_concept_net_data(self, value: bool) -> None:
+        if type(value) != bool:
+            raise TypeError("Property must be of type 'bool'!")
+        self._requires_concept_net_data = bool
 
     def create_padding_mask(self, batch_seq) -> Tuple[torch.Tensor]:
         padding_mask = (batch_seq != self.tokenizer.PAD_IDX)
@@ -98,7 +154,6 @@ class EncoderDecoderModel(DialogueModelBase):
     
     @property
     def has_encoder(self) -> bool:
-        # DO NOT OVERWRITE THIS PROPERTY
         return True
 
     def forward(
@@ -118,7 +173,6 @@ class DecoderModel(DialogueModelBase):
     
     @property
     def has_encoder(self) -> bool:
-        # DO NOT OVERWRITE THIS PROPERTY
         return False
 
     def forward(

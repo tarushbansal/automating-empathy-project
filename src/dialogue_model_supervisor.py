@@ -17,11 +17,7 @@ from transformers.modeling_outputs import Seq2SeqLMOutput, CausalLMOutput
 from base_classes import DialogueModelBase, TokenizerBase
 from utils.metric_utils import compute_test_metrics
 from utils.generation_utils import generate
-from data_classes import (
-    EncoderDecoderModelBatch, 
-    DecoderModelBatch, 
-    GenerationConfig
-)
+from data_classes import ModelBatch, GenerationConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -46,11 +42,11 @@ class DialogueModelSupervisor(pl.LightningModule):
 
     def forward(
         self, 
-        batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
+        batch: ModelBatch,
         encoder_outputs: Optional[Tuple[torch.FloatTensor]] = None,
         past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
         use_cache: Optional[bool] = None
-    ) -> Union[Seq2SeqLMOutput, CausalLMOutput]:
+    ) -> Tuple[Union[Seq2SeqLMOutput, CausalLMOutput, torch.Tensor]]:
         input_kwargs = {"past_key_values": past_key_values, "use_cache": use_cache}
         if self.model.requires_emotion_label:
             input_kwargs["emotion_label"] = batch.emotions
@@ -61,25 +57,36 @@ class DialogueModelSupervisor(pl.LightningModule):
             input_kwargs["contexts"] = batch.contexts
             input_kwargs["targets"] = batch.targets
             output = self.model(**input_kwargs)
+            target_logits = output.logits
         else:
-            input_kwargs["dialogues"] = batch.dialogues
+            N = batch.contexts.size(dim=0)
+            target_len = batch.targets.size(dim=1)
+            insert_idx = torch.sum(batch.contexts != self.tokenizer.PAD_IDX, dim=1)
+            unstacked_sequences = tuple(torch.cat((
+                    batch.contexts[i, :insert_idx[i]], 
+                    batch.targets[i], 
+                    batch.contexts[i, insert_idx[i]:]), dim=-1) 
+                for i in range(N))
+            input_kwargs["dialogues"] = torch.stack(unstacked_sequences)
             output = self.model(**input_kwargs)
+            target_logits = torch.stack(
+                tuple(output.logits[i, insert_idx[i]:insert_idx[i]+target_len] 
+                      for i in range(N)))
+        lm_loss = F.cross_entropy(
+            target_logits[:, :-1, :].permute(0, 2, 1),
+            batch.targets[:, 1:],
+            ignore_index=self.tokenizer.PAD_IDX
+        )
         
-        return output
+        return output, target_logits, lm_loss
 
     def forward_and_log_metrics(
         self, 
-        batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
+        batch: ModelBatch,
         stage: str
     ) -> float:
-        output = self.forward(batch)
-        N = batch.contexts.size(dim=0) if self.model.has_encoder else batch.dialogues.size(dim=0)
-        labels = batch.targets[:, 1:] if self.model.has_encoder else batch.dialogues[:, 1:]
-        lm_loss = F.cross_entropy(
-            output.logits[:, :-1, :].permute(0, 2, 1),
-            labels,
-            ignore_index=self.tokenizer.PAD_IDX
-        )
+        N = batch.contexts.size(dim=0)
+        lm_loss = self.forward(batch)[-1]
         emo_loss, emo_attn_loss = 0, 0
         if hasattr(self.model, "emo_logits"):
             emo_loss = F.cross_entropy(
@@ -127,7 +134,7 @@ class DialogueModelSupervisor(pl.LightningModule):
 
     def training_step(
         self, 
-        batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
+        batch: ModelBatch,
         _
     ) -> float:
         train_loss = self.forward_and_log_metrics(batch, "train")
@@ -135,32 +142,29 @@ class DialogueModelSupervisor(pl.LightningModule):
 
     def validation_step(
         self, 
-        batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
+        batch: ModelBatch,
         _
     ) -> float:
         val_loss = self.forward_and_log_metrics(batch, "val")
         return val_loss
 
     def on_test_start(self) -> None:
-        self.sum_cross_entropy = 0
-        self.num_tokens = 0
         (self.contexts, self.targets, self.emotions,
          self.predictions, self.enc_targets, self.enc_predictions,
-         self.emo_predictions, self.concepts) = ([] for _ in range(8))
+         self.emo_predictions, self.concepts, self.lm_loss) = ([] for _ in range(9))
 
     def test_step(
         self, 
-        batch: Union[EncoderDecoderModelBatch, DecoderModelBatch],
+        batch: ModelBatch,
         _
     ) -> None:
-        contexts = batch.contexts if self.model.has_encoder else batch.dialogues
         self.contexts.extend([self.tokenizer.decode_to_text(context)
-                              for context in contexts.tolist()])
-        targets = [self.tokenizer.decode_to_text(target)
-                   for target in batch.targets.tolist()]
-        self.targets.extend(targets)
-        self.enc_targets.extend([self.tokenizer.encode_text(target)[0]
-                                 for target in targets])
+                              for context in batch.contexts.tolist()])
+        self.targets.extend([self.tokenizer.decode_to_text(target)
+                             for target in batch.targets.tolist()])
+        indices = torch.sum(batch.targets != self.tokenizer.PAD_IDX, dim=1)
+        self.enc_targets.extend([batch.targets[i, :indices[i]].tolist()
+                                 for i in range(batch.targets.size(dim=0))])
 
         enc_predictions = self.generate(batch)
         self.enc_predictions.extend(enc_predictions)
@@ -175,30 +179,12 @@ class DialogueModelSupervisor(pl.LightningModule):
         if batch.emotions is not None:
             self.emotions.extend([self.tokenizer.rev_emo_map[emo_idx]
                                 for emo_idx in batch.emotions.tolist()])
-        if self.model.has_encoder and batch.concept_net_data is not None:
+        if batch.concept_net_data is not None:
             self.concepts.extend([self.tokenizer.decode_to_text(concepts)
                                   for concepts in batch.concept_net_data.tolist()])
         
-        if self.model.has_encoder:
-            labels = batch.targets[:, 1:]
-        else:
-            insert_idx = torch.sum(batch.dialogues != self.tokenizer.PAD_IDX, dim=1)
-            unstacked_sequences = tuple(torch.cat((
-                    batch.dialogues[i, :insert_idx[i]], 
-                    batch.targets[i], 
-                    batch.dialogues[i, insert_idx[i]:]), dim=-1) 
-                for i in range(batch.dialogues.size(dim=0)))
-            batch.dialogues = torch.stack(unstacked_sequences)
-            labels = batch.dialogues[:, 1:]
-
-        logits = self.forward(batch).logits
-        self.num_tokens += torch.sum(labels != self.tokenizer.PAD_IDX)
-        self.sum_cross_entropy += F.cross_entropy(
-            logits[:, :-1, :].permute(0, 2, 1),
-            labels,
-            reduction="sum",
-            ignore_index=self.tokenizer.PAD_IDX
-        )
+        lm_loss = self.forward(batch)[-1]
+        self.lm_loss.append(lm_loss)
 
     def test_epoch_end(self, _) -> None:
         N = len(self.contexts)
@@ -234,7 +220,7 @@ class DialogueModelSupervisor(pl.LightningModule):
             self.metric_n_grams,
         )
 
-        test_metrics["ppl"] = math.exp(self.sum_cross_entropy / self.num_tokens)
+        test_metrics["ppl"] = math.exp(sum(self.lm_loss) / len(self.lm_loss))
 
         if log_emo_accuracy:
             test_metrics["emo_accuracy"] = accurate_emo_labels / N
@@ -248,15 +234,16 @@ class DialogueModelSupervisor(pl.LightningModule):
     @torch.no_grad()
     def generate(
         self, 
-        batch: Union[EncoderDecoderModelBatch, DecoderModelBatch]
+        batch: ModelBatch
     ) -> torch.LongTensor:
         self.model.eval()
         return generate(
             forward_fn=self.forward, 
             batch=copy.deepcopy(batch), 
+            model_has_encoder=self.model.has_encoder,
             start_token=self.tokenizer.SOS_IDX,
             stop_token=self.tokenizer.EOS_IDX,
-            model_has_encoder=self.model.has_encoder,
+            pad_token=self.tokenizer.PAD_IDX,
             generation_config=self.generation_config
         )
 

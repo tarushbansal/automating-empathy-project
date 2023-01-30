@@ -24,18 +24,12 @@ class BlenderBot(EncoderDecoderModel):
         super().__init__(tokenizer)
         self.model = AutoModelForSeq2SeqLM.from_pretrained("facebook/blenderbot-400M-distill")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
+        self.word_embeddings = self.model.get_input_embeddings()
+        self.hidden_size = self.model.config.hidden_size
 
     @staticmethod
     def tokenizer_cls():
         return "BlenderBotTokenizer"
-
-    @property
-    def word_embeddings(self):
-        return self.model.get_input_embeddings()
-
-    @property
-    def hidden_size(self) -> int:
-        return self.model.config.hidden_size
 
     def forward(
         self,
@@ -72,18 +66,12 @@ class GODEL(EncoderDecoderModel):
         self.model = AutoModelForSeq2SeqLM.from_pretrained(f"microsoft/GODEL-v1_1-{version}-seq2seq")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
         self.model.config.dropout_rate = 0.6
+        self.word_embeddings = self.model.get_input_embeddings()
+        self.hidden_size = self.model.config.hidden_size
 
     @staticmethod
     def tokenizer_cls():
         return "GODELTokenizer"
-
-    @property
-    def word_embeddings(self):
-        return self.model.get_input_embeddings()
-
-    @property
-    def hidden_size(self) -> int:
-        return self.model.config.hidden_size
 
     def forward(
         self,
@@ -121,22 +109,13 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
         self.graph_embeddings = nn.Embedding(2, self.hidden_size)
         self.emo_linear = nn.Linear(self.model.config.hidden_size, self.tokenizer.num_emo_labels)
         self.attn_loss = nn.MSELoss()
+        self.word_embeddings = self.model.get_input_embeddings()
+        self.hidden_size = self.model.config.hidden_size
+        self.requires_concept_net_data = True
 
     @staticmethod
     def tokenizer_cls():
         return "GODELTokenizer"
-
-    @property
-    def word_embeddings(self):
-        return self.model.get_input_embeddings()
-    
-    @property
-    def hidden_size(self) -> int:
-        return self.model.config.hidden_size
-    
-    @property
-    def requires_concept_net_data(self) -> bool:
-        return True
 
     def knowledge_enriched_context(
         self,
@@ -206,15 +185,9 @@ class DialoGPT(DecoderModel):
         self.model = AutoModelForCausalLM.from_pretrained(f"microsoft/DialoGPT-{version}")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
         self.model.config.resid_pdrop = self.model.config.attn_pdrop = self.model.config.embd_pdrop = 0.6
+        self.word_embeddings = self.model.get_input_embeddings()
+        self.hidden_size = self.model.config.hidden_size
 
-    @property
-    def word_embeddings(self):
-        return self.model.get_input_embeddings()
-    
-    @property
-    def hidden_size(self) -> int:
-        return self.model.config.hidden_size
-    
     @staticmethod
     def tokenizer_cls():
         return "DialoGPTTokenizer"

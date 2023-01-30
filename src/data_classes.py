@@ -34,7 +34,7 @@ class ConceptNetBatchData:
         self.concept_emo_intensity = concept_emo_intensity
 
 
-class EncoderDecoderModelRawData:
+class ModelRawData:
     def __init__(
         self,
         context: List[int],
@@ -50,20 +50,6 @@ class EncoderDecoderModelRawData:
         self.concept_net_data = concept_net_data
 
 
-class DecoderModelRawData:
-    def __init__(
-        self,
-        dialogue: List[List[int]],
-        raw_dialogue: List[List[str]],
-        target: Optional[List[int]],
-        emotion: Optional[List[int]],
-    ):
-        self.dialogue = dialogue
-        self.raw_dialogue = raw_dialogue
-        self.target = target
-        self.emotion = emotion
-
-
 class RewardModelRawData:
     def __init__(
         self,
@@ -74,7 +60,7 @@ class RewardModelRawData:
         self.dialogue = dialogue
         self.reward = reward
 
-class EncoderDecoderModelBatch:
+class ModelBatch:
     def __init__(
         self,
         contexts: torch.LongTensor,
@@ -89,21 +75,6 @@ class EncoderDecoderModelBatch:
         self.targets = targets
         self.emotions = emotions
         self.concept_net_data = concept_net_data
-
-
-class DecoderModelBatch:
-    def __init__(
-        self,
-        dialogues: torch.LongTensor,
-        raw_dialogues: List[List[str]],
-        targets: Optional[torch.LongTensor],
-        emotions: Optional[torch.LongTensor],
-    ) -> None:
-
-        self.dialogues = dialogues
-        self.raw_dialogues = raw_dialogues
-        self.targets = targets
-        self.emotions = emotions
 
 
 class RewardModelBatch:

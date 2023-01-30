@@ -7,12 +7,8 @@ import argparse
 # User-defined Modules
 from dialogue_model_supervisor import DialogueModelSupervisor
 from utils.train_utils import load_ckpt_path, load_config
-from data_loader import collate_decoder_batch, collate_encoder_decoder_batch
-from data_classes import (
-    EncoderDecoderModelRawData, 
-    DecoderModelRawData, 
-    GenerationConfig
-)
+from data_loader import collate_batch
+from data_classes import ModelRawData, GenerationConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -56,6 +52,7 @@ def main():
     model.eval()
     model_supervisor = DialogueModelSupervisor.load_from_checkpoint(
         ckpt_path,
+        strict=False,
         tokenizer=tokenizer,
         model=model,
         batch_size=1,
@@ -91,24 +88,15 @@ def main():
             None if instruction == "" else instruction
         )
 
-        if model.has_encoder:
-            batch = collate_encoder_decoder_batch([
-                EncoderDecoderModelRawData(
-                    context=enc_context,
-                    raw_context=context,
-                    target=[],
-                    emotion=None,
-                    concept_net_data=concept_net_data
-                )], tokenizer
-            )
-        else:
-            batch = collate_decoder_batch([
-                DecoderModelRawData(
-                    dialogue=context,
-                    raw_dialogue=context,
-                    gen_target=None
-                )], tokenizer
-            )
+        batch = collate_batch([
+            ModelRawData(
+                context=enc_context,
+                raw_context=context,
+                target=[],
+                emotion=None,
+                concept_net_data=concept_net_data
+            )], tokenizer
+        )
 
         response = model_supervisor.generate(batch)[0]
         decoded_reponse = tokenizer.decode_to_text(response)

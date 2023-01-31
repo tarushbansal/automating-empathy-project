@@ -109,7 +109,7 @@ class RLHFSupervisor(pl.LightningModule):
             enc_predictions = self.tuned_model.generate(batch)
             predictions = [self.tuned_model.tokenizer.decode_to_text(enc)
                            for enc in enc_predictions]
-            
+
             # EVALUATION PHASE
             dialogues = [
                 f" {self.reward_model.tokenizer.eos_token} ".join(context + [prediction])

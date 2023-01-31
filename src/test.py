@@ -20,6 +20,7 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument("--dataset_dir", type=str, default=None, required=True)
     parser.add_argument("--model", type=str, default=None)
+    parser.add_argument("--output_dir", type=str, default=None)
     parser.add_argument("--pretrained_model_dir", type=str, default=None)
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--metric_n_grams", type=int, default=4)
@@ -57,6 +58,14 @@ def main():
         cli_args.model,
         cli_args.pretrained_model_dir
     )
+    model_supervisor.metric_n_grams = cli_args.metric_n_grams
+    if cli_args.pretrained_model_dir is None:
+        if cli_args.output_dir is None:
+            raise ValueError(
+                "Output directory must be specified for saving test results for new models!")
+        model_supervisor.test_output_dir = cli_args.output_dir
+    else:
+        model_supervisor.test_output_dir = cli_args.pretrained_model_dir
     model_supervisor.generation_config = generation_config
 
     # Set up data module

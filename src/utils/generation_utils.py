@@ -56,11 +56,9 @@ def generate(
 
     if model_has_encoder:
         if start_token is None:
-            raise ValueError("Must specify a start token for encoder-decoder models")
-        beams = torch.empty(
-            N, beam_width, 1, 
-            dtype=torch.long, device=device).fill_(start_token)
-        max_new_tokens += 1
+            raise ValueError("Must specify a start sequence for encoder-decoder models")
+        beams = torch.LongTensor(N * [beam_width * [[start_token]]]).to(device)
+        max_new_tokens += beams.size(dim=-1)
     else:
         beams = torch.empty(N, beam_width, 0, dtype=torch.long, device=device)
     

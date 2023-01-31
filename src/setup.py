@@ -19,27 +19,14 @@ def get_model_supervisor_and_config(
         initial_lr: Optional[float] = None
 ) -> Tuple[Union[DialogueModelSupervisor, Dict]]:
     
-    if pretrained_model_dir is not None:
-        config = load_config(pretrained_model_dir)
-        tokenizer_cls = getattr(__import__("custom_tokenizers"), config["tokenizer"]["cls"])
-        tokenizer_kwargs = config["tokenizer"]["kwargs"]
-        tokenizer = tokenizer_cls(**tokenizer_kwargs)
+    # Sanity checks
+    if model is None and pretrained_model_dir is None:
+        raise ValueError( "Either a pretrained or a new model must be specified!")
+    if model is not None and pretrained_model_dir is not None:
+        raise ValueError("Cannot specify both a new and a pretrained model!")
 
-        model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
-        model_kwargs = config["model"]["kwargs"]
-        model = model_cls(tokenizer=tokenizer, **model_kwargs)
-        model_supervisor = DialogueModelSupervisor.load_from_checkpoint(
-            load_ckpt_path(pretrained_model_dir),
-            strict=False,
-            tokenizer=tokenizer,
-            model=model,
-            initial_lr=initial_lr
-        )
-    else:
-        if model is None:
-            raise ValueError(
-                "Either a pretrained or new model must be specified for training!")
-
+    if model is not None:
+        # Instantiate new model from config.json file
         dirname = os.path.dirname(os.path.abspath(__file__))
         with open(f"{dirname}/configs.json") as f:
             model_config = json.load(f).get(model, {})
@@ -70,6 +57,23 @@ def get_model_supervisor_and_config(
         model_kwargs = model_config
         model = model_cls(tokenizer=tokenizer, **model_kwargs)
         model_supervisor = DialogueModelSupervisor(
+            tokenizer=tokenizer,
+            model=model,
+            initial_lr=initial_lr
+        )
+    else:
+        # Load pretrained model from known configuration
+        config = load_config(pretrained_model_dir)
+        tokenizer_cls = getattr(__import__("custom_tokenizers"), config["tokenizer"]["cls"])
+        tokenizer_kwargs = config["tokenizer"]["kwargs"]
+        tokenizer = tokenizer_cls(**tokenizer_kwargs)
+
+        model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
+        model_kwargs = config["model"]["kwargs"]
+        model = model_cls(tokenizer=tokenizer, **model_kwargs)
+        model_supervisor = DialogueModelSupervisor.load_from_checkpoint(
+            load_ckpt_path(pretrained_model_dir),
+            strict=False,
             tokenizer=tokenizer,
             model=model,
             initial_lr=initial_lr

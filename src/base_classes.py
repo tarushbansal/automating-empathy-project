@@ -13,16 +13,16 @@ from data_classes import ConceptNetRawData
 
 class TokenizerBase:
     def __init__(self) -> None:
+        # Start sequence for generation is none by default
+        self._SOS_IDX = None
+
+        # Properties to be set in child class
+        self._EOS_IDX = None
+        self._vocab_size = None
+        
         # Value of PAD_IDX does not matter due to the paddding mask created in the model
         # However, it should not conflict with any token id in the vocab!!
         self.PAD_IDX = -100
-
-        # No start of sentence tokens will be used for target responses by default
-        self.SOS_IDX = None
-
-        # EOS_IDX property to be set in child class
-        self._EOS_IDX = None
-        
         # Emotion label map
         self.emo_map = {
             'surprised': 0, 'excited': 1, 'annoyed': 2, 'proud': 3, 'angry': 4, 
@@ -36,6 +36,28 @@ class TokenizerBase:
         }
         self.rev_emo_map = {v : k for k, v in self.emo_map.items()}
         self.num_emo_labels = len(self.emo_map)
+
+    @property
+    def SOS_IDX(self) -> int:
+        return self._SOS_IDX
+    
+    @SOS_IDX.setter
+    def SOS_IDX(self, value: int):
+        if type(value) != int:
+            raise TypeError("Property must be of type 'int'!")
+        self._SOS_IDX = value
+
+    @property
+    def vocab_size(self) -> int:
+        if self._vocab_size is None:
+            raise NotImplementedError
+        return self._vocab_size
+    
+    @vocab_size.setter
+    def vocab_size(self, value: int):
+        if type(value) != int:
+            raise TypeError("Property must be of type 'int'!")
+        self._vocab_size = value
 
     @property
     def EOS_IDX(self) -> int:

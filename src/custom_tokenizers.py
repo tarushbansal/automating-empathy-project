@@ -34,17 +34,15 @@ class BlenderBotTokenizer(TokenizerBase):
     ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
 
         if type(text) == list:
-            dialogue = " ".join([f"{self.tokenizer.bos_token} {utt} {self.tokenizer.eos_token}" for utt in text])
+            dialogue = "</s> <s>".join(text)
             token_ids = self.tokenizer(
                 dialogue,
-                add_special_tokens=False,
                 truncation=True,
-                max_length=self.tokenizer.model_max_length)["input_ids"]
+                max_length=self.tokenizer.model_max_length
+                )["input_ids"]
 
         else:
-            token_ids = self.tokenizer(
-                f"{self.tokenizer.bos_token} {text} {self.tokenizer.eos_token}",
-                add_special_tokens=False)["input_ids"]
+            token_ids = self.tokenizer(f"<s> {text}")["input_ids"]
 
         return token_ids, None
 

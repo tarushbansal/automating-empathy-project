@@ -63,6 +63,7 @@ def main():
         if cli_args.output_dir is None:
             raise ValueError(
                 "Output directory must be specified for saving test results for new models!")
+        os.makedirs(cli_args.output_dir, exist_ok=True)
         model_supervisor.test_output_dir = cli_args.output_dir
     else:
         model_supervisor.test_output_dir = cli_args.pretrained_model_dir

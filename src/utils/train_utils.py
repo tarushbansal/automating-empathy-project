@@ -26,8 +26,7 @@ class SaveConfigCallback(pl.Callback):
         if trainer.log_dir is None:
             raise ValueError("No log directory specified to save config file!")
         
-        if not os.path.isdir(trainer.log_dir):
-            os.makedirs(trainer.log_dir)
+        os.makedirs(trainer.log_dir, exist_ok=True)
         
         output_fpath = f"{trainer.log_dir}/config.json"
         with open(output_fpath, "w") as f:

@@ -2,7 +2,6 @@
 
 # System Modules
 import os
-import json
 import argparse
 from typing import Optional, List
 
@@ -13,14 +12,12 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 # User-defined Modules
 from data_loader import DataModule
-from dialogue_model_supervisor import DialogueModelSupervisor
 from reward_model_supervisor import RewardModelSupervisor
 from rlhf_supervisor import RLHFSupervisor
 from transformers import GPT2Model, GPT2Tokenizer
-from utils.train_utils import load_ckpt_path, load_config, SaveConfigCallback
+from utils.train_utils import load_ckpt_path, SaveConfigCallback
 from data_classes import GenerationConfig, PPOConfig
-from train_dialogue_model import get_model_cls
-from custom_tokenizers import TokenizerBase
+from train_dialogue_model import get_model_supervisor_and_config
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -90,6 +87,7 @@ def main():
         name="tensorboard_logs"
     )
 
+    # Define generation configuration
     generation_config = GenerationConfig(
         max_new_tokens=cli_args.max_new_tokens,
         beam_width=cli_args.beam_width,
@@ -99,55 +97,13 @@ def main():
         top_k=cli_args.top_k
     )
 
-    # Initialise model and tokenizer from config
-    if cli_args.pretrained_dialogue_model_dir is not None:
-        config = load_config(cli_args.pretrained_dialogue_model_dir)
-        tokenizer_cls = getattr(__import__("custom_tokenizers"), config["tokenizer"]["cls"])
-        tokenizer_kwargs = config["tokenizer"]["kwargs"]
-        tokenizer = tokenizer_cls(**tokenizer_kwargs)
-
-        model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
-        model_kwargs = config["model"]["kwargs"]
-        model = model_cls(tokenizer=tokenizer, **model_kwargs)
-        dialogue_model = DialogueModelSupervisor.load_from_checkpoint(
-            load_ckpt_path(cli_args.pretrained_dialogue_model_dir),
-            strict=False,
-            tokenizer=tokenizer,
-            model=model,
-            initial_lr=cli_args.initial_lr,
-            generation_config=generation_config
-        )
-
-    else:
-        if cli_args.dialogue_model is None:
-            raise ValueError(
-                "Either a pretrained or new dialogue model must be specified for training!")
-
-        dirname = os.path.dirname(os.path.abspath(__file__))
-        with open(f"{dirname}/configs.json") as f:
-            model_config = json.load(f).get(cli_args.dialogue_model, {})
-
-        model_cls = get_model_cls()
-        tokenizer_name = model_cls.tokenizer_cls()
-        if tokenizer_name is None:
-            raise ValueError(
-                "Must specify the tokenizer associated with the model as a static method!")
-
-        tokenizer_cls = getattr(__import__("custom_tokenizers"), tokenizer_name)
-        if not issubclass(tokenizer_cls, TokenizerBase):
-            raise ValueError(
-                "Tokenizer must be derived from base class 'TokenizerBase'!")
-        tokenizer_kwargs = model_config.pop("tokenizer_kwargs", {})
-        tokenizer = tokenizer_cls(**tokenizer_kwargs)
-
-        model_kwargs = model_config
-        model = model_cls(tokenizer=tokenizer, **model_kwargs)
-        dialogue_model = DialogueModelSupervisor(
-            tokenizer=tokenizer,
-            model=model,
-            initial_lr=cli_args.initial_lr,
-            generation_config=generation_config
-        )
+    # Set up dialogue and reward model as well as RLHF pipeline
+    dialogue_model, config = get_model_supervisor_and_config(
+        cli_args.dialogue_model,
+        cli_args.pretrained_dialogue_model_dir,
+        cli_args.initial_lr
+    )
+    dialogue_model.generation_config = generation_config
     
     reward_model = RewardModelSupervisor.load_from_checkpoint(
         load_ckpt_path(cli_args.pretrained_reward_model_dir),
@@ -173,7 +129,7 @@ def main():
     # Set up data module
     data_module = DataModule(dataset_dir=cli_args.dataset_dir,
                              batch_size=cli_args.batch_size,
-                             tokenizer=tokenizer,
+                             tokenizer=dialogue_model.tokenizer,
                              num_workers=max(1, os.cpu_count() // 4),
                              few_shot_training=cli_args.few_shot_training)
 
@@ -183,16 +139,6 @@ def main():
     callbacks = []
     if checkpoint_callback is not None:
         callbacks.extend(checkpoint_callback)
-    config = {
-        "model": {
-            "cls": model_cls.__name__,
-            "kwargs": model_kwargs
-        },
-        "tokenizer": {
-            "cls": tokenizer_cls.__name__,
-            "kwargs": tokenizer_kwargs,
-        }
-    }
     callbacks.append(SaveConfigCallback(config=config))
 
     # Set up trainer

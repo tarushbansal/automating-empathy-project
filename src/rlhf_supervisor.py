@@ -138,15 +138,15 @@ class RLHFSupervisor(pl.LightningModule):
         batch.targets = batch.targets.to(device)
         
         # Compute new and reference log probability and advantage for each generated token
-        labels = batch.targets[:, 1:]
+        labels = batch.targets[:, 1:] if self.tuned_model.model.has_encoder else batch.targets
         output, target_logits, _ = self.tuned_model.forward(batch)
         if self.tuned_model.model.has_encoder:
             last_hidden_states = output.decoder_hidden_states[-1][:, :-1, :] 
         else:
-            target_len = batch.targets.size(dim=1)
             insert_idx = torch.sum(batch.contexts != self.tuned_model.tokenizer.PAD_IDX, dim=1)
             last_hidden_states = torch.stack(
-                tuple(output.hidden_states[-1][i, insert_idx[i]:insert_idx[i]+target_len-1, :] 
+                tuple(output.hidden_states[-1]
+                      [i, insert_idx[i]-1:insert_idx[i]+batch.targets.size(dim=1)-1, :] 
                       for i in range(N)))
         pad_mask = (labels != self.tuned_model.tokenizer.PAD_IDX)
         gen_len = torch.sum(pad_mask, dim=-1)

@@ -58,25 +58,38 @@ class DialogueModelSupervisor(pl.LightningModule):
             input_kwargs["targets"] = batch.targets
             output = self.model(**input_kwargs)
             target_logits = output.logits
+            lm_loss = (
+                F.cross_entropy(
+                    target_logits[:, :-1, :].permute(0, 2, 1),
+                    batch.targets[:, 1:],
+                    ignore_index=self.tokenizer.PAD_IDX
+                ) if batch.targets.size(dim=1) > 1 else None)
         else:
             N = batch.contexts.size(dim=0)
             target_len = batch.targets.size(dim=1)
-            insert_idx = torch.sum(batch.contexts != self.tokenizer.PAD_IDX, dim=1)
-            unstacked_sequences = tuple(torch.cat((
-                    batch.contexts[i, :insert_idx[i]], 
-                    batch.targets[i], 
-                    batch.contexts[i, insert_idx[i]:]), dim=-1) 
-                for i in range(N))
-            input_kwargs["dialogues"] = torch.stack(unstacked_sequences)
-            output = self.model(**input_kwargs)
-            target_logits = torch.stack(
-                tuple(output.logits[i, insert_idx[i]:insert_idx[i]+target_len] 
-                      for i in range(N)))
-        lm_loss = F.cross_entropy(
-            target_logits[:, :-1, :].permute(0, 2, 1),
-            batch.targets[:, 1:],
-            ignore_index=self.tokenizer.PAD_IDX
-        )
+            if past_key_values is None:
+                insert_idx = torch.sum(batch.contexts != self.tokenizer.PAD_IDX, dim=1)
+                unstacked_sequences = tuple(torch.cat((
+                        batch.contexts[i, :insert_idx[i]], 
+                        batch.targets[i], 
+                        batch.contexts[i, insert_idx[i]:]), dim=-1) 
+                    for i in range(N))
+                input_kwargs["dialogues"] = torch.stack(unstacked_sequences)
+                output = self.model(**input_kwargs)
+                target_logits = torch.stack(
+                    tuple(output.logits[i, insert_idx[i]-1:insert_idx[i]+target_len] 
+                        for i in range(N)))
+                lm_loss = (
+                    F.cross_entropy(
+                        target_logits[:, :-1, :].permute(0, 2, 1),
+                        batch.targets,
+                        ignore_index=self.tokenizer.PAD_IDX
+                    ) if target_len > 0 else None)
+            else:
+                input_kwargs["dialogues"] = batch.targets
+                output = self.model(**input_kwargs)
+                target_logits = output.logits
+                lm_loss = None
         
         return output, target_logits, lm_loss
 
@@ -243,7 +256,6 @@ class DialogueModelSupervisor(pl.LightningModule):
             model_has_encoder=self.model.has_encoder,
             start_token=self.tokenizer.SOS_IDX,
             stop_token=self.tokenizer.EOS_IDX,
-            pad_token=self.tokenizer.PAD_IDX,
             generation_config=self.generation_config
         )
 

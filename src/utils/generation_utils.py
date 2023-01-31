@@ -40,7 +40,6 @@ def generate(
     model_has_encoder: bool,
     batch: ModelBatch,
     stop_token: int,
-    pad_token: int,
     generation_config: GenerationConfig,
     start_token: Optional[int] = None,
 ) -> List[List[int]]:
@@ -74,12 +73,7 @@ def generate(
     while True:
         # Run all beams through model and process output logits
         for i in range(beam_width):
-            if decoder_cache[i] is not None:
-                batch.targets = beams[:, i, -1:]
-                if not model_has_encoder:
-                    batch.contexts = torch.empty(N, 0, dtype=torch.long, device=device)
-            else:
-                batch.targets = beams[:, i, :]
+            batch.targets = beams[:, i, :] if decoder_cache[i] is None else beams[:, i, -1:]
             input_kwargs = {
                 "batch": batch,
                 "encoder_outputs": encoder_cache,
@@ -89,11 +83,7 @@ def generate(
             output, target_logits, _ = forward_fn(**input_kwargs)
             if model_has_encoder:
                 encoder_cache = (output.encoder_last_hidden_state,)
-            if batch.targets.size(dim=-1) == 0:
-                insert_idx = torch.sum(batch.contexts != pad_token, dim=1, keepdim=True)
-                new_logits = torch.gather(output.logits, 1, (insert_idx - 1).unsqueeze(-1))
-            else:
-                new_logits = target_logits[:, -1:, :]
+            new_logits = target_logits[:, -1:, :]
             decoder_cache[i] = output.past_key_values
             logits = torch.cat((logits, new_logits), dim=1) if i != 0 else new_logits
 

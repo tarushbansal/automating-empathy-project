@@ -3,9 +3,10 @@
 # System Modules
 import os
 import json
-from typing import Optional
+from typing import Optional, List
 
 import pytorch_lightning as pl
+from pytorch_lightning.callbacks import ModelCheckpoint
 from pytorch_lightning.utilities.distributed import rank_zero_only
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -67,5 +68,25 @@ def load_ckpt_path(trained_model_dir: Optional[str]) -> Optional[str]:
             raise ValueError("Specified model directory does not exist!")
     
     return ckpt_path
+
+
+def get_model_checkpoints(ckpt_dir: str) -> Optional[List[ModelCheckpoint]]:
+    if ckpt_dir is None:
+        return None
+
+    return [
+        ModelCheckpoint(
+            monitor="train_loss_epoch",
+            dirpath=ckpt_dir,
+            filename="{train_loss_epoch:.2f}-{epoch}",
+            every_n_epochs=1
+        ),
+        ModelCheckpoint(
+            monitor="val_loss_epoch",
+            dirpath=ckpt_dir,
+            filename="{val_loss_epoch:.2f}-{epoch}",
+            every_n_epochs=1
+        ),
+    ]
 
 #----------------------------------------------------------------------------

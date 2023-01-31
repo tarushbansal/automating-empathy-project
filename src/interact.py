@@ -6,8 +6,8 @@ import argparse
 
 # User-defined Modules
 from data_loader import collate_batch
+from setup import get_model_supervisor_and_config
 from data_classes import ModelRawData, GenerationConfig
-from train_dialogue_model import get_model_supervisor_and_config
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -26,9 +26,10 @@ def initialise_interface():
     print("")
 
 
-def main():
-    # Parse command line arguments
+def parse_args() -> argparse.Namespace:
+
     parser = argparse.ArgumentParser()
+
     parser.add_argument("--model", type=str, default=None)
     parser.add_argument("--pretrained_model_dir", type=str, default=None)
     parser.add_argument("--beam_width", type=int, default=1)
@@ -37,7 +38,15 @@ def main():
     parser.add_argument("--top_p", type=float, default=1.0)
     parser.add_argument("--top_k", type=int, default=50)
     parser.add_argument("--max_new_tokens", type=int, default=100)
-    cli_args, _ = parser.parse_known_args()
+    
+    cli_args = parser.parse_args()
+
+    return cli_args
+
+
+def main():
+    # Parse command line arguments
+    cli_args = parse_args()
 
     # Define generation configuration
     generation_config = GenerationConfig(

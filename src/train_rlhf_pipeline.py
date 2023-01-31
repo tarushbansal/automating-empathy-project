@@ -3,22 +3,23 @@
 # System Modules
 import os
 import argparse
-from typing import Optional, List
 
 import torch
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
-from pytorch_lightning.callbacks import ModelCheckpoint
 
 # User-defined Modules
 from data_loader import DataModule
 from reward_model_supervisor import RewardModelSupervisor
 from rlhf_supervisor import RLHFSupervisor
 from transformers import GPT2Model, GPT2Tokenizer
-from utils.train_utils import load_ckpt_path, SaveConfigCallback
 from data_classes import GenerationConfig, PPOConfig
-from train_dialogue_model import get_model_supervisor_and_config
-
+from setup import get_model_supervisor_and_config
+from utils.train_utils import (
+    load_ckpt_path, 
+    get_model_checkpoints, 
+    SaveConfigCallback
+)
 # ------------------------- IMPLEMENTATION -----------------------------------
 
 
@@ -52,26 +53,6 @@ def parse_args() -> argparse.Namespace:
     cli_args = parser.parse_args()
 
     return cli_args
-
-
-def get_model_checkpoints(ckpt_dir: str) -> Optional[List[ModelCheckpoint]]:
-    if ckpt_dir is None:
-        return None
-
-    return [
-        ModelCheckpoint(
-            monitor="train_loss_epoch",
-            dirpath=ckpt_dir,
-            filename="{train_loss_epoch:.2f}-{epoch}",
-            every_n_epochs=1
-        ),
-        ModelCheckpoint(
-            monitor="val_loss_epoch",
-            dirpath=ckpt_dir,
-            filename="{val_loss_epoch:.2f}-{epoch}",
-            every_n_epochs=1
-        ),
-    ]
 
 
 def main():

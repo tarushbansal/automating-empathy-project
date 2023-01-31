@@ -9,13 +9,15 @@ import pytorch_lightning as pl
 # User-defined Modules
 from data_loader import DataModule
 from data_classes import GenerationConfig
-from train_dialogue_model import get_model_supervisor_and_config
+from setup import get_model_supervisor_and_config
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
-def main():
-    # Parse command line arguments
+
+def parse_args() -> argparse.Namespace:
+
     parser = argparse.ArgumentParser()
+
     parser.add_argument("--dataset_dir", type=str, default=None, required=True)
     parser.add_argument("--model", type=str, default=None)
     parser.add_argument("--pretrained_model_dir", type=str, default=None)
@@ -27,7 +29,15 @@ def main():
     parser.add_argument("--top_p", type=float, default=1.0)
     parser.add_argument("--top_k", type=int, default=20)
     parser.add_argument("--max_new_tokens", type=int, default=100)
-    cli_args, _ = parser.parse_known_args()
+    
+    cli_args = parser.parse_args()
+
+    return cli_args
+
+
+def main():
+    # Parse command line arguments
+    cli_args = parse_args()
 
     if not os.path.isdir(cli_args.dataset_dir):
         raise ValueError(f"Specified dataset directory does not exist!")

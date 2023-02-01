@@ -43,6 +43,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--top_p", type=float, default=1.0)
     parser.add_argument("--top_k", type=int, default=20)
     parser.add_argument("--max_new_tokens", type=int, default=100)
+    parser.add_argument("--length_alpha", type=float, default=0.65)
     parser.add_argument("--clip_epsilon", type=int, default=0.2)
     parser.add_argument("--kl_penalty", type=int, default=0.0)
     parser.add_argument("--gamma", type=float, default=0.99)
@@ -75,7 +76,8 @@ def main():
         sample=cli_args.sample,
         temperature=cli_args.temperature,
         top_p=cli_args.top_p,
-        top_k=cli_args.top_k
+        top_k=cli_args.top_k,
+        length_alpha=cli_args.length_alpha
     )
 
     # Set up dialogue and reward model as well as RLHF pipeline
@@ -112,6 +114,7 @@ def main():
                              batch_size=cli_args.batch_size,
                              tokenizer=dialogue_model.tokenizer,
                              num_workers=max(1, os.cpu_count() // 4),
+                             model_has_encoder=dialogue_model.model.has_encoder,
                              few_shot_training=cli_args.few_shot_training)
 
     # Set up model checkpointing

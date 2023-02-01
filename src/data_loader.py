@@ -62,8 +62,8 @@ class Dataset(data.Dataset):
 
         return ModelRawData(
             context=context,
-            raw_context=self.contexts[idx],
             target=target,
+            raw_context=self.contexts[idx],
             emotion=emotion,
             concept_net_data=concept_net_data
         )
@@ -76,6 +76,7 @@ class DataModule(pl.LightningDataModule):
         batch_size: int,
         tokenizer: TokenizerBase,
         num_workers: int,
+        model_has_encoder: bool,
         few_shot_training: Optional[bool] = None,
         ppo_mode: Optional[bool] = None,
     ) -> None:
@@ -85,6 +86,7 @@ class DataModule(pl.LightningDataModule):
         self.batch_size = batch_size
         self.tokenizer = tokenizer
         self.num_workers = num_workers
+        self.model_has_encoder = model_has_encoder
         self.few_shot_training = few_shot_training
         self.ppo_mode = ppo_mode
 
@@ -157,7 +159,7 @@ class DataModule(pl.LightningDataModule):
             self.train_dataset,
             batch_size=self.batch_size,
             shuffle=True,
-            collate_fn=lambda x: collate_batch(x, self.tokenizer),
+            collate_fn=lambda x: collate_batch(x, self.tokenizer, self.model_has_encoder),
             num_workers=self.num_workers
         )
 
@@ -165,7 +167,7 @@ class DataModule(pl.LightningDataModule):
         return data.DataLoader(
             self.val_dataset,
             batch_size=self.batch_size,
-            collate_fn=lambda x: collate_batch(x, self.tokenizer),
+            collate_fn=lambda x: collate_batch(x, self.tokenizer, self.model_has_encoder),
             num_workers=self.num_workers
         )
 
@@ -173,14 +175,15 @@ class DataModule(pl.LightningDataModule):
         return data.DataLoader(
             self.test_dataset,
             batch_size=self.batch_size,
-            collate_fn=lambda x: collate_batch(x, self.tokenizer),
+            collate_fn=lambda x: collate_batch(x, self.tokenizer, self.model_has_encoder),
             num_workers=self.num_workers
         )
 
 
 def collate_batch(
     batch: List[ModelRawData],
-    tokenizer: TokenizerBase
+    tokenizer: TokenizerBase,
+    model_has_encoder: bool
 ) -> ModelBatch:
 
     contexts = [item.context for item in batch]
@@ -190,29 +193,39 @@ def collate_batch(
     max_len_target_seq = max([len(seq) for seq in targets])
 
     contexts = pad_seq_and_convert_to_tensor(
-        contexts, max_len_context_seq, padding_idx=tokenizer.PAD_IDX)
+        contexts,
+        max_len_context_seq, 
+        pad_token=tokenizer.PAD_IDX, 
+        padding_side="right" if model_has_encoder else "left"
+    )
+    context_mask = (contexts != tokenizer.PAD_IDX)
+    raw_contexts = [item.raw_context for item in batch]
     targets = pad_seq_and_convert_to_tensor(
-        targets, max_len_target_seq, padding_idx=tokenizer.PAD_IDX)
+        targets, 
+        max_len_target_seq, 
+        pad_token=tokenizer.PAD_IDX
+    )
+    target_mask = (targets != tokenizer.PAD_IDX)
 
     emotions =  None 
     if batch[0].emotion is not None:
         emotions = torch.LongTensor([item.emotion for item in batch])
 
     concept_net_data = None
-    if batch[0].concept_net_data is not None:
-        concept_net_data = process_concept_net_data(
-            [item.concept_net_data for item in batch],
-            max_len_context_seq,
-            tokenizer.PAD_IDX,
-            len(getattr(tokenizer, "prefix", []))
-        )
-
-    raw_contexts = [item.raw_context for item in batch]
+    # if batch[0].concept_net_data is not None:
+    #     concept_net_data = process_concept_net_data(
+    #         [item.concept_net_data for item in batch],
+    #         max_len_context_seq,
+    #         tokenizer.PAD_IDX,
+    #         len(getattr(tokenizer, "prefix", []))
+    #     )
 
     return ModelBatch(
         contexts=contexts,
-        raw_contexts=raw_contexts,
+        context_mask=context_mask,
         targets=targets,
+        target_mask=target_mask,
+        raw_contexts=raw_contexts,
         emotions=emotions,
         concept_net_data=concept_net_data
     )
@@ -221,11 +234,15 @@ def collate_batch(
 def pad_seq_and_convert_to_tensor(
     sequences: List[int],
     max_len: int,
-    padding_idx: int,
+    pad_token: int,
+    padding_side: str = "right",
     dtype: torch.dtype = torch.long
 ) -> torch.Tensor:
 
-    sequences = [seq + [padding_idx] * (max_len - len(seq)) for seq in sequences]
+    if padding_side == "right":
+        sequences = [seq + [pad_token] * (max_len - len(seq)) for seq in sequences]
+    elif padding_side == "left":
+        sequences = [[pad_token] * (max_len - len(seq)) + seq for seq in sequences]
 
     return torch.tensor(sequences, dtype=dtype)
 
@@ -233,7 +250,7 @@ def pad_seq_and_convert_to_tensor(
 def process_concept_net_data(
     data: List[ConceptNetRawData],
     max_len_context_seq: int,
-    padding_idx: int,
+    pad_token: int,
     prefix_len: int = 0
 ) -> None:
 
@@ -244,11 +261,11 @@ def process_concept_net_data(
     max_len_concept_seq = max([len(seq) for seq in concepts])
 
     concepts = pad_seq_and_convert_to_tensor(
-        concepts, max_len_concept_seq, padding_idx=padding_idx)
+        concepts, max_len_concept_seq, pad_token=pad_token)
     context_emo_intensity = pad_seq_and_convert_to_tensor(
-        context_emo_intensity, max_len_context_seq, padding_idx=0, dtype=torch.float32)
+        context_emo_intensity, max_len_context_seq, pad_token=0, dtype=torch.float32)
     concept_emo_intensity = pad_seq_and_convert_to_tensor(
-        concept_emo_intensity, max_len_concept_seq, padding_idx=0, dtype=torch.float32)
+        concept_emo_intensity, max_len_concept_seq, pad_token=0, dtype=torch.float32)
     adjacency_mask = create_adjacency_mask(
         concept_mask, max_len_context_seq, max_len_concept_seq, prefix_len)
 

@@ -32,7 +32,24 @@ def warp_logits(
         logits = logits.masked_fill(remove_logits, float("-inf"))
 
     return logits
-    
+
+
+def length_normalization(
+    sequences: torch.LongTensor,
+    stop_token: int, 
+    alpha: float = 0.65
+) -> float:
+    N, num, len = sequences.size()
+    length = torch.empty(N, num, dtype=torch.long, device=sequences.device)
+    for i in range(N):
+        for j in range(num):
+            try:
+                ind = sequences[i, j].tolist().index(stop_token)
+                length[i, j] = ind + 1
+            except ValueError:
+                length[i, j] = len
+    return length ** alpha
+
 
 @torch.no_grad()
 def generate(
@@ -50,6 +67,7 @@ def generate(
     temperature = generation_config.temperature
     top_p = generation_config.top_p
     top_k = generation_config.top_k
+    length_alpha = generation_config.length_alpha
 
     N = batch.contexts.size(dim=0)
     device = batch.contexts.device
@@ -82,7 +100,7 @@ def generate(
             if model_has_encoder:
                 encoder_cache = (output.encoder_last_hidden_state,)
             new_logits = target_logits[:, -1:, :]
-            decoder_cache[i] = output.past_key_values
+            # decoder_cache[i] = output.past_key_values
             logits = torch.cat((logits, new_logits), dim=1) if i != 0 else new_logits
 
         warped_logits = warp_logits(logits, temperature, top_p, top_k)
@@ -99,14 +117,18 @@ def generate(
                 beam_width,
                 dim=-1
             )
-        new_scores = new_scores.masked_fill(stop_detected.unsqueeze(-1), 0)
+        new_scores[:, :, 0] = new_scores[:, :, 0].masked_fill(stop_detected, 0)
+        new_scores[:, :, 1:] = new_scores[:, :, 1:].masked_fill(
+            stop_detected.unsqueeze(-1), -float("inf"))
 
         # Choose {beam_width} number of sequences with highest probabilities
         new_tokens = new_tokens.view(N, beam_width ** 2).unsqueeze(-1)
         sequences = torch.cat(
             (beams.repeat_interleave(beam_width, dim=1), new_tokens), dim=-1)
         scores = (new_scores + beam_scores.unsqueeze(-1)).view(N, beam_width ** 2)
-        beam_scores, top_indices = torch.topk(scores, beam_width, dim=-1)
+        _, top_indices = torch.topk(
+            scores / length_normalization(sequences, stop_token, length_alpha), beam_width, dim=-1)
+        beam_scores = torch.gather(scores, 1, top_indices)
         top_indices = top_indices.unsqueeze(-1).expand(
             N, beam_width, sequences.size(dim=-1))
         beams = torch.gather(sequences, 1, top_indices)

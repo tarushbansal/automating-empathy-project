@@ -50,13 +50,12 @@ class RLHFSupervisor(pl.LightningModule):
     def log_probs(
         self, 
         logits: torch.FloatTensor, 
-        labels: torch.LongTensor,
-        pad_mask: torch.BoolTensor
+        labels: torch.LongTensor
     ) -> torch.FloatTensor:
         logp = torch.gather(
             F.log_softmax(logits, dim=-1), 
             -1, 
-            labels.masked_fill(pad_mask == 0, 0).unsqueeze(-1)).squeeze(-1)
+            labels.unsqueeze(-1)).squeeze(-1)
         return logp
 
     @torch.no_grad()
@@ -105,16 +104,15 @@ class RLHFSupervisor(pl.LightningModule):
 
         with torch.no_grad():
             # ROLLOUT PHASE
-            contexts = batch.raw_contexts
-            enc_predictions = self.tuned_model.generate(batch)
-            predictions = [self.tuned_model.tokenizer.decode_to_text(enc)
-                           for enc in enc_predictions]
+            enc_predictions = self.tuned_model.generate(batch.contexts, batch.context_mask)
+            predictions = self.tuned_model.tokenizer.decode(enc_predictions)
+            print(predictions)
 
             # EVALUATION PHASE
             dialogues = [
                 f" {self.reward_model.tokenizer.eos_token} ".join(context + [prediction])
                   + f" {self.reward_model.tokenizer.eos_token}"
-                for context, prediction in zip(contexts, predictions)
+                for context, prediction in zip(batch.raw_contexts, predictions)
             ]
             reward_model_inputs = self.reward_model.tokenizer(
                 dialogues, 
@@ -130,34 +128,38 @@ class RLHFSupervisor(pl.LightningModule):
             )
             self.log(f"{stage}_reward", torch.mean(scores), batch_size=N, **self.default_log_config)
         
-        # OPTIMIZATION PHASE
-        max_len = max([len(seq) for seq in enc_predictions])
-        batch.targets = torch.LongTensor(
-            [seq + [self.tuned_model.tokenizer.PAD_IDX] * (max_len - len(seq))
-             for seq in enc_predictions])
-        batch.targets = batch.targets.to(device)
-        
+        # OPTIMIZATION PHASE   
+     
         # Compute new and reference log probability and advantage for each generated token
+        batch.targets = enc_predictions
+        batch.target_mask = (enc_predictions != self.tuned_model.tokenizer.PAD_IDX)
+        output, _ = self.tuned_model.forward(batch)
+        target_logits = (
+            output.logits[:, :-1, :] 
+            if self.tuned_model.model.has_encoder 
+            else output.logits[:, batch.contexts.size(dim=1)-1:-1]
+        )
+        last_hidden_states = (
+            output.decoder_hidden_states[-1][:, :-1, :]
+            if self.tuned_model.model.has_encoder
+            else output.decoder_hidden_states[:, batch.contexts.size(dim=1)-1:-1]
+        )
         labels = batch.targets[:, 1:] if self.tuned_model.model.has_encoder else batch.targets
-        output, target_logits, _ = self.tuned_model.forward(batch)
-        if self.tuned_model.model.has_encoder:
-            last_hidden_states = output.decoder_hidden_states[-1][:, :-1, :] 
-        else:
-            insert_idx = torch.sum(batch.contexts != self.tuned_model.tokenizer.PAD_IDX, dim=1)
-            last_hidden_states = torch.stack(
-                tuple(output.hidden_states[-1]
-                      [i, insert_idx[i]-1:insert_idx[i]+batch.targets.size(dim=1)-1, :] 
-                      for i in range(N)))
-        pad_mask = (labels != self.tuned_model.tokenizer.PAD_IDX)
-        gen_len = torch.sum(pad_mask, dim=-1)
-        new_log_probs = self.log_probs(target_logits[:, :-1, :], labels, pad_mask)
-        entropy = -torch.sum(torch.softmax(target_logits[:, :-1, :], dim=-1) * 
-                             torch.log_softmax(target_logits[:, :-1, :], dim=-1), dim=-1)
+        mask = batch.target_mask[:, 1:] if self.tuned_model.model.has_encoder else batch.target_mask
+        gen_len = torch.sum(mask, dim=-1)
+        new_log_probs = self.log_probs(target_logits, labels)
+        entropy = -torch.sum(torch.softmax(target_logits, dim=-1) * 
+                             torch.log_softmax(target_logits, dim=-1), dim=-1)
         values = self.value_head(self.dropout(last_hidden_states)).squeeze(-1)
 
         with torch.no_grad():
-            _, target_logits, _ = self.ref_model.forward(batch)
-            ref_log_probs = self.log_probs(target_logits[:, :-1, :], labels, pad_mask)
+            output, _ = self.ref_model.forward(batch)
+            target_logits = (
+                output.logits[:, :-1, :] 
+                if self.tuned_model.model.has_encoder 
+                else output.logits[:, batch.contexts.size(dim=1)-1:-1]
+            )
+            ref_log_probs = self.log_probs(target_logits, labels)
 
         ratios = torch.exp(new_log_probs - ref_log_probs)
         clipped_ratios = torch.clip(
@@ -166,12 +168,12 @@ class RLHFSupervisor(pl.LightningModule):
         advantages, returns = self.estimate_advantages_and_returns(rewards, values, gen_len)
 
         # Apply PPO Algorithm (With ppo clip, value function and entropy losses)
-        num_tokens = torch.sum(pad_mask)
-        vf_loss = torch.sum(((values - returns) ** 2) * pad_mask) / num_tokens
-        entropy_loss = -torch.sum(entropy * pad_mask) / num_tokens
+        num_tokens = torch.sum(mask)
+        vf_loss = torch.sum(((values - returns) ** 2) * mask) / num_tokens
+        entropy_loss = -torch.sum(entropy * mask) / num_tokens
         ppo_loss = torch.sum(
             torch.max(-ratios * advantages, 
-                      -clipped_ratios * advantages) * pad_mask
+                      -clipped_ratios * advantages) * mask
             ) / num_tokens
         loss = (
             ppo_loss + 

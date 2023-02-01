@@ -1,7 +1,6 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
-import copy
 import json
 import math
 from typing import Optional, Union, Tuple
@@ -16,7 +15,6 @@ from transformers.modeling_outputs import Seq2SeqLMOutput, CausalLMOutput
 # User-defined Modules
 from base_classes import DialogueModelBase, TokenizerBase
 from utils.metric_utils import compute_test_metrics
-from utils.generation_utils import generate
 from data_classes import ModelBatch, GenerationConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -43,55 +41,36 @@ class DialogueModelSupervisor(pl.LightningModule):
     def forward(
         self, 
         batch: ModelBatch,
-        encoder_outputs: Optional[Tuple[torch.FloatTensor]] = None,
-        past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
-        use_cache: Optional[bool] = None
     ) -> Tuple[Union[Seq2SeqLMOutput, CausalLMOutput, torch.Tensor]]:
-        input_kwargs = {"past_key_values": past_key_values, "use_cache": use_cache}
+        input_kwargs = {}
         if self.model.requires_emotion_label:
             input_kwargs["emotion_label"] = batch.emotions
         if self.model.requires_concept_net_data:
             input_kwargs["concept_net_data"] = batch.concept_net_data
         if self.model.has_encoder:
-            input_kwargs["encoder_outputs"] = encoder_outputs
             input_kwargs["contexts"] = batch.contexts
+            input_kwargs["context_mask"] = batch.context_mask
             input_kwargs["targets"] = batch.targets
+            input_kwargs["target_mask"] = batch.target_mask
             output = self.model(**input_kwargs)
-            target_logits = output.logits
-            lm_loss = (
-                F.cross_entropy(
-                    target_logits[:, :-1, :].permute(0, 2, 1),
-                    batch.targets[:, 1:],
-                    ignore_index=self.tokenizer.PAD_IDX
-                ) if batch.targets.size(dim=1) > 1 else None)
+            logits = output.logits[:, :-1, :]
+            labels = batch.targets[:, 1:]
         else:
-            N = batch.contexts.size(dim=0)
-            target_len = batch.targets.size(dim=1)
-            if past_key_values is None:
-                insert_idx = torch.sum(batch.contexts != self.tokenizer.PAD_IDX, dim=1)
-                unstacked_sequences = tuple(torch.cat((
-                        batch.contexts[i, :insert_idx[i]], 
-                        batch.targets[i], 
-                        batch.contexts[i, insert_idx[i]:]), dim=-1) 
-                    for i in range(N))
-                input_kwargs["dialogues"] = torch.stack(unstacked_sequences)
-                output = self.model(**input_kwargs)
-                target_logits = torch.stack(
-                    tuple(output.logits[i, insert_idx[i]-1:insert_idx[i]+target_len] 
-                        for i in range(N)))
-                lm_loss = (
-                    F.cross_entropy(
-                        target_logits[:, :-1, :].permute(0, 2, 1),
-                        batch.targets,
-                        ignore_index=self.tokenizer.PAD_IDX
-                    ) if target_len > 0 else None)
-            else:
-                input_kwargs["dialogues"] = batch.targets
-                output = self.model(**input_kwargs)
-                target_logits = output.logits
-                lm_loss = None
+            input_kwargs["dialogues"] = torch.cat((batch.contexts, batch.targets), dim=1)
+            input_kwargs["dialogue_mask"] = torch.cat((batch.context_mask, batch.target_mask), dim=1)
+            output = self.model(**input_kwargs)
+            logits = output.logits[:, batch.contexts.size(dim=1)-1:-1]
+            labels = batch.targets
         
-        return output, target_logits, lm_loss
+        lm_loss = (
+            F.cross_entropy(
+                logits.permute(0, 2, 1),
+                labels,
+                ignore_index=self.tokenizer.PAD_IDX
+            ) if labels.size(dim=1) > 0 else None
+        )
+        
+        return output, lm_loss
 
     def forward_and_log_metrics(
         self, 
@@ -99,7 +78,7 @@ class DialogueModelSupervisor(pl.LightningModule):
         stage: str
     ) -> float:
         N = batch.contexts.size(dim=0)
-        lm_loss = self.forward(batch)[-1]
+        _, lm_loss = self.forward(batch)
         emo_loss, emo_attn_loss = 0, 0
         if hasattr(self.model, "emo_logits"):
             emo_loss = F.cross_entropy(
@@ -171,18 +150,17 @@ class DialogueModelSupervisor(pl.LightningModule):
         batch: ModelBatch,
         _
     ) -> None:
-        self.contexts.extend([self.tokenizer.decode_to_text(context)
-                              for context in batch.contexts.tolist()])
-        self.targets.extend([self.tokenizer.decode_to_text(target)
-                             for target in batch.targets.tolist()])
-        indices = torch.sum(batch.targets != self.tokenizer.PAD_IDX, dim=1)
-        self.enc_targets.extend([batch.targets[i, :indices[i]].tolist()
-                                 for i in range(batch.targets.size(dim=0))])
+        self.contexts.extend(batch.raw_contexts)
+        self.enc_targets.extend([[token for token in target 
+                                  if token != self.tokenizer.PAD_IDX] 
+                                  for target in batch.targets.tolist()])
+        self.targets.extend(self.tokenizer.decode(batch.targets))
 
-        enc_predictions = self.generate(batch)
-        self.enc_predictions.extend(enc_predictions)
-        self.predictions.extend([self.tokenizer.decode_to_text(enc) 
-                                 for enc in enc_predictions])
+        enc_predictions = self.generate(batch.contexts, batch.context_mask)
+        self.enc_targets.extend([[token for token in prediction 
+                                  if token != self.tokenizer.PAD_IDX] 
+                                  for prediction in enc_predictions.tolist()])
+        self.predictions.extend([self.tokenizer.decode(enc_predictions)])
     
         if hasattr(self.model, "emo_logits"):
             self.emo_predictions.extend(
@@ -193,10 +171,10 @@ class DialogueModelSupervisor(pl.LightningModule):
             self.emotions.extend([self.tokenizer.rev_emo_map[emo_idx]
                                 for emo_idx in batch.emotions.tolist()])
         if batch.concept_net_data is not None:
-            self.concepts.extend([self.tokenizer.decode_to_text(concepts)
+            self.concepts.extend([self.tokenizer.decode(concepts)
                                   for concepts in batch.concept_net_data.tolist()])
         
-        lm_loss = self.forward(batch)[-1]
+        _, lm_loss = self.forward(batch)
         self.lm_loss.append(lm_loss)
 
     def test_epoch_end(self, _) -> None:
@@ -247,18 +225,23 @@ class DialogueModelSupervisor(pl.LightningModule):
     @torch.no_grad()
     def generate(
         self, 
-        batch: ModelBatch
+        contexts: torch.LongTensor,
+        context_mask: torch.BoolTensor
     ) -> torch.LongTensor:
-        self.model.eval()
-        return generate(
-            forward_fn=self.forward, 
-            batch=copy.deepcopy(batch), 
-            model_has_encoder=self.model.has_encoder,
-            start_token=self.tokenizer.SOS_IDX,
-            stop_token=self.tokenizer.EOS_IDX,
-            generation_config=self.generation_config
+        return self.model.generate(
+            contexts=contexts,
+            context_mask=context_mask,
+            bos_token_id=self.tokenizer.SOS_IDX,
+            pad_token_id=self.tokenizer.PAD_IDX,
+            eos_token_id=self.tokenizer.EOS_IDX,
+            max_new_tokens=self.generation_config.max_new_tokens,
+            num_beams=self.generation_config.beam_width,
+            do_sample=self.generation_config.sample,
+            temperature=self.generation_config.temperature,
+            top_p=self.generation_config.top_p,
+            top_k=self.generation_config.top_k,
+            length_penalty=self.generation_config.length_alpha
         )
-
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = torch.optim.AdamW(

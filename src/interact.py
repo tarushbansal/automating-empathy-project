@@ -38,6 +38,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--top_p", type=float, default=1.0)
     parser.add_argument("--top_k", type=int, default=50)
     parser.add_argument("--max_new_tokens", type=int, default=100)
+    parser.add_argument("--length_alpha", type=float, default=0.65)
     
     cli_args = parser.parse_args()
 
@@ -55,7 +56,8 @@ def main():
         sample=cli_args.sample,
         temperature=cli_args.temperature,
         top_p=cli_args.top_p,
-        top_k=cli_args.top_k
+        top_k=cli_args.top_k,
+        length_alpha=cli_args.length_alpha
     )
 
     # Set up dialogue model and configuration
@@ -95,11 +97,13 @@ def main():
                 target=[],
                 emotion=None,
                 concept_net_data=concept_net_data
-            )], tokenizer
+            )], 
+            tokenizer, 
+            model_supervisor.model.has_encoder
         )
 
-        response = model_supervisor.generate(batch)[0]
-        decoded_reponse = tokenizer.decode_to_text(response)
+        response = model_supervisor.generate(batch.contexts, batch.context_mask)
+        decoded_reponse = tokenizer.decode(response)[0]
         print(f"Dialogue Model: {decoded_reponse}")
         print("")
 

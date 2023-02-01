@@ -12,20 +12,16 @@ from pattern.text.en import singularize
 from transformers import AutoTokenizer
 
 # User-Defined Modules
-from base_classes import TokenizerBase
+from base_classes import HuggingFaceTokenizerBase
 from data_classes import ConceptNetRawData
 
 # ------------------------- IMPLEMENTATION ----------------------------------------
 
 
-class BlenderBotTokenizer(TokenizerBase):
+class BlenderBotTokenizer(HuggingFaceTokenizerBase):
     def __init__(self) -> None:
-        super().__init__()
-        self.tokenizer = AutoTokenizer.from_pretrained("facebook/blenderbot-400M-distill")
+        super().__init__(AutoTokenizer.from_pretrained("facebook/blenderbot-400M-distill"))
         self.tokenizer.truncation_side = "left"
-        self.SOS_IDX = self.tokenizer.bos_token_id
-        self.EOS_IDX = self.tokenizer.eos_token_id
-        self.vocab_size = len(self.tokenizer)
 
     def encode_text(
         self,
@@ -47,7 +43,7 @@ class BlenderBotTokenizer(TokenizerBase):
         return token_ids, None
 
 
-class GODELTokenizer(TokenizerBase):
+class GODELTokenizer(HuggingFaceTokenizerBase):
     def __init__(
         self,
         version: str,
@@ -56,18 +52,13 @@ class GODELTokenizer(TokenizerBase):
         max_num_concepts: int = 10
     ) -> None:
 
-        super().__init__()
         if version not in ["base", "large"]:
             raise ValueError("Model version must be either 'base' or 'large'!")
-        self.tokenizer = AutoTokenizer.from_pretrained(
+        super().__init__(AutoTokenizer.from_pretrained(
             f"microsoft/GODEL-v1_1-{version}-seq2seq"
-        )
-        self.tokenizer.add_special_tokens({
-            "bos_token": "<SOS>"
-        })
+        ))
+        self.tokenizer.add_special_tokens({"bos_token": "<SOS>"})
         self.SOS_IDX = self.tokenizer.bos_token_id
-        self.EOS_IDX = self.tokenizer.eos_token_id
-        self.vocab_size = len(self.tokenizer)
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
         self.prefix = self.tokenizer(
             "Instruction: given a dialog context, "
@@ -108,14 +99,13 @@ class GODELTokenizer(TokenizerBase):
         return token_ids, external_knowledge
 
 
-class DialoGPTTokenizer(TokenizerBase):
+class DialoGPTTokenizer(HuggingFaceTokenizerBase):
     def __init__(self, version: str) -> None:
-        super().__init__()
         if version not in ["small", "medium", "large"]:
             raise ValueError("Model version must be 'small', 'medium' or 'large'!")
-        self.tokenizer = AutoTokenizer.from_pretrained(f"microsoft/DialoGPT-{version}")
-        self.EOS_IDX = self.tokenizer.eos_token_id
-        self.vocab_size = len(self.tokenizer)
+        tokenizer = AutoTokenizer.from_pretrained(f"microsoft/DialoGPT-{version}")
+        tokenizer.add_special_tokens({"pad_token": "<PAD>"})
+        super().__init__(tokenizer)
 
     def encode_text(
         self,
@@ -137,7 +127,7 @@ class DialoGPTTokenizer(TokenizerBase):
 class QueryConceptNet:
     def __init__(
         self,
-        tokenizer: TokenizerBase,
+        tokenizer: HuggingFaceTokenizerBase,
         num_top_concepts: int,
         max_num_concepts: int,
     ) -> None:

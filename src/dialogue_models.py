@@ -1,7 +1,7 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
-from typing import Tuple, Optional
+from typing import Tuple, Optional, List
 
 import torch
 import torch.nn as nn
@@ -34,28 +34,31 @@ class BlenderBot(EncoderDecoderModel):
     def forward(
         self,
         contexts: torch.LongTensor,
+        context_mask: torch.BoolTensor,
         targets: torch.LongTensor,
-        encoder_outputs: Optional[Tuple[torch.FloatTensor]] = None,
-        past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
-        use_cache: Optional[bool] = None
+        target_mask: torch.BoolTensor
     ) -> Seq2SeqLMOutput:
-
-        contexts, context_mask = self.create_padding_mask(contexts)
-        target_mask = None
-        if past_key_values is None:
-            targets, target_mask = self.create_padding_mask(targets)
 
         out = self.model(
             input_ids=contexts,
             attention_mask=context_mask,
-            encoder_outputs=encoder_outputs,
             decoder_input_ids=targets,
             decoder_attention_mask=target_mask,
-            output_hidden_states=True,
-            past_key_values=past_key_values,
-            use_cache=use_cache
+            output_hidden_states=True
         )
         return out
+
+    def generate(
+            self, 
+            contexts: torch.LongTensor, 
+            context_mask: torch.BoolTensor, 
+            **kwargs
+        ) -> torch.LongTensor:
+        return self.model.generate(
+            input_ids=contexts,
+            attention_mask=context_mask,
+            **kwargs
+        )
 
 
 class GODEL(EncoderDecoderModel):
@@ -76,26 +79,31 @@ class GODEL(EncoderDecoderModel):
     def forward(
         self,
         contexts: torch.LongTensor,
+        context_mask: torch.BoolTensor,
         targets: torch.LongTensor,
-        encoder_outputs: Optional[Tuple[torch.FloatTensor]] = None,
-        past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
-        use_cache: Optional[bool] = None
+        target_mask: torch.BoolTensor
     ) -> Seq2SeqLMOutput:
-
-        contexts, context_mask = self.create_padding_mask(contexts)
-        targets, target_mask = self.create_padding_mask(targets)
 
         out = self.model(
             input_ids=contexts,
             attention_mask=context_mask,
-            encoder_outputs=encoder_outputs,
             decoder_input_ids=targets,
             decoder_attention_mask=target_mask,
-            output_hidden_states=True,
-            past_key_values=past_key_values,
-            use_cache=use_cache
+            output_hidden_states=True
         )
         return out
+
+    def generate(
+            self, 
+            contexts: torch.LongTensor, 
+            context_mask: torch.BoolTensor, 
+            **kwargs
+        ) -> torch.LongTensor:
+        return self.model.generate(
+            input_ids=contexts,
+            attention_mask=context_mask,
+            **kwargs
+        )
 
 
 class KnowledgeBridgedGODEL(EncoderDecoderModel):
@@ -120,11 +128,11 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
     def knowledge_enriched_context(
         self,
         context: torch.LongTensor,
+        context_mask: torch.BoolTensor,
         concepts: torch.LongTensor,
+        concept_mask: torch.BoolTensor
     ) -> Tuple[torch.Tensor]:
 
-        context, context_mask = self.create_padding_mask(context)
-        concepts, concept_mask = self.create_padding_mask(concepts)
         pad_mask = torch.cat((context_mask, concept_mask), dim=1)
 
         context_graph_embeds = self.graph_embeddings(
@@ -140,28 +148,23 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
     def forward(
         self,
         contexts: torch.LongTensor,
+        context_mask: torch.BoolTensor,
         targets: torch.LongTensor,
-        concept_net_data: ConceptNetBatchData,
-        encoder_outputs: Optional[Tuple[torch.FloatTensor]] = None,
-        past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
-        use_cache: Optional[bool] = None
+        target_mask: torch.BoolTensor,
+        concept_net_data: ConceptNetBatchData
     ) -> Seq2SeqLMOutput:
 
         context_embeds, pad_mask = self.knowledge_enriched_context(
-            contexts, concept_net_data.concepts)
+            contexts, context_mask, concept_net_data.concepts, concept_net_data.concept_mask)
         # attention_mask = torch.minimum(pad_mask.unsqueeze(1), concept_net_data.adjacency_mask)
-        targets, target_mask = self.create_padding_mask(targets)
 
         out = self.model(
             inputs_embeds=context_embeds,
             attention_mask=pad_mask,
-            encoder_outputs=encoder_outputs,
             decoder_input_ids=targets,
             decoder_attention_mask=target_mask,
             output_attentions=True,
-            output_hidden_states=True,
-            past_key_values=past_key_values,
-            use_cache=use_cache
+            output_hidden_states=True
         )
 
         emo_intensities = torch.cat(
@@ -175,6 +178,18 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
         self.emo_attn_loss = self.attn_loss(emo_intensities, average_attn_weights)
 
         return out
+
+    def generate(
+            self, 
+            contexts: torch.LongTensor, 
+            context_mask: torch.BoolTensor, 
+            **kwargs
+        ) -> torch.LongTensor:
+        return self.model.generate(
+            input_ids=contexts,
+            attention_mask=context_mask,
+            **kwargs
+        )
 
 
 class DialoGPT(DecoderModel):
@@ -195,17 +210,26 @@ class DialoGPT(DecoderModel):
     def forward(
         self, 
         dialogues: torch.LongTensor,
-        past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
-        use_cache: Optional[bool] = None
+        dialogue_mask: torch.BoolTensor,
     ) -> CausalLMOutput:
-        dialogues, mask = self.create_padding_mask(dialogues)
         out = self.model(
             input_ids=dialogues,
-            attention_mask=mask,
+            attention_mask=dialogue_mask,
             output_hidden_states=True,
-            use_cache=use_cache,
-            past_key_values=past_key_values
         )
         return out
+
+    def generate(
+            self, 
+            contexts: torch.LongTensor, 
+            context_mask: torch.BoolTensor, 
+            **kwargs
+        ) -> torch.LongTensor:
+        len = contexts.size(dim=1)
+        return self.model.generate(
+            input_ids=contexts,
+            attention_mask=context_mask,
+            **kwargs
+        )[:, len:]
     
 # -----------------------------------------------------------------------------

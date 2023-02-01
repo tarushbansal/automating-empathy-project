@@ -6,8 +6,10 @@ import torch.nn as nn
 
 from typing import Tuple, Optional, Union, List
 
+from transformers.modeling_outputs import Seq2SeqLMOutput, CausalLMOutput
+
 # User-Defined Modules
-from data_classes import ConceptNetRawData
+from data_classes import ConceptNetRawData, CustomSeq2SeqLMOutput, CustomCausalLMOutput
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -18,11 +20,9 @@ class TokenizerBase:
 
         # Properties to be set in child class
         self._EOS_IDX = None
+        self._PAD_IDX = None
         self._vocab_size = None
         
-        # Value of PAD_IDX does not matter due to the paddding mask created in the model
-        # However, it should not conflict with any token id in the vocab!!
-        self.PAD_IDX = -100
         # Emotion label map
         self.emo_map = {
             'surprised': 0, 'excited': 1, 'annoyed': 2, 'proud': 3, 'angry': 4, 
@@ -71,6 +71,18 @@ class TokenizerBase:
             raise TypeError("Property must be of type 'int'!")
         self._EOS_IDX = value
 
+    @property
+    def PAD_IDX(self) -> int:
+        if self._PAD_IDX is None:
+            raise NotImplementedError
+        return self._PAD_IDX
+    
+    @PAD_IDX.setter
+    def PAD_IDX(self, value: int):
+        if type(value) != int:
+            raise TypeError("Property must be of type 'int'!")
+        self._PAD_IDX = value
+
     def encode_text(
         self,
         text: Union[str, List[str]],
@@ -78,15 +90,27 @@ class TokenizerBase:
     ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
         raise NotImplementedError
 
-    def decode_to_text(self, sequence: List[int]) -> str:
-        try:
-            i = sequence.index(self.PAD_IDX)
-        except ValueError:
-            i = len(sequence)
-        decoded_text = self.tokenizer.decode(
-            sequence[:i],
-            skip_special_tokens=True).strip()
-        return decoded_text
+    def decode(
+        self, 
+        sequences: Union[List[int], List[List[int]], torch.Tensor]
+    ) -> List[str]:
+        raise NotImplementedError
+
+
+class HuggingFaceTokenizerBase(TokenizerBase):
+    def __init__(self, tokenizer):
+        super().__init__()
+        self.tokenizer = tokenizer
+        self.PAD_IDX = self.tokenizer.pad_token_id
+        self.EOS_IDX = self.tokenizer.eos_token_id
+        self.vocab_size = len(self.tokenizer)
+    
+    def decode(
+        self, 
+        sequences: Union[List[int], List[List[int]], torch.Tensor]
+    ) -> List[str]:
+        return self.tokenizer.batch_decode(sequences, skip_special_tokens=True)
+
 
 class DialogueModelBase(nn.Module):
     def __init__(self, tokenizer: TokenizerBase) -> None:
@@ -158,16 +182,13 @@ class DialogueModelBase(nn.Module):
             raise TypeError("Property must be of type 'bool'!")
         self._requires_concept_net_data = bool
 
-    def create_padding_mask(self, batch_seq) -> Tuple[torch.Tensor]:
-        padding_mask = (batch_seq != self.tokenizer.PAD_IDX)
-        batch_seq = batch_seq.masked_fill(padding_mask == 0, 0)
-        return batch_seq, padding_mask
-    
-    def create_lookahead_mask(self, batch_seq) -> torch.Tensor:
-        N, seq_len = batch_seq.shape
-        lookahead_mask = torch.tril(torch.ones(
-            N, 1, seq_len, seq_len, device=batch_seq.device))
-        return lookahead_mask
+    def generate(
+        self,
+        contexts: torch.LongTensor, 
+        context_mask: torch.BoolTensor, 
+        **kwargs
+    ) -> torch.LongTensor:
+        raise NotImplementedError
 
 
 class EncoderDecoderModel(DialogueModelBase):
@@ -181,11 +202,10 @@ class EncoderDecoderModel(DialogueModelBase):
     def forward(
         self,
         contexts: torch.LongTensor,
+        context_mask: torch.BoolTensor,
         targets: torch.LongTensor,
-        encoder_outputs: Optional[Tuple[torch.FloatTensor]] = None,
-        past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
-        use_cache: bool = False,
-    ) -> Tuple[torch.FloatTensor]:
+        target_mask: torch.BoolTensor,
+    ) -> Union[Seq2SeqLMOutput, CustomSeq2SeqLMOutput]:
         raise NotImplementedError
 
 
@@ -200,9 +220,8 @@ class DecoderModel(DialogueModelBase):
     def forward(
         self, 
         dialogues: torch.LongTensor,
-        past_key_values: Optional[Tuple[Tuple[torch.FloatTensor]]] = None,
-        use_cache: bool = False
-    ) -> Tuple[torch.FloatTensor]:
+        dialogue_mask: torch.BoolTensor
+    ) -> Union[CausalLMOutput, CustomCausalLMOutput]:
         raise NotImplementedError
 
 #---------------------------------------------------------------------------

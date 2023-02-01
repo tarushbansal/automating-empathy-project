@@ -60,6 +60,7 @@ def main():
                              batch_size=cli_args.batch_size,
                              tokenizer=model_supervisor.tokenizer,
                              num_workers=max(1, os.cpu_count() // 4),
+                             model_has_encoder=model_supervisor.model.has_encoder,
                              few_shot_training=cli_args.few_shot_training)
 
     # Set up model checkpointing

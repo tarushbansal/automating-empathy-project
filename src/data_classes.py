@@ -38,14 +38,14 @@ class ModelRawData:
     def __init__(
         self,
         context: List[int],
-        raw_context: List[List[str]],
         target: List[int],
+        raw_context: List[List[str]],
         emotion: Optional[List[int]],
         concept_net_data: Optional[ConceptNetRawData]
     ):
         self.context = context
-        self.raw_context = raw_context
         self.target = target
+        self.raw_context = raw_context
         self.emotion = emotion
         self.concept_net_data = concept_net_data
 
@@ -64,15 +64,19 @@ class ModelBatch:
     def __init__(
         self,
         contexts: torch.LongTensor,
-        raw_contexts: List[List[str]],
+        context_mask: torch.BoolTensor,
         targets: torch.LongTensor,
+        target_mask: torch.BoolTensor,
+        raw_contexts: List[List[str]],
         emotions: Optional[torch.LongTensor],
         concept_net_data: Optional[ConceptNetBatchData]
     ) -> None:
 
         self.contexts = contexts
-        self.raw_contexts = raw_contexts
+        self.context_mask = context_mask
         self.targets = targets
+        self.target_mask = target_mask
+        self.raw_contexts = raw_contexts
         self.emotions = emotions
         self.concept_net_data = concept_net_data
 
@@ -90,6 +94,16 @@ class RewardModelBatch:
         self.mask = mask
 
 
+class CustomSeq2SeqLMOutput:
+    def __init__(self) -> None:
+        raise NotImplementedError
+
+
+class CustomCausalLMOutput:
+    def __init__(self) -> None:
+        raise NotImplementedError
+
+
 class GenerationConfig:
     def __init__(
         self,
@@ -98,7 +112,8 @@ class GenerationConfig:
         sample: bool,
         temperature: float,
         top_p: float,
-        top_k: int
+        top_k: int,
+        length_alpha: float
     ) -> None:
         
         self.max_new_tokens = max_new_tokens
@@ -107,6 +122,7 @@ class GenerationConfig:
         self.temperature = temperature
         self.top_p = top_p
         self.top_k = top_k
+        self.length_alpha = length_alpha
 
 
 class PPOConfig:

@@ -30,6 +30,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--top_p", type=float, default=1.0)
     parser.add_argument("--top_k", type=int, default=20)
     parser.add_argument("--max_new_tokens", type=int, default=100)
+    parser.add_argument("--length_alpha", type=float, default=0.65)
     
     cli_args = parser.parse_args()
 
@@ -50,7 +51,8 @@ def main():
         sample=cli_args.sample,
         temperature=cli_args.temperature,
         top_p=cli_args.top_p,
-        top_k=cli_args.top_k
+        top_k=cli_args.top_k,
+        length_alpha=cli_args.length_alpha
     )
 
     # Set up dialogue model and configuration
@@ -73,6 +75,7 @@ def main():
     data_module = DataModule(dataset_dir=cli_args.dataset_dir,
                              batch_size=cli_args.batch_size,
                              tokenizer=model_supervisor.tokenizer,
+                             model_has_encoder=model_supervisor.model.has_encoder,
                              num_workers=max(1, os.cpu_count() // 4))
 
     # Set up trainer

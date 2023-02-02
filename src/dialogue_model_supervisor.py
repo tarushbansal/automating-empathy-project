@@ -160,7 +160,7 @@ class DialogueModelSupervisor(pl.LightningModule):
         self.enc_targets.extend([[token for token in prediction 
                                   if token != self.tokenizer.PAD_IDX] 
                                   for prediction in enc_predictions.tolist()])
-        self.predictions.extend([self.tokenizer.decode(enc_predictions)])
+        self.predictions.extend(self.tokenizer.decode(enc_predictions))
     
         if hasattr(self.model, "emo_logits"):
             self.emo_predictions.extend(
@@ -169,7 +169,7 @@ class DialogueModelSupervisor(pl.LightningModule):
                     torch.softmax(self.model.emo_logits, dim=-1), dim=-1)[1].tolist()])
         if batch.emotions is not None:
             self.emotions.extend([self.tokenizer.rev_emo_map[emo_idx]
-                                for emo_idx in batch.emotions.tolist()])
+                                  for emo_idx in batch.emotions.tolist()])
         if batch.concept_net_data is not None:
             self.concepts.extend([self.tokenizer.decode(concepts)
                                   for concepts in batch.concept_net_data.tolist()])
@@ -207,7 +207,7 @@ class DialogueModelSupervisor(pl.LightningModule):
             self.predictions,
             self.enc_targets,
             self.enc_predictions,
-            self.model.word_embeddings,
+            self.model.word_embeddings(),
             self.metric_n_grams,
         )
 

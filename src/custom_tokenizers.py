@@ -57,7 +57,6 @@ class GODELTokenizer(HuggingFaceTokenizerBase):
         super().__init__(AutoTokenizer.from_pretrained(
             f"microsoft/GODEL-v1_1-{version}-seq2seq"
         ))
-        self.tokenizer.add_special_tokens({"bos_token": "<SOS>"})
         self.SOS_IDX = self.tokenizer.bos_token_id
         os.environ["TOKENIZERS_PARALLELISM"] = "false"
         self.prefix = self.tokenizer(
@@ -103,9 +102,8 @@ class DialoGPTTokenizer(HuggingFaceTokenizerBase):
     def __init__(self, version: str) -> None:
         if version not in ["small", "medium", "large"]:
             raise ValueError("Model version must be 'small', 'medium' or 'large'!")
-        tokenizer = AutoTokenizer.from_pretrained(f"microsoft/DialoGPT-{version}")
-        tokenizer.add_special_tokens({"pad_token": "<PAD>"})
-        super().__init__(tokenizer)
+        super().__init__(
+            AutoTokenizer.from_pretrained(f"microsoft/DialoGPT-{version}"), add_bos_token=False)
 
     def encode_text(
         self,
@@ -113,13 +111,14 @@ class DialoGPTTokenizer(HuggingFaceTokenizerBase):
         *_
     ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
     
-        if type(text) == list:
-            input_ = f"{f' {self.tokenizer.eos_token} '.join(text)} {self.tokenizer.eos_token}"
-        else:
-            input_ = f"{text} {self.tokenizer.eos_token}"
+        if type(text) == str:
+            text = [text]
+        input_ = f"{f' {self.tokenizer.eos_token} '.join(text)} {self.tokenizer.eos_token}"
 
         token_ids = self.tokenizer(
-            input_, add_special_tokens=False)["input_ids"]
+            input_, 
+            add_special_tokens=False
+        )["input_ids"]
 
         return token_ids, None
 

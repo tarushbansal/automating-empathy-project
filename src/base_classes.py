@@ -3,9 +3,11 @@
 # System Modules
 import torch
 import torch.nn as nn
+from abc import ABC, abstractmethod
 
 from typing import Tuple, Optional, Union, List
 
+from transformers import AutoTokenizer
 from transformers.modeling_outputs import Seq2SeqLMOutput, CausalLMOutput
 
 # User-Defined Modules
@@ -13,7 +15,7 @@ from data_classes import ConceptNetRawData, CustomSeq2SeqLMOutput, CustomCausalL
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
-class TokenizerBase:
+class TokenizerBase(ABC):
     def __init__(self) -> None:
         # Start sequence for generation is none by default
         self._SOS_IDX = None
@@ -83,6 +85,7 @@ class TokenizerBase:
             raise TypeError("Property must be of type 'int'!")
         self._PAD_IDX = value
 
+    @abstractmethod
     def encode_text(
         self,
         text: Union[str, List[str]],
@@ -90,6 +93,7 @@ class TokenizerBase:
     ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
         raise NotImplementedError
 
+    @abstractmethod
     def decode(
         self, 
         sequences: Union[List[int], List[List[int]], torch.Tensor]
@@ -98,9 +102,13 @@ class TokenizerBase:
 
 
 class HuggingFaceTokenizerBase(TokenizerBase):
-    def __init__(self, tokenizer):
+    def __init__(self, tokenizer: AutoTokenizer, add_bos_token: bool = True) -> None:
         super().__init__()
         self.tokenizer = tokenizer
+        special_tokens = {"pad_token": "<PAD>"}
+        if add_bos_token:
+            special_tokens["bos_token"] = "<SOS>"
+        self.tokenizer.add_special_tokens(special_tokens)
         self.PAD_IDX = self.tokenizer.pad_token_id
         self.EOS_IDX = self.tokenizer.eos_token_id
         self.vocab_size = len(self.tokenizer)
@@ -112,17 +120,17 @@ class HuggingFaceTokenizerBase(TokenizerBase):
         return self.tokenizer.batch_decode(sequences, skip_special_tokens=True)
 
 
-class DialogueModelBase(nn.Module):
+class DialogueModelBase(ABC, nn.Module):
     def __init__(self, tokenizer: TokenizerBase) -> None:
         super().__init__()
         self.tokenizer = tokenizer
         self._has_encoder = None
         self._hidden_size = None
-        self._word_embeddings = None
         self._requires_emotion_label = False
         self._requires_concept_net_data = False
     
     @staticmethod
+    @abstractmethod
     def tokenizer_cls():
         raise NotImplementedError
 
@@ -150,17 +158,9 @@ class DialogueModelBase(nn.Module):
             raise TypeError("Property must be of type 'int'!")
         self._hidden_size = value
     
-    @property
+    @abstractmethod
     def word_embeddings(self) -> nn.Embedding:
-        if self._word_embeddings is None:
-            raise NotImplementedError
-        return self._word_embeddings
-    
-    @word_embeddings.setter
-    def word_embeddings(self, embeddings: nn.Embedding) -> None:
-        if not isinstance(embeddings, nn.Embedding):
-            raise TypeError("Property must be an instance of 'nn.Embedding'!")
-        self._word_embeddings = embeddings
+        raise NotImplementedError
         
     @property
     def requires_emotion_label(self) -> bool:
@@ -182,6 +182,7 @@ class DialogueModelBase(nn.Module):
             raise TypeError("Property must be of type 'bool'!")
         self._requires_concept_net_data = bool
 
+    @abstractmethod
     def generate(
         self,
         contexts: torch.LongTensor, 
@@ -199,12 +200,14 @@ class EncoderDecoderModel(DialogueModelBase):
     def has_encoder(self) -> bool:
         return True
 
+    @abstractmethod
     def forward(
         self,
         contexts: torch.LongTensor,
         context_mask: torch.BoolTensor,
         targets: torch.LongTensor,
         target_mask: torch.BoolTensor,
+        **kwargs
     ) -> Union[Seq2SeqLMOutput, CustomSeq2SeqLMOutput]:
         raise NotImplementedError
 
@@ -217,10 +220,12 @@ class DecoderModel(DialogueModelBase):
     def has_encoder(self) -> bool:
         return False
 
+    @abstractmethod
     def forward(
         self, 
         dialogues: torch.LongTensor,
-        dialogue_mask: torch.BoolTensor
+        dialogue_mask: torch.BoolTensor,
+        **kwargs
     ) -> Union[CausalLMOutput, CustomCausalLMOutput]:
         raise NotImplementedError
 

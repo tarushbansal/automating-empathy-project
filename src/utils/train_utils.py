@@ -7,7 +7,7 @@ from typing import Optional, List
 
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.utilities.distributed import rank_zero_only
+from pytorch_lightning.utilities import rank_zero_only
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 

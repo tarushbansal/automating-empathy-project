@@ -24,12 +24,13 @@ class BlenderBot(EncoderDecoderModel):
         super().__init__(tokenizer)
         self.model = AutoModelForSeq2SeqLM.from_pretrained("facebook/blenderbot-400M-distill")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
-        self.word_embeddings = self.model.get_input_embeddings()
         self.hidden_size = self.model.config.hidden_size
 
-    @staticmethod
     def tokenizer_cls():
         return "BlenderBotTokenizer"
+
+    def word_embeddings(self) -> nn.Embedding:
+        return self.model.get_input_embeddings()
 
     def forward(
         self,
@@ -69,12 +70,13 @@ class GODEL(EncoderDecoderModel):
         self.model = AutoModelForSeq2SeqLM.from_pretrained(f"microsoft/GODEL-v1_1-{version}-seq2seq")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
         self.model.config.dropout_rate = 0.6
-        self.word_embeddings = self.model.get_input_embeddings()
         self.hidden_size = self.model.config.hidden_size
 
-    @staticmethod
     def tokenizer_cls():
         return "GODELTokenizer"
+
+    def word_embeddings(self) -> nn.Embedding:
+        return self.model.get_input_embeddings()
 
     def forward(
         self,
@@ -117,13 +119,14 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
         self.graph_embeddings = nn.Embedding(2, self.hidden_size)
         self.emo_linear = nn.Linear(self.model.config.hidden_size, self.tokenizer.num_emo_labels)
         self.attn_loss = nn.MSELoss()
-        self.word_embeddings = self.model.get_input_embeddings()
         self.hidden_size = self.model.config.hidden_size
         self.requires_concept_net_data = True
 
-    @staticmethod
     def tokenizer_cls():
         return "GODELTokenizer"
+
+    def word_embeddings(self) -> nn.Embedding:
+        return self.model.get_input_embeddings()
 
     def knowledge_enriched_context(
         self,
@@ -137,10 +140,10 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
 
         context_graph_embeds = self.graph_embeddings(
             torch.zeros(context.size(), dtype=torch.long, device=context.device))
-        context_embeds = self.word_embeddings(context) + context_graph_embeds
+        context_embeds = self.word_embeddings()(context) + context_graph_embeds
         concept_graph_embeds = self.graph_embeddings(
             torch.ones(concepts.size(), dtype=torch.long, device=concepts.device))
-        concept_embeds = self.word_embeddings(concepts) + concept_graph_embeds
+        concept_embeds = self.word_embeddings()(concepts) + concept_graph_embeds
         embeddings = torch.cat((context_embeds, concept_embeds), dim=1)
 
         return embeddings, pad_mask
@@ -200,12 +203,13 @@ class DialoGPT(DecoderModel):
         self.model = AutoModelForCausalLM.from_pretrained(f"microsoft/DialoGPT-{version}")
         self.model.resize_token_embeddings(tokenizer.vocab_size)
         self.model.config.resid_pdrop = self.model.config.attn_pdrop = self.model.config.embd_pdrop = 0.6
-        self.word_embeddings = self.model.get_input_embeddings()
         self.hidden_size = self.model.config.hidden_size
 
-    @staticmethod
     def tokenizer_cls():
         return "DialoGPTTokenizer"
+
+    def word_embeddings(self) -> nn.Embedding:
+        return self.model.get_input_embeddings()
 
     def forward(
         self, 

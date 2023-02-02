@@ -141,7 +141,9 @@ class DataModule(pl.LightningDataModule):
     def transfer_batch_to_device(self, batch, device, dataloader_idx):
         if isinstance(batch, ModelBatch):
             batch.contexts = batch.contexts.to(device)
+            batch.context_mask = batch.context_mask.to(device)
             batch.targets = batch.targets.to(device)
+            batch.target_mask = batch.target_mask.to(device)
             if batch.emotions is not None:
                 batch.emotions = batch.emotions.to(device)
             data = batch.concept_net_data

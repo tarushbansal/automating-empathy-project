@@ -35,7 +35,7 @@ class BlenderBotTokenizer(HuggingFaceTokenizerBase):
                 dialogue,
                 truncation=True,
                 max_length=self.tokenizer.model_max_length
-                )["input_ids"]
+            )["input_ids"]
 
         else:
             token_ids = self.tokenizer(f"<s> {text}")["input_ids"]
@@ -57,12 +57,7 @@ class GODELTokenizer(HuggingFaceTokenizerBase):
         super().__init__(AutoTokenizer.from_pretrained(
             f"microsoft/GODEL-v1_1-{version}-seq2seq"
         ))
-        self.SOS_IDX = self.tokenizer.bos_token_id
-        os.environ["TOKENIZERS_PARALLELISM"] = "false"
-        self.prefix = self.tokenizer(
-            "Instruction: given a dialog context, "
-             + "you need to response empathically. [CONTEXT] ",
-            add_special_tokens=False)["input_ids"]
+        self.default_instruction = "Given a dialog context, you need to response empathically."
         self.query_concept_net = query_concept_net
         if self.query_concept_net:
             self.concept_net = QueryConceptNet(
@@ -79,21 +74,20 @@ class GODELTokenizer(HuggingFaceTokenizerBase):
 
         external_knowledge = None
         if type(text) == list:
-            if instruction is not None:
-                self.prefix = self.tokenizer(
-                    f"Instruction: {instruction} [CONTEXT] ",
-                    add_special_tokens=False)["input_ids"]
-            dialog_history = f' EOS '.join(text)
-            tokens = self.tokenizer.tokenize(dialog_history)
-            token_ids = self.prefix + self.tokenizer.convert_tokens_to_ids(tokens)
+            if instruction is None:
+                instruction = self.default_instruction
+            dialogue = f' EOS '.join(text)
+            token_ids = self.tokenizer(
+                f"Instruction: {instruction} [CONTEXT] {dialogue}")["input_ids"]
             if self.query_concept_net:
-                tokens = [token[1:] if token[0] == "▁" else token for token in tokens]
+                tokens = [token[1:] if token[0] == "▁" else token 
+                          for token in self.tokenizer.convert_ids_to_tokens(token_ids)]
                 external_knowledge = self.concept_net.query(tokens)
 
         else:
             token_ids = self.tokenizer(
-                f"{self.tokenizer.bos_token} {text} {self.tokenizer.eos_token}",
-                add_special_tokens=False)["input_ids"]
+                f"{self.tokenizer.pad_token} {text}"
+            )["input_ids"]
 
         return token_ids, external_knowledge
 
@@ -102,8 +96,7 @@ class DialoGPTTokenizer(HuggingFaceTokenizerBase):
     def __init__(self, version: str) -> None:
         if version not in ["small", "medium", "large"]:
             raise ValueError("Model version must be 'small', 'medium' or 'large'!")
-        super().__init__(
-            AutoTokenizer.from_pretrained(f"microsoft/DialoGPT-{version}"), add_bos_token=False)
+        super().__init__(AutoTokenizer.from_pretrained(f"microsoft/DialoGPT-{version}"))
 
     def encode_text(
         self,

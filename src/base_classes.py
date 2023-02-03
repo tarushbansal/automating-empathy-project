@@ -102,13 +102,11 @@ class TokenizerBase(ABC):
 
 
 class HuggingFaceTokenizerBase(TokenizerBase):
-    def __init__(self, tokenizer: AutoTokenizer, add_bos_token: bool = True) -> None:
+    def __init__(self, tokenizer: AutoTokenizer) -> None:
         super().__init__()
         self.tokenizer = tokenizer
-        special_tokens = {"pad_token": "<PAD>"}
-        if add_bos_token:
-            special_tokens["bos_token"] = "<SOS>"
-        self.tokenizer.add_special_tokens(special_tokens)
+        self.tokenizer.add_special_tokens({"pad_token": "<PAD>"})
+        self.SOS_IDX = self.tokenizer.bos_token_id
         self.PAD_IDX = self.tokenizer.pad_token_id
         self.EOS_IDX = self.tokenizer.eos_token_id
         self.vocab_size = len(self.tokenizer)

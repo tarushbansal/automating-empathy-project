@@ -1,7 +1,7 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
-from typing import Tuple, Optional, List
+from typing import Tuple
 
 import torch
 import torch.nn as nn
@@ -86,6 +86,9 @@ class GODEL(EncoderDecoderModel):
         target_mask: torch.BoolTensor
     ) -> Seq2SeqLMOutput:
 
+        # Unmask pad token used to start generation
+        target_mask[:, 0] = 1
+        
         out = self.model(
             input_ids=contexts,
             attention_mask=context_mask,

@@ -106,7 +106,6 @@ class RLHFSupervisor(pl.LightningModule):
             # ROLLOUT PHASE
             enc_predictions = self.tuned_model.generate(batch.contexts, batch.context_mask)
             predictions = self.tuned_model.tokenizer.decode(enc_predictions)
-            print(predictions)
 
             # EVALUATION PHASE
             dialogues = [

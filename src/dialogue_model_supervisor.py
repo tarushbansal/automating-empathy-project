@@ -157,9 +157,9 @@ class DialogueModelSupervisor(pl.LightningModule):
         self.targets.extend(self.tokenizer.decode(batch.targets))
 
         enc_predictions = self.generate(batch.contexts, batch.context_mask)
-        self.enc_targets.extend([[token for token in prediction 
-                                  if token != self.tokenizer.PAD_IDX] 
-                                  for prediction in enc_predictions.tolist()])
+        self.enc_predictions.extend([[token for token in prediction 
+                                      if token != self.tokenizer.PAD_IDX] 
+                                      for prediction in enc_predictions.tolist()])
         self.predictions.extend(self.tokenizer.decode(enc_predictions))
     
         if hasattr(self.model, "emo_logits"):

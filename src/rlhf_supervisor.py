@@ -88,9 +88,14 @@ class RLHFSupervisor(pl.LightningModule):
                 delta = rewards[i, j] + self.ppo_config.gamma * nextvalue - values[i, j]
                 advantages[i, j] = delta + self.ppo_config.gamma * self.ppo_config.lam * nextadvantage
                 nextadvantage = advantages[i, j]
-            mean, var = torch.mean(advantages[i, :len]), torch.var(advantages[i, :len])
-            advantages[i, :len] = (advantages[i, :len] - mean) * torch.rsqrt(var + 1e-8)
+        # Normalize advantage to zero mean and unit variance
+        num_tokens = torch.sum(gen_len)
+        mean = torch.sum(advantages) / num_tokens
+        var = torch.sum(advantages ** 2) / num_tokens - mean ** 2
+        advantages = (advantages - mean) * torch.rsqrt(var + 1e-8)
+        
         returns = advantages + values
+        
         return advantages, returns
 
     def forward_and_log_metrics(
@@ -128,7 +133,7 @@ class RLHFSupervisor(pl.LightningModule):
             self.log(f"{stage}_reward", torch.mean(scores), batch_size=N, **self.default_log_config)
         
         # OPTIMIZATION PHASE   
-     
+
         # Compute new and reference log probability and advantage for each generated token
         batch.targets = enc_predictions
         batch.target_mask = (enc_predictions != self.tuned_model.tokenizer.PAD_IDX)

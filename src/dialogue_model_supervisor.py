@@ -37,6 +37,11 @@ class DialogueModelSupervisor(pl.LightningModule):
         self.test_output_dir = test_output_dir
         self.generation_config = generation_config
         self.metric_n_grams = metric_n_grams
+        self.default_log_config = {
+            "on_step": True,
+            "on_epoch": True,
+            "sync_dist": True
+        }
 
     def forward(
         self, 
@@ -88,18 +93,16 @@ class DialogueModelSupervisor(pl.LightningModule):
             self.log(
                 f"{stage}_emo_loss", 
                 emo_loss,
-                on_epoch=True, 
                 batch_size=N, 
-                sync_dist=True
+                **self.default_log_config
             )
         if hasattr(self.model, "emo_attn_loss"):
             emo_attn_loss = self.model.emo_attn_loss
             self.log(
                 f"{stage}_emo_attn_loss", 
                 emo_attn_loss,
-                on_epoch=True, 
                 batch_size=N, 
-                sync_dist=True
+                **self.default_log_config
             )
         
         loss = lm_loss + 1 * emo_loss + 0.1 * emo_attn_loss
@@ -107,19 +110,17 @@ class DialogueModelSupervisor(pl.LightningModule):
         self.log(
             f"{stage}_loss", 
             loss, 
-            prog_bar=True, 
-            on_epoch=True,
+            prog_bar=True,
             batch_size=N, 
-            sync_dist=True
+            **self.default_log_config
         )
 
         if loss != lm_loss:
             self.log(
                 f"{stage}_lm_loss", 
                 loss,
-                on_epoch=True,
                 batch_size=N, 
-                sync_dist=True
+                **self.default_log_config
             )
 
         return loss

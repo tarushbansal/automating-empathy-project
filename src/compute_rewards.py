@@ -71,10 +71,10 @@ def main():
     
     mean_reward = sum(rewards)/len(rewards)
     print(f"Mean reward for dialogue model: {mean_reward}")
-    with open(f"{model_dir}/reward.json", "w") as f:
+    with open(f"{model_dir}/rewards.json", "w") as f:
         json.dump({"mean": mean_reward, "rewards": 
                    [{i: reward} for i, reward in enumerate(rewards)]}, f)
-        print(f"All rewards saved at {model_dir}/reward.json")
+        print(f"All rewards saved at {model_dir}/rewards.json")
 
 
 if __name__ == "__main__":

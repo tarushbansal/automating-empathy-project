@@ -17,10 +17,8 @@ from data_classes import ConceptNetRawData, CustomSeq2SeqLMOutput, CustomCausalL
 
 class TokenizerBase(ABC):
     def __init__(self) -> None:
-        # Start sequence for generation is none by default
-        self._SOS_IDX = None
-
         # Properties to be set in child class
+        self._SOS_IDX = None
         self._EOS_IDX = None
         self._PAD_IDX = None
         self._vocab_size = None
@@ -45,7 +43,7 @@ class TokenizerBase(ABC):
     
     @SOS_IDX.setter
     def SOS_IDX(self, value: int):
-        if type(value) != int:
+        if value is not None and type(value) != int:
             raise TypeError("Property must be of type 'int'!")
         self._SOS_IDX = value
 

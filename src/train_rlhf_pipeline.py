@@ -45,7 +45,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max_new_tokens", type=int, default=100)
     parser.add_argument("--length_alpha", type=float, default=0.65)
     parser.add_argument("--clip_epsilon", type=int, default=0.2)
-    parser.add_argument("--kl_penalty", type=int, default=0.0)
+    parser.add_argument("--kl_penalty", type=int, default=0)
     parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--lam", type=float, default=0.95)
     parser.add_argument("--vf_coeff", type=float, default=0.1)
@@ -133,7 +133,8 @@ def main():
         strategy="ddp_find_unused_parameters_false",
         max_epochs=cli_args.max_epochs,
         logger=logger,
-        callbacks=callbacks
+        callbacks=callbacks,
+        log_every_n_steps=10
     )
 
     # Train / Validate the model

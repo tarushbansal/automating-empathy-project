@@ -13,6 +13,7 @@ import pytorch_lightning as pl
 from transformers.optimization import get_linear_schedule_with_warmup
 
 # User-defined Modules
+from data_loader import pad_seq_and_convert_to_tensor
 from dialogue_model_supervisor import DialogueModelSupervisor
 from reward_model_supervisor import RewardModelSupervisor
 from data_classes import ModelBatch, RewardModelBatch, PPOConfig
@@ -113,21 +114,32 @@ class RLHFSupervisor(pl.LightningModule):
             predictions = self.tuned_model.tokenizer.decode(enc_predictions)
 
             # EVALUATION PHASE
-            dialogues = [
-                f" {self.reward_model.tokenizer.eos_token} ".join(context + [prediction])
-                  + f" {self.reward_model.tokenizer.eos_token}"
-                for context, prediction in zip(batch.raw_contexts, predictions)
-            ]
-            reward_model_inputs = self.reward_model.tokenizer(
-                dialogues, 
-                padding=True,
-                return_tensors="pt"
+            contexts = [self.reward_model.tokenizer.encode_text(context)[0] 
+                        for context in batch.raw_contexts]
+            max_len_context_seq = max([len(seq) for seq in contexts])
+            contexts = pad_seq_and_convert_to_tensor(
+                contexts,
+                max_len_context_seq,
+                pad_token=self.reward_model.tokenizer.PAD_IDX
             )
+            contexts = contexts.to(device)
+            targets = [self.reward_model.tokenizer.encode_text(prediction)[0]
+                       for prediction in predictions]
+            max_len_target_seq = max([len(seq) for seq in targets])
+            targets = pad_seq_and_convert_to_tensor(
+                targets,
+                max_len_target_seq,
+                pad_token=self.reward_model.tokenizer.PAD_IDX
+            )
+            targets = targets.to(device)
+            self.reward_model.eval()
             scores = self.reward_model.forward(
                 RewardModelBatch(
-                    dialogues=reward_model_inputs.input_ids.to(device),
-                    rewards=None,
-                    mask=reward_model_inputs.attention_mask.to(device)
+                    contexts=contexts,
+                    context_mask=(contexts != self.reward_model.tokenizer.PAD_IDX),
+                    targets=targets,
+                    target_mask=(targets != self.reward_model.tokenizer.PAD_IDX),
+                    ratings=None
                 )
             )
             self.log(f"{stage}_reward", torch.mean(scores), batch_size=N, **self.default_log_config)
@@ -157,6 +169,7 @@ class RLHFSupervisor(pl.LightningModule):
         values = self.value_head(self.dropout(last_hidden_states)).squeeze(-1)
 
         with torch.no_grad():
+            self.ref_model.eval()
             output, _ = self.ref_model.forward(batch)
             target_logits = (
                 output.logits[:, :-1, :] 

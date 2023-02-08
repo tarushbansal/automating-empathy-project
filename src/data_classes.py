@@ -2,7 +2,7 @@
 
 # System Modules
 import torch
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 # ------------------------- IMPLEMENTATION ----------------------------------------
 
@@ -53,12 +53,15 @@ class ModelRawData:
 class RewardModelRawData:
     def __init__(
         self,
-        dialogue: List[str],
-        reward: float
+        context: List[int],
+        targets: List[List[int]],
+        ratings: List[Tuple[int]]
     ) -> None:
 
-        self.dialogue = dialogue
-        self.reward = reward
+        self.context = context
+        self.targets = targets
+        self.ratings = ratings
+
 
 class ModelBatch:
     def __init__(
@@ -84,14 +87,18 @@ class ModelBatch:
 class RewardModelBatch:
     def __init__(
         self,
-        dialogues: torch.LongTensor,
-        rewards: torch.FloatTensor,
-        mask: torch.BoolTensor
+        contexts: torch.LongTensor,
+        context_mask: torch.BoolTensor,
+        targets: torch.LongTensor,
+        target_mask: torch.BoolTensor,
+        ratings: List[Tuple[int]]
     ) -> None:
 
-        self.dialogues = dialogues
-        self.rewards = rewards
-        self.mask = mask
+        self.contexts = contexts
+        self.context_mask = context_mask
+        self.targets = targets
+        self.target_mask = target_mask
+        self.ratings = ratings
 
 
 class CustomSeq2SeqLMOutput:

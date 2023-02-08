@@ -10,9 +10,8 @@ import torch
 
 # User-defined Modules
 from data_classes import RewardModelBatch
-from reward_model_supervisor import RewardModelSupervisor
-from transformers import GPT2Tokenizer, GPT2Model
-from utils.train_utils import load_ckpt_path
+from data_loader import pad_seq_and_convert_to_tensor
+from setup import get_model_supervisor_and_config
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -42,34 +41,49 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Initialise model and tokenizer
-    reward_model = RewardModelSupervisor.load_from_checkpoint(
-        load_ckpt_path(cli_args.pretrained_reward_model_dir),
-        model=GPT2Model.from_pretrained("gpt2-large")).to(device)
-    tokenizer = GPT2Tokenizer.from_pretrained("gpt2-large")
-    tokenizer.add_special_tokens({"pad_token": "<PAD>"})
+    reward_model, _ = get_model_supervisor_and_config(
+        pretrained_model_dir=cli_args.pretrained_reward_model_dir,
+        reward_model=True
+    )
+    reward_model = reward_model.to(device)
+    reward_model.eval()
 
     # Prepare data
     test_data = json.load(open(f"{model_dir}/test_data.json"))
-    dialogues = [f" {tokenizer.eos_token} ".join(item["context"] + [item["prediction"]])
-                 + f" {tokenizer.eos_token}" for item in test_data]
 
     # Compute rewards
     rewards = []
     with torch.no_grad():
-        for i in tqdm(range(0, len(dialogues), cli_args.batch_size)):
-            input = tokenizer(
-                dialogues[i:i+cli_args.batch_size], 
-                return_tensors="pt",
-                padding=True
+        for i in tqdm(range(0, len(test_data), cli_args.batch_size)):
+            contexts = [reward_model.tokenizer.encode_text(item["context"])[0] 
+                        for item in test_data[i:i+cli_args.batch_size]]
+            max_len_context_seq = max([len(seq) for seq in contexts])
+            contexts = pad_seq_and_convert_to_tensor(
+                contexts,
+                max_len_context_seq,
+                pad_token=reward_model.tokenizer.PAD_IDX
             )
+            contexts = contexts.to(device)
+            model_max_len = reward_model.tokenizer.tokenizer.model_max_length
+            targets = [reward_model.tokenizer.encode_text(item["prediction"])[0][:model_max_len]
+                       for item in test_data[i:i+cli_args.batch_size]]
+            max_len_target_seq = max([len(seq) for seq in targets])
+            targets = pad_seq_and_convert_to_tensor(
+                targets,
+                max_len_target_seq,
+                pad_token=reward_model.tokenizer.PAD_IDX
+            )
+            targets = targets.to(device)
             batch = RewardModelBatch(
-                dialogues=input.input_ids.to(device), 
-                rewards=None,
-                mask=input.attention_mask.to(device)
+                contexts=contexts,
+                context_mask=(contexts != reward_model.tokenizer.PAD_IDX),
+                targets=targets,
+                target_mask=(targets != reward_model.tokenizer.PAD_IDX),
+                ratings=None
             )
             rewards.extend(reward_model.forward(batch).tolist())
     
-    mean_reward = sum(rewards)/len(rewards)
+    mean_reward = sum(rewards) / len(rewards)
     print(f"Mean reward for dialogue model: {mean_reward}")
     with open(f"{model_dir}/rewards.json", "w") as f:
         json.dump({"mean": mean_reward, "rewards": 

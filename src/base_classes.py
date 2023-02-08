@@ -1,6 +1,8 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
+import os
+
 import torch
 import torch.nn as nn
 from abc import ABC, abstractmethod
@@ -108,6 +110,7 @@ class HuggingFaceTokenizerBase(TokenizerBase):
         self.PAD_IDX = self.tokenizer.pad_token_id
         self.EOS_IDX = self.tokenizer.eos_token_id
         self.vocab_size = len(self.tokenizer)
+        os.environ["TOKENIZERS_PARALLELISM"] = "false"
     
     def decode(
         self, 

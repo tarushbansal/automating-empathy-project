@@ -10,16 +10,11 @@ from pytorch_lightning.loggers import TensorBoardLogger
 
 # User-defined Modules
 from data_loader import DataModule
-from reward_model_supervisor import RewardModelSupervisor
 from rlhf_supervisor import RLHFSupervisor
-from transformers import GPT2Model, GPT2Tokenizer
 from data_classes import GenerationConfig, PPOConfig
 from setup import get_model_supervisor_and_config
-from utils.train_utils import (
-    load_ckpt_path, 
-    get_model_checkpoints, 
-    SaveConfigCallback
-)
+from utils.train_utils import get_model_checkpoints, SaveConfigCallback
+
 # ------------------------- IMPLEMENTATION -----------------------------------
 
 
@@ -37,13 +32,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--initial_lr", type=float, default=0.00001)
     parser.add_argument("--few_shot_training", action="store_true")
-    parser.add_argument("--beam_width", type=int, default=1)
-    parser.add_argument("--sample", action="store_true")
-    parser.add_argument("--temperature", type=float, default=1.0)
-    parser.add_argument("--top_p", type=float, default=1.0)
-    parser.add_argument("--top_k", type=int, default=20)
+    parser.add_argument("--beam_width", type=int, default=None)
+    parser.add_argument('--sample', action='store_true', default=None)
+    parser.add_argument('--no_sample', dest='sample', action='store_false')   
+    parser.add_argument("--temperature", type=float, default=None)
+    parser.add_argument("--top_p", type=float, default=None)
+    parser.add_argument("--top_k", type=int, default=None)
     parser.add_argument("--max_new_tokens", type=int, default=100)
-    parser.add_argument("--length_alpha", type=float, default=0.65)
+    parser.add_argument("--length_alpha", type=float, default=None)
     parser.add_argument("--clip_epsilon", type=int, default=0.2)
     parser.add_argument("--kl_penalty", type=int, default=0)
     parser.add_argument("--gamma", type=float, default=0.99)
@@ -87,14 +83,10 @@ def main():
         cli_args.initial_lr
     )
     dialogue_model.generation_config = generation_config
-    
-    reward_model = RewardModelSupervisor.load_from_checkpoint(
-        load_ckpt_path(cli_args.pretrained_reward_model_dir),
-        model=GPT2Model.from_pretrained("gpt2-large"),
-        initial_lr=cli_args.initial_lr
+    reward_model, _ = get_model_supervisor_and_config(
+        pretrained_model_dir=cli_args.pretrained_reward_model_dir,
+        reward_model=True
     )
-    reward_model.tokenizer = GPT2Tokenizer.from_pretrained('gpt2-large')
-    reward_model.tokenizer.add_special_tokens({"pad_token": "<PAD>"})
     rlhf_supervisor = RLHFSupervisor(
         dialogue_model=dialogue_model,
         reward_model=reward_model,

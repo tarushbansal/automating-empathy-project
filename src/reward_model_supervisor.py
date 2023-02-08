@@ -1,19 +1,16 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
-from typing import Optional
+from collections import OrderedDict
+from typing import Optional, List, Tuple
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 import pytorch_lightning as pl
 
-from transformers.optimization import get_linear_schedule_with_warmup
-
-
 # User-defined Modules
-from transformers import GPT2Model
 from data_classes import RewardModelBatch
+from base_classes import DialogueModelBase, TokenizerBase
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -21,23 +18,61 @@ from data_classes import RewardModelBatch
 class RewardModelSupervisor(pl.LightningModule):
     def __init__(
         self,
-        model: GPT2Model,
-        initial_lr: Optional[float] = None
+        model: DialogueModelBase,
+        tokenizer: TokenizerBase,
+        initial_lr: Optional[float] = None,
+        dropout_prob: Optional[float] = 0.6,
     ) -> None:
         super().__init__()
         self.model = model
+        self.tokenizer = tokenizer
         self.initial_lr = initial_lr
-        self.linear = nn.Linear(model.config.hidden_size, 1)
+        self.linear = nn.Linear(model.hidden_size, 1)
+        self.dropout = nn.Dropout(dropout_prob)
+        self.mean_offset = 0
 
     def forward(self, batch: RewardModelBatch) -> torch.FloatTensor:
-        last_hidden_state = self.model(
-            input_ids=batch.dialogues.masked_fill(batch.mask == 0, 0),
-            attention_mask=batch.mask).last_hidden_state
-        last_idx = torch.sum(batch.mask, dim=-1, keepdim=True) - 1
-        last_idx = last_idx.unsqueeze(-1).expand(-1, -1, last_hidden_state.size(dim=-1))
-        dialogue_hidden_state = torch.gather(last_hidden_state, 1, last_idx).squeeze(1)
-        rewards = self.linear(dialogue_hidden_state).squeeze(-1)
+        if self.model.has_encoder:
+            output = self.model(
+                contexts=batch.contexts,
+                context_mask=batch.context_mask,
+                targets=batch.targets,
+                target_mask=batch.target_mask,
+            )
+            last_hidden_states = output.decoder_hidden_states[-1]
+        else:
+            output = self.model(
+                dialogues=torch.cat((batch.contexts, batch.targets), dim=1),
+                dialogue_mask=torch.cat((batch.context_mask, batch.target_mask), dim=1),
+            )
+            last_hidden_states = output.hidden_states[-1][:, batch.contexts.size(dim=1):, :]
+        dialogue_hidden_state = torch.sum(
+            last_hidden_states * batch.target_mask.unsqueeze(-1), dim=1
+            ) / torch.sum(batch.target_mask, dim=1).unsqueeze(-1)
+        rewards = self.linear(self.dropout(dialogue_hidden_state)).squeeze(-1)
+        if not self.training:
+            rewards -= self.mean_offset
         return rewards
+
+    def compute_loss_and_accuracy(
+        self, 
+        rewards: torch.FloatTensor, 
+        pairwise_ratings: List[Tuple[int]]
+    ) -> float:
+        sum_loss, num_correct, total = 0, 0, 0
+        for rating in pairwise_ratings:
+            A, B, factor = rating
+            if factor == 0:
+                sum_loss += (rewards[A] - rewards[B]) ** 2
+            else:
+                diff = (rewards[A] - rewards[B]) * (1 if factor < 0 else -1)
+                sum_loss -= (abs(factor) ** 0.5) * torch.log(torch.sigmoid(diff))
+                if diff > 0:
+                    num_correct += 1
+                total += 1
+        mean_loss = sum_loss / len(pairwise_ratings)
+        accuracy = num_correct / total
+        return mean_loss, accuracy
 
     def forward_and_log_metrics(
         self, 
@@ -45,18 +80,31 @@ class RewardModelSupervisor(pl.LightningModule):
         stage: str
     ) -> float:
         pred_rewards = self.forward(batch)
-        loss = F.mse_loss(pred_rewards, batch.rewards)
-        N = batch.dialogues.size(dim=0)
+        loss, accuracy = self.compute_loss_and_accuracy(pred_rewards, batch.ratings)
+        N1 = batch.contexts.size(dim=0)
+        N2 = len([rating for _, _, rating in batch.ratings if rating != 0])
         self.log(
             f"{stage}_loss", 
             loss, 
             prog_bar=True, 
             on_step=True, 
             on_epoch=True, 
-            batch_size=N, 
+            batch_size=N1, 
             sync_dist=True
         )
-        self.logger.experiment.add_scalars('loss', {stage: loss}, self.global_step)
+        self.log(
+            f"{stage}_accuracy", 
+            accuracy, 
+            prog_bar=True, 
+            on_step=True, 
+            on_epoch=True, 
+            batch_size=N2, 
+            sync_dist=True
+        )
+        # Mean reward calculation for normalization
+        if stage == "val":
+            self.sum_rewards += torch.sum(pred_rewards)
+            self.num += N1
         return loss
 
     def training_step(
@@ -67,24 +115,34 @@ class RewardModelSupervisor(pl.LightningModule):
         train_loss = self.forward_and_log_metrics(batch, "train")
         return train_loss
 
+    def on_validation_epoch_start(self) -> None:
+        self.sum_rewards, self.num = 0, 0
+
     def validation_step(
         self, 
         batch: RewardModelBatch,
         _
     ) -> float:
-
         val_loss = self.forward_and_log_metrics(batch, "val")
         return val_loss
+    
+    def on_load_checkpoint(self, ckpt: OrderedDict) -> None:
+        self.mean_offset = ckpt["state_dict"]["mean_offset"]
+        del ckpt["state_dict"]["mean_offset"]
+
+    def on_save_checkpoint(self, ckpt: OrderedDict):
+        if hasattr(self, "sum_rewards") and hasattr(self, "num"):
+            ckpt["state_dict"]["mean_offset"] = self.sum_rewards / self.num
 
     def configure_optimizers(self) -> torch.optim.Optimizer:
         optimizer = torch.optim.AdamW(
             self.parameters(),
             lr=self.initial_lr
         )
-        scheduler = get_linear_schedule_with_warmup(
+        scheduler = torch.optim.lr_scheduler.StepLR(
             optimizer,
-            num_warmup_steps=0,
-            num_training_steps=self.trainer.max_epochs
+            step_size=1,
+            gamma=0.5
         )
         return ([optimizer], [{"scheduler": scheduler, "interval": "epoch"}])
 

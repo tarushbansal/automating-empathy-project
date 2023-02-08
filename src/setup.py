@@ -7,6 +7,7 @@ from typing import Optional, Tuple, Union, Dict
 
 # User-defined Modules
 from base_classes import DialogueModelBase, TokenizerBase
+from reward_model_supervisor import RewardModelSupervisor
 from dialogue_model_supervisor import DialogueModelSupervisor
 from utils.train_utils import load_ckpt_path, load_config
 
@@ -16,15 +17,17 @@ from utils.train_utils import load_ckpt_path, load_config
 def get_model_supervisor_and_config(
         model: Optional[str] = None,
         pretrained_model_dir: Optional[str] = None,
-        initial_lr: Optional[float] = None
-) -> Tuple[Union[DialogueModelSupervisor, Dict]]:
+        initial_lr: Optional[float] = None,
+        reward_model: bool = False
+) -> Tuple[Union[DialogueModelSupervisor, RewardModelSupervisor, Dict]]:
     
     # Sanity checks
     if model is None and pretrained_model_dir is None:
         raise ValueError( "Either a pretrained or a new model must be specified!")
     if model is not None and pretrained_model_dir is not None:
         raise ValueError("Cannot specify both a new and a pretrained model!")
-
+    
+    supervisor_cls = RewardModelSupervisor if reward_model else DialogueModelSupervisor
     if model is not None:
         # Instantiate new model from config.json file
         dirname = os.path.dirname(os.path.abspath(__file__))
@@ -56,7 +59,7 @@ def get_model_supervisor_and_config(
 
         model_kwargs = model_config
         model = model_cls(tokenizer=tokenizer, **model_kwargs)
-        model_supervisor = DialogueModelSupervisor(
+        model_supervisor = supervisor_cls(
             tokenizer=tokenizer,
             model=model,
             initial_lr=initial_lr
@@ -71,7 +74,7 @@ def get_model_supervisor_and_config(
         model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
         model_kwargs = config["model"]["kwargs"]
         model = model_cls(tokenizer=tokenizer, **model_kwargs)
-        model_supervisor = DialogueModelSupervisor.load_from_checkpoint(
+        model_supervisor = supervisor_cls.load_from_checkpoint(
             load_ckpt_path(pretrained_model_dir),
             strict=False,
             tokenizer=tokenizer,

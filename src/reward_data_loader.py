@@ -2,14 +2,15 @@
 
 # System Modules
 import json
-from typing import List, Union
+from typing import List, Union, Tuple
 
 import torch
 import torch.utils.data as data
 import pytorch_lightning as pl
 
 # User-defined Modules
-from transformers import GPT2Tokenizer
+from base_classes import TokenizerBase
+from data_loader import pad_seq_and_convert_to_tensor
 from data_classes import RewardModelRawData, RewardModelBatch
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -18,25 +19,31 @@ from data_classes import RewardModelRawData, RewardModelBatch
 class RewardDataset(data.Dataset):
     def __init__(
         self,
-        dialogues: List[List[str]],
-        rewards: List[float],
-        tokenizer: GPT2Tokenizer
+        contexts: List[List[str]],
+        responses: List[List[str]],
+        ratings: List[List[Tuple[int]]],
+        tokenizer: TokenizerBase
     ) -> None:
         
-        self.dialogues = dialogues
-        self.rewards = rewards
+        self.contexts = contexts
+        self.responses = responses
+        self.ratings = ratings
         self.tokenizer = tokenizer
 
     def __len__(self) -> int:
-        return len(self.dialogues)
+        return len(self.contexts)
 
     def __getitem__(self, idx: int) -> RewardModelRawData:
-        dialogue = f" {self.tokenizer.eos_token} ".join(self.dialogues[idx]) + f" {self.tokenizer.eos_token}"
-        reward = self.rewards[idx]
+        context = self.tokenizer.encode_text(self.contexts[idx])[0]
+        targets = [] 
+        for response in self.responses[idx]:
+            targets.append(self.tokenizer.encode_text(response)[0])
+        ratings = self.ratings[idx]
 
         return RewardModelRawData(
-            dialogue=dialogue,
-            reward=reward
+            context=context,
+            targets=targets,
+            ratings=ratings
         )
 
 
@@ -44,14 +51,12 @@ class RewardDataModule(pl.LightningDataModule):
     def __init__(
         self,
         dataset_dir: str,
-        batch_size: int,
-        tokenizer: GPT2Tokenizer,
+        tokenizer: TokenizerBase,
         num_workers: int
     ) -> None:
 
         super().__init__()
         self.dataset_dir = dataset_dir
-        self.batch_size = batch_size
         self.tokenizer = tokenizer
         self.num_workers = num_workers
 
@@ -64,25 +69,28 @@ class RewardDataModule(pl.LightningDataModule):
             data = json.load(f)
         return data
 
-    def load_dataset(self, split: str):
-        dialogues = self.load_data(f"{self.dataset_dir}/{split}/dialogues.json")
-        rewards = self.load_data(f"{self.dataset_dir}/{split}/rewards.json")
+    def load_dataset(self):
+        contexts = self.load_data(f"{self.dataset_dir}/train/contexts.json")
+        responses = self.load_data(f"{self.dataset_dir}/train/responses.json")
+        ratings = self.load_data(f"{self.dataset_dir}/train/ratings.json")
         return RewardDataset(
-            dialogues=dialogues,
-            rewards=rewards,
+            contexts=contexts,
+            responses=responses,
+            ratings=ratings,
             tokenizer=self.tokenizer
         )
 
     def setup(self, stage: str) -> None:
         if stage == "fit":
-            self.train_dataset = self.load_dataset("train")
-            self.val_dataset = self.load_dataset("val")
+            self.train_dataset = self.load_dataset()
+            self.val_dataset = self.load_dataset()
 
     def transfer_batch_to_device(self, batch, device, dataloader_idx):
         if isinstance(batch, RewardModelBatch):
-            batch.dialogues = batch.dialogues.to(device)
-            batch.mask = batch.mask.to(device)
-            batch.rewards = batch.rewards.to(device)
+            batch.contexts = batch.contexts.to(device)
+            batch.context_mask = batch.context_mask.to(device)
+            batch.targets = batch.targets.to(device)
+            batch.target_mask = batch.target_mask.to(device)
         else:
             batch = super().transfer_batch_to_device(data, device, dataloader_idx)
         return batch
@@ -90,29 +98,31 @@ class RewardDataModule(pl.LightningDataModule):
     def train_dataloader(self) -> data.DataLoader:
         return data.DataLoader(
             self.train_dataset,
-            batch_size=self.batch_size,
+            batch_size=1,
             shuffle=True,
-            collate_fn=lambda x: collate_fn(x, self.tokenizer),
+            collate_fn=lambda x: collate_fn(x[0], self.tokenizer),
             num_workers=self.num_workers
         )
-
 
     def val_dataloader(self) -> data.DataLoader:
         return data.DataLoader(
             self.val_dataset,
-            batch_size=self.batch_size,
-            collate_fn=lambda x: collate_fn(x, self.tokenizer),
+            batch_size=1,
+            collate_fn=lambda x: collate_fn(x[0], self.tokenizer),
             num_workers=self.num_workers
         )
 
 
-def collate_fn(batch: List[RewardModelRawData], tokenizer: GPT2Tokenizer):
-    out = tokenizer([item.dialogue for item in batch], return_tensors="pt", padding=True)
-    dialogues = out.input_ids
-    mask = out.attention_mask
-    rewards = torch.FloatTensor([item.reward for item in batch])
+def collate_fn(data: RewardModelRawData, tokenizer: TokenizerBase):
+    contexts = torch.LongTensor([data.context for _ in range(len(data.targets))])
+    context_mask = torch.ones_like(contexts)
+    max_len_target_seq = max([len(seq) for seq in data.targets])
+    targets = pad_seq_and_convert_to_tensor(data.targets, max_len_target_seq, tokenizer.PAD_IDX)
+    target_mask = (targets != tokenizer.PAD_IDX)
     return RewardModelBatch(
-        dialogues=dialogues,
-        rewards=rewards,
-        mask=mask
+        contexts=contexts,
+        context_mask=context_mask,
+        targets=targets,
+        target_mask=target_mask,
+        ratings=data.ratings
     )

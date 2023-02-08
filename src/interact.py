@@ -32,13 +32,14 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument("--model", type=str, default=None)
     parser.add_argument("--pretrained_model_dir", type=str, default=None)
-    parser.add_argument("--beam_width", type=int, default=1)
-    parser.add_argument("--sample", action="store_true")
-    parser.add_argument("--temperature", type=float, default=1.0)
-    parser.add_argument("--top_p", type=float, default=1.0)
-    parser.add_argument("--top_k", type=int, default=50)
+    parser.add_argument("--beam_width", type=int, default=None)
+    parser.add_argument('--sample', action='store_true', default=None)
+    parser.add_argument('--no_sample', dest='sample', action='store_false')   
+    parser.add_argument("--temperature", type=float, default=None)
+    parser.add_argument("--top_p", type=float, default=None)
+    parser.add_argument("--top_k", type=int, default=None)
     parser.add_argument("--max_new_tokens", type=int, default=100)
-    parser.add_argument("--length_alpha", type=float, default=0.65)
+    parser.add_argument("--length_alpha", type=float, default=None)
     
     cli_args = parser.parse_args()
 

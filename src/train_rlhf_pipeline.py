@@ -7,6 +7,7 @@ import argparse
 import torch
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
+from pytorch_lightning.callbacks import ModelCheckpoint
 
 # User-defined Modules
 from data_loader import DataModule
@@ -44,7 +45,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--kl_penalty", type=int, default=0)
     parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--lam", type=float, default=0.95)
-    parser.add_argument("--vf_coeff", type=float, default=0.1)
+    parser.add_argument("--vf_coeff", type=float, default=1.0)
     parser.add_argument("--entropy_coeff", type=float, default=0.01)
 
     cli_args = parser.parse_args()
@@ -112,6 +113,15 @@ def main():
     # Set up model checkpointing
     ckpt_dir = f"{logger.log_dir}/checkpoints"
     checkpoint_callback = get_model_checkpoints(ckpt_dir)
+    checkpoint_callback += [
+        ModelCheckpoint(
+            monitor="val_reward_epoch",
+            dirpath=ckpt_dir,
+            filename="{val_reward_epoch:.2f}-{epoch}",
+            every_n_epochs=1,
+            mode="max"
+        )
+    ]
     callbacks = []
     if checkpoint_callback is not None:
         callbacks.extend(checkpoint_callback)

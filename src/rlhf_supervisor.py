@@ -158,7 +158,7 @@ class RLHFSupervisor(pl.LightningModule):
         last_hidden_states = (
             output.decoder_hidden_states[-1][:, :-1, :]
             if self.tuned_model.model.has_encoder
-            else output.decoder_hidden_states[:, batch.contexts.size(dim=1)-1:-1]
+            else output.hidden_states[-1][:, batch.contexts.size(dim=1)-1:-1]
         )
         labels = batch.targets[:, 1:] if self.tuned_model.model.has_encoder else batch.targets
         mask = batch.target_mask[:, 1:] if self.tuned_model.model.has_encoder else batch.target_mask

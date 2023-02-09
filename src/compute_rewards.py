@@ -64,8 +64,7 @@ def main():
                 pad_token=reward_model.tokenizer.PAD_IDX
             )
             contexts = contexts.to(device)
-            model_max_len = reward_model.tokenizer.tokenizer.model_max_length
-            targets = [reward_model.tokenizer.encode_text(item["prediction"])[0][:model_max_len]
+            targets = [reward_model.tokenizer.encode_text(item["prediction"])[0]
                        for item in test_data[i:i+cli_args.batch_size]]
             max_len_target_seq = max([len(seq) for seq in targets])
             targets = pad_seq_and_convert_to_tensor(
@@ -87,7 +86,7 @@ def main():
     print(f"Mean reward for dialogue model: {mean_reward}")
     with open(f"{model_dir}/rewards.json", "w") as f:
         json.dump({"mean": mean_reward, "rewards": 
-                   [{i: reward} for i, reward in enumerate(rewards)]}, f)
+                   {i: reward for i, reward in enumerate(rewards)}}, f)
         print(f"All rewards saved at {model_dir}/rewards.json")
 
 

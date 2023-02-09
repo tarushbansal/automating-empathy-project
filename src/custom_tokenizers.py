@@ -39,6 +39,7 @@ class BlenderBotTokenizer(HuggingFaceTokenizerBase):
 
         else:
             token_ids = self.tokenizer(f"<s> {text}")["input_ids"]
+            token_ids = token_ids[:self.tokenizer.model_max_length]
 
         return token_ids, None
 

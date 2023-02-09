@@ -31,7 +31,7 @@ if __name__ == "__main__":
             pairwise_ratings.append((
                 list(ordered_res.keys()).index(rating["A"]), 
                 list(ordered_res.keys()).index(rating["B"]), 
-                rating["ratings"][0]
+                0.5 * rating["ratings"][0] + 0.5 * rating["ratings"][1]
             ))
         ratings.append(pairwise_ratings)
     with open(f"{output_dir}/reward_dataset/train/contexts.json", "w") as f:

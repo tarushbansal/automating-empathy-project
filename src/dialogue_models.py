@@ -39,7 +39,7 @@ class BlenderBot(EncoderDecoderModel):
         targets: torch.LongTensor,
         target_mask: torch.BoolTensor
     ) -> Seq2SeqLMOutput:
-
+        
         out = self.model(
             input_ids=contexts,
             attention_mask=context_mask,

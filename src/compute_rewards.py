@@ -83,9 +83,11 @@ def main():
             rewards.extend(reward_model.forward(batch).tolist())
     
     mean_reward = sum(rewards) / len(rewards)
+    var_reward = sum([(reward - mean_reward) ** 2 for reward in rewards]) / len(rewards)
     print(f"Mean reward for dialogue model: {mean_reward}")
+    print(f"Variance in reward for dialogue model: {var_reward}")
     with open(f"{model_dir}/rewards.json", "w") as f:
-        json.dump({"mean": mean_reward, "rewards": 
+        json.dump({"mean": mean_reward, "var": var_reward, "rewards": 
                    {i: reward for i, reward in enumerate(rewards)}}, f)
         print(f"All rewards saved at {model_dir}/rewards.json")
 

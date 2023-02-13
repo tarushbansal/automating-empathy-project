@@ -110,7 +110,11 @@ class RLHFSupervisor(pl.LightningModule):
 
         with torch.no_grad():
             # ROLLOUT PHASE
-            enc_predictions = self.tuned_model.generate(batch.contexts, batch.context_mask)
+            enc_predictions = self.tuned_model.generate(
+                batch.contexts, 
+                batch.context_mask, 
+                default_config = True if stage == "val" else False
+            )
             predictions = self.tuned_model.tokenizer.decode(enc_predictions)
 
             # EVALUATION PHASE

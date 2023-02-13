@@ -25,7 +25,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", type=str, default=None)
     parser.add_argument("--pretrained_model_dir", type=str, default=None)
     parser.add_argument("--num_nodes", type=int, default=1)
-    parser.add_argument("--max_epochs", type=int, default=5)
+    parser.add_argument("--max_epochs", type=int, default=1)
     parser.add_argument("--initial_lr", type=float, default=0.00001)
 
     cli_args = parser.parse_args()

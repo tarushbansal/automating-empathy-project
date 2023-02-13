@@ -227,8 +227,20 @@ class DialogueModelSupervisor(pl.LightningModule):
     def generate(
         self, 
         contexts: torch.LongTensor,
-        context_mask: torch.BoolTensor
+        context_mask: torch.BoolTensor,
+        default_config: bool = False
     ) -> torch.LongTensor:
+        if default_config:
+            config = {}
+        else:
+            config = {
+                "num_beams":self.generation_config.beam_width,
+                "do_sample":self.generation_config.sample,
+                "temperature":self.generation_config.temperature,
+                "top_p":self.generation_config.top_p,
+                "top_k":self.generation_config.top_k,
+                "length_penalty":self.generation_config.length_alpha
+            }
         return self.model.generate(
             contexts=contexts,
             context_mask=context_mask,
@@ -236,12 +248,7 @@ class DialogueModelSupervisor(pl.LightningModule):
             pad_token_id=self.tokenizer.PAD_IDX,
             eos_token_id=self.tokenizer.EOS_IDX,
             max_new_tokens=self.generation_config.max_new_tokens,
-            num_beams=self.generation_config.beam_width,
-            do_sample=self.generation_config.sample,
-            temperature=self.generation_config.temperature,
-            top_p=self.generation_config.top_p,
-            top_k=self.generation_config.top_k,
-            length_penalty=self.generation_config.length_alpha
+            **config
         )
 
     def configure_optimizers(self) -> torch.optim.Optimizer:

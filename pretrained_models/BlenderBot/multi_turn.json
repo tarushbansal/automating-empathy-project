@@ -1,0 +1,117 @@
+[
+    {
+        "session_id": 0,
+        "instruction": null,
+        "dialogue": [
+            "One of my friends managed to pay off their first house at the age of 25.",
+            " Wow, that is impressive.  How long did it take them to pay it off? ",
+            "About 4-5 years. He had to work his ass off.",
+            " That is a long time to be paying off a house.  Did he have a lot of debt?",
+            "No but his mortgage was quite expensive since his house is pretty big.",
+            " He must have been very fortunate to be able to do that at such a young age.",
+            "Yes I cannot believe it. Having such financial stability at 25 is an incredible feat.",
+            " Yes it is.  I wish I could have done that when I was that young.",
+            "I think it's something a majority of us cannot do. Getting a good job and a successful career takes time.",
+            " I agree.  It takes a lot to get to that point in life.  You have to work hard to get where you want to be."
+        ],
+        "rewards": [
+            0.1482747495174408,
+            -0.37586766481399536,
+            0.29382362961769104,
+            -0.5498958230018616,
+            0.5025380253791809
+        ]
+    },
+    {
+        "session_id": 1,
+        "instruction": null,
+        "dialogue": [
+            "I just graduated from college! I feel so accomplished.",
+            " Congratulations! That's a big accomplishment. What did you graduate in, if you don't mind me asking?",
+            "I graduated with a Masters in Engineering from the University of Cambridge.",
+            " Oh wow, congratulations! You must be very proud of yourself. What are you going to do with your degree?",
+            "Thank you I am very happy myself. I am going to work as a Software Engineer at Google.",
+            " That's awesome! I'm sure you'll do great. What kind of work will you be doing?",
+            "The day-to-day mostly involves building high quality software systems and testing / maintaining them thoroughly to support the vast number of users Google has.",
+            " That sounds like a lot of fun. I hope you have a great time at your new job!",
+            "Thank you. I am looking forward to it as well!",
+            " You're welcome. I wish you the best of luck in your future endeavors."
+        ],
+        "rewards": [
+            0.0541871041059494,
+            -0.20658592879772186,
+            -0.028893020004034042,
+            0.5462020635604858,
+            0.20020928978919983
+        ]
+    },
+    {
+        "session_id": 2,
+        "instruction": null,
+        "dialogue": [
+            "I just got a puppy, but I have to leave him at home while I go to work. I feel so bad.",
+            " Aww, I'm sure he'll be fine. What kind of puppy is it?",
+            "It is a pug. I feel terrible about leaving him alone but my work does not allow dogs unfortunately :((",
+            " That's too bad. Maybe you can take him to a dog park and let him play with other dogs.",
+            "I do that in the evenings, however, I cannot just leave him in the park alone. That would be so irresponsible.",
+            " I know what you mean, but it's better to be safe than sorry. Do you have any other pets?",
+            "Yes it is of course in the interest of safety that I cannot. No I don't have any other pets. Too much work.",
+            " I can understand that. It's hard to find the time to take care of a pet.",
+            "Yes that's my whole problem. I do not know what to do. I miss him!",
+            " I'm sorry to hear that. I hope you can find some time to spend with him."
+        ],
+        "rewards": [
+            -0.12318510562181473,
+            0.018944934010505676,
+            0.672095000743866,
+            0.17500688135623932,
+            0.2567569315433502
+        ]
+    },
+    {
+        "session_id": 3,
+        "instruction": null,
+        "dialogue": [
+            "i have always felt really guilty about lying to my parents",
+            " I'm sorry to hear that. Why did you lie to them? Did they find out?",
+            "They are just very narrow-minded about a lot of things so I have to lie to them about the smallest of things. I do realise it's a bad thing to do but I have no other option. They haven't found out yet but I still feel guilty.",
+            " Why do you feel guilty about it? Do you think they would be upset if you told them?",
+            "Yes I am quite sure they will be. I find it hard to communicate my feelings to them.",
+            " That's understandable. I'm sure they would understand if you just told them the truth.",
+            "I cannot tell them how I feel because on some level I think we lack the sort of understanding and connect you know?",
+            " I'm sorry to hear that. I hope you can find a way to make it up to them somehow.",
+            "I just try to be a good son and compensate in other areas which they do understand.",
+            " That sounds like a good way to go about it. I wish you the best of luck!"
+        ],
+        "rewards": [
+            0.15278109908103943,
+            0.9261826872825623,
+            1.084423303604126,
+            0.5469111800193787,
+            0.41447508335113525
+        ]
+    },
+    {
+        "session_id": 4,
+        "instruction": null,
+        "dialogue": [
+            "I always feel like no one hears me. Like When I speak it falls on deaf ears.",
+            " Oh no, I'm sorry to hear that. Have you been to a doctor about it?",
+            "It is not really an issue that a doctor needs to deal with. It's just people do not really hear what I'm trying to tell them.",
+            " That's too bad. I hope you can find a doctor that can help you with that.",
+            "You said that already and no I do not want a doctor!!",
+            " I'm so sorry, I didn't mean to make you feel that way. Do you have any family or friends that you can talk to?",
+            "Well I have talked to my family about it but that's been zero help.",
+            " I am sorry to hear that. Have you thought about talking to a counselor or therapist?",
+            "I do not need a therapist. I just need some supportive and understanding people who get it.",
+            " That's good. I'm glad you have someone to talk to. I hope you feel better."
+        ],
+        "rewards": [
+            0.013412374071776867,
+            0.5390499830245972,
+            0.18732358515262604,
+            0.3445682227611542,
+            0.09993162006139755
+        ]
+    }
+]

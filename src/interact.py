@@ -3,6 +3,7 @@
 # System Modules
 import os
 import argparse
+from typing import Optional
 
 # User-defined Modules
 from data_loader import collate_batch
@@ -12,18 +13,22 @@ from data_classes import ModelRawData, GenerationConfig
 # ------------------------- IMPLEMENTATION -----------------------------------
 
 
-def initialise_interface():
+def initialise_interface() -> Optional[str]:
     os.system("clear")
-    print("---- Welcome to this interface to interact with a dialogue model! -------")
+    print("------- Welcome to this interface to interact with a dialogue model! -------")
     print("")
     print("Supply an instruction to the model to get started.")
-    print("Note that if you leave the instruction prompt empty it defaults to " +
-          "'Instruction: given a dialog context, you need to respond empathetically.'")
+    print("NOTE that you can leave the instruction prompt empty in which case " + 
+          "it will default to a preset value depending on the model in concern.")
     print("")
     print("Command keys:")
     print("---- <new>  - Clear current conversation history and start a new session.")
     print("---- <quit> - Exit interface")
     print("")
+    instruction = input("Instruction: ").strip()
+    print("")
+
+    return (None if instruction == "" else instruction)
 
 
 def parse_args() -> argparse.Namespace:
@@ -71,8 +76,7 @@ def main():
 
     # Run main interface loop
     context = []
-    initialise_interface()
-    instruction = input("Instruction: ").strip()
+    instruction = initialise_interface()
 
     while True:
         speaker_utterance = input(f"Speaker: ").strip()
@@ -81,14 +85,13 @@ def main():
             break
         if speaker_utterance == "<new>":
             context = []
-            initialise_interface()
-            instruction = input("Instruction: ").strip()
+            instruction = initialise_interface()
             continue
 
         context.append(speaker_utterance)
         enc_context, concept_net_data = tokenizer.encode_text(
             context,
-            None if instruction == "" else instruction
+            instruction
         )
 
         batch = collate_batch([
@@ -106,6 +109,8 @@ def main():
         response = model_supervisor.generate(batch.contexts, batch.context_mask)
         decoded_reponse = tokenizer.decode(response)[0]
         print(f"Dialogue Model: {decoded_reponse}")
+
+        context.append(decoded_reponse)
         print("")
 
 

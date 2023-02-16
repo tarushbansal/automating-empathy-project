@@ -2,666 +2,674 @@
 ----- Reward Statistics (mean, var) -----
 
 dialogue_models/GODEL_LARGE_v0: (-0.108, 0.045)
-RLHF_tuned_models/BlenderBot_v1: (0.029, 0.038)
-RLHF_tuned_models/GODEL_LARGE_v2: (0.175, 0.050)
+RLHF_tuned_models/BlenderBot_v2: (0.081, 0.037)
+RLHF_tuned_models/GODEL_LARGE_v0: (0.175, 0.050)
 pretrained_models/BlenderBot: (-0.037, 0.035)
 pretrained_models/GPT3: (0.178, 0.054)
 pretrained_models/GOLD: (-0.052, 0.059)
 
----- Sample ID 2947 -----
+---- Sample ID 4296 -----
 
-Speaker: I am so excited - after a year of misery due to my loud, inconsiderate upstairs neighbors I'm finally moving into a new apartment!
+Speaker: I surprised my girlfriend with Chik-Fil-A breakfast this morning when she got off work.
+Listener: Wow,  that's so nice of you
+Speaker: She works nights, and had no idea I was coming. I knew she had a bad night so I wanted to do something nice for her.
 
-pretrained_models/GPT3: That's great news! Congratulations! I'm sure you'll be much happier in your new place. [Reward = 0.010]
-pretrained_models/GOLD: That is great news!  I bet you are glad to get a fresh start somewhere new. [Reward = -0.045]
-RLHF_tuned_models/BlenderBot_v1:  That's great! I'm sure you'll have a great time in your new place.  [Reward = -0.113]
-RLHF_tuned_models/GODEL_LARGE_v2: That's a great feeling. I hope you have a good time! [Reward = -0.197]
-pretrained_models/BlenderBot:  Congratulations! That must be such a relief. I hope you enjoy your new place. [Reward = -0.199]
-dialogue_models/GODEL_LARGE_v0: That's great! I hope you have a great time! [Reward = -0.269]
+pretrained_models/GPT3: That's really sweet of you. It's the little things like that that make a big difference. [Reward = 0.362]
+RLHF_tuned_models/BlenderBot_v2:  That's really sweet of you to do.  I'm sure she appreciated it a lot. [Reward = 0.136]
+pretrained_models/BlenderBot:  That's really sweet of you. I'm sure she appreciated it. What did you get her? [Reward = 0.122]
+RLHF_tuned_models/GODEL_LARGE_v0: That's a good thing to do [Reward = 0.059]
+dialogue_models/GODEL_LARGE_v0: That's great, I hope she enjoys it [Reward = -0.076]
+pretrained_models/GOLD: That is cool.  You are really so caring [Reward = -0.109]
 
 
----- Sample ID 1798 -----
+---- Sample ID 4406 -----
 
-Speaker: I was terrified when I watched that horror movie
-Listener: which one was it
-Speaker: It was Scream
+Speaker: One of my friends managed to pay off their first house at the age of 25.
 
-pretrained_models/GPT3: That is a really scary movie, I can understand why it would be terrifying! Did it help to talk to someone after watching it? [Reward = 0.479]
-RLHF_tuned_models/BlenderBot_v1:  I love that movie, it's one of my favorites.  Did you like it? [Reward = 0.162]
-RLHF_tuned_models/GODEL_LARGE_v2: that is a great movie [Reward = 0.100]
-pretrained_models/GOLD: it wasn't that scary to me [Reward = -0.027]
-pretrained_models/BlenderBot:  I've never seen that one, but I've heard of it. What was it about? [Reward = -0.113]
-dialogue_models/GODEL_LARGE_v0: oh wow thats a good one [Reward = -0.162]
+RLHF_tuned_models/BlenderBot_v2:  Wow, that's impressive. How long did it take them to pay it off, if you don't mind me asking? [Reward = 0.073]
+pretrained_models/BlenderBot:  Wow, that is impressive.  How long did it take them to pay it off?  [Reward = -0.108]
+dialogue_models/GODEL_LARGE_v0: That's amazing! I'm sure they're proud of themselves. [Reward = -0.130]
+RLHF_tuned_models/GODEL_LARGE_v0: That's a great achievement. Is it a big house? [Reward = -0.137]
+pretrained_models/GPT3: Wow, that's really impressive! How did they manage to do that? [Reward = -0.188]
+pretrained_models/GOLD: well dang! that is very impressive! [Reward = -0.562]
 
 
----- Sample ID 3224 -----
-
-Speaker: I like finding little resources or tips that change old habits I've been coping with in what seems like 1 easy step
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's a good thing. It's nice to have a little bit of help to keep you going. [Reward = 0.274]
-RLHF_tuned_models/BlenderBot_v1:  That's a good way to look at it. It's always good to learn new things. [Reward = 0.126]
-pretrained_models/BlenderBot:  That's a good way to look at it. It's always good to have a plan and stick to it. [Reward = 0.123]
-pretrained_models/GPT3: That sounds really helpful! What kind of resources or tips have you found that have been most helpful? [Reward = -0.016]
-dialogue_models/GODEL_LARGE_v0: I love that too. I'm always looking for new ways to cope with things. [Reward = -0.119]
-pretrained_models/GOLD: Hahaha, sounds kind of like clickbait [Reward = -0.561]
-
-
----- Sample ID 2692 -----
-
-Speaker: I love the holidays. Driving around looking at decoration is my favorite.
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's a great thing to do. It's a great way to spend time with family. [Reward = 0.575]
-pretrained_models/GPT3: That sounds like so much fun! I love driving around to see all the decorations too. It's a great way to get into the holiday spirit. [Reward = 0.445]
-pretrained_models/GOLD: That is a lot of fun.  What is your favorite holiday to drive around in? [Reward = 0.313]
-RLHF_tuned_models/BlenderBot_v1:  I love decorating as well. It's so relaxing. What do you like to decorate? [Reward = 0.254]
-pretrained_models/BlenderBot:  Me too!  I love decorating for Christmas.  What is your favorite holiday? [Reward = 0.170]
-dialogue_models/GODEL_LARGE_v0: I love the holidays too. I love Christmas too. [Reward = 0.028]
-
-
----- Sample ID 279 -----
-
-Speaker: I one time lost my trunks in the pool! People saw me in a way I didn't want!
-Listener: Oh no! That must have been super embarrassing! How did you react to that?
-Speaker: I covered my body and then went to the bathroom and got a towel!
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's a good idea! It's always good to have a backup plan. [Reward = 0.200]
-pretrained_models/GPT3: That sounds like a good idea. I'm glad you were able to think quickly. How did you feel after that? [Reward = 0.035]
-RLHF_tuned_models/BlenderBot_v1:  Oh my gosh! I would have been so embarrassed! Did anyone say anything to you about it? [Reward = 0.001]
-pretrained_models/BlenderBot:  I would have been so embarrassed! I'm glad you were able to laugh it off. [Reward = -0.116]
-dialogue_models/GODEL_LARGE_v0: That's a good idea! I'm sure you'll be fine! [Reward = -0.148]
-pretrained_models/GOLD: My goodness, well I guess that happens to all of us at least once. [Reward = -0.179]
-
-
----- Sample ID 3274 -----
-
-Speaker: I thought I bombed my math test but I got a 103 on it.
-
-RLHF_tuned_models/BlenderBot_v1:  That's awesome! Math is not my strong suit, but I'm sure you did great! [Reward = -0.108]
-pretrained_models/GPT3: That's awesome! You must have worked really hard to get such a great score. Congratulations! [Reward = -0.133]
-RLHF_tuned_models/GODEL_LARGE_v2: That's a great score! I'm glad you did well. It's always nice to get a good score. [Reward = -0.193]
-pretrained_models/BlenderBot:  That's awesome! I'm sure you worked hard for it. What class was it for? [Reward = -0.243]
-pretrained_models/GOLD: That's great, man! Did you study hard for it? [Reward = -0.253]
-dialogue_models/GODEL_LARGE_v0: That's awesome! Did you study hard? [Reward = -0.346]
-
-
----- Sample ID 477 -----
-
-Speaker: As a kid, I was SO frightened any time there was a tornado warning. Not sure if it was the Wizard of Oz effect or what -- I just remember being frozen with fear.
-Listener: Oh, wow! My son was terrified of tornadoes because of that darn movie, and we don't really even get tornadoes where we live! Did you ever live through a tornado?
-Speaker: That's the thing -- NO! I mean, there were some that were kind of close -- but NOTHING like what so many folks have to deal with. I just remember wanting a basement sooooo badly -- not something that's common where I grew up!
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's a good thing to have a basement! It's a great place to have a safe place to be. [Reward = 0.482]
-pretrained_models/GPT3: Yeah, I can totally understand that. It's scary to think about something like that happening and not having a safe place to go. It's good that you never had to experience it firsthand though. [Reward = 0.242]
-pretrained_models/GOLD: Aw, poor little thing! How did you overcome this? Or, are you still afraid of them? [Reward = 0.102]
-dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that! I'm sure you're a very lucky person! [Reward = -0.079]
-RLHF_tuned_models/BlenderBot_v1:  Yeah, I know what you mean. I live in Oklahoma, so we get a lot of hurricanes, but nothing like that. [Reward = -0.300]
-pretrained_models/BlenderBot:  Yeah, I know what you mean. I live in Oklahoma, so we get a lot of hurricanes, but nothing like that. [Reward = -0.300]
-
-
----- Sample ID 3292 -----
-
-Speaker: Some people are just so generous. Really makes you feel like there is some humanity left out there.
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's a good thing. It's nice to see that there is still some humanity out there. [Reward = 0.156]
-pretrained_models/GPT3: Yes, it's so heartening to see people being so kind and generous. It's a reminder that there are still good people in the world. [Reward = 0.046]
-pretrained_models/GOLD: I agree. I think I am one of them, considering I gave my whole life savings to charity yesterday. [Reward = 0.002]
-RLHF_tuned_models/BlenderBot_v1:  I know, right? I was so thankful for them. It made me feel so grateful to have them in my life. [Reward = -0.141]
-dialogue_models/GODEL_LARGE_v0: I agree. I've been in a lot of situations where people were just so generous. [Reward = -0.232]
-pretrained_models/BlenderBot:  I know right? I was so grateful to him. I felt like I needed a hug. [Reward = -0.435]
-
-
----- Sample ID 2471 -----
-
-Speaker: I love it when the new star wars movies come out, seeing all those kids (and adults) dress up for the theater really takes me back!
-Listener: Do you dress up when the new movies come out also?
-Speaker: I don't anymore, but when I was a kid, a friend and I dressed up as the hero and the villain for the premiere of Episode I.
-
-pretrained_models/GOLD: Ah, I bet seeing all of the kids now dressed up does take you back to an earlier time.  Nostalgia has a way of getting to each of us. [Reward = 0.447]
-RLHF_tuned_models/GODEL_LARGE_v2: That's a great memory. I remember that feeling. [Reward = 0.292]
-RLHF_tuned_models/BlenderBot_v1:  That sounds like a lot of fun.  Do you have a favorite character from the movie? [Reward = 0.236]
-pretrained_models/GPT3: That sounds like a lot of fun! What was it like? [Reward = 0.228]
-dialogue_models/GODEL_LARGE_v0: That's awesome! I remember that too. [Reward = 0.105]
-pretrained_models/BlenderBot:  That sounds like a lot of fun. I wish I could go to a theater and dress up like that. [Reward = 0.097]
-
-
----- Sample ID 540 -----
-
-Speaker: I came home from work and step barefoot on one of my sons legos, i was so pissed!
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's a terrible thing to do. Is it a common thing to do? [Reward = 0.468]
-pretrained_models/GPT3: Oh no! That must have been so painful. Is your foot okay? Is there anything I can do to help? [Reward = 0.326]
-pretrained_models/GOLD: That sounds really painful!  You should pick them up. [Reward = -0.049]
-RLHF_tuned_models/BlenderBot_v1:  Why were you so mad? Was it because you didn't want him to step on it? [Reward = -0.163]
-pretrained_models/BlenderBot:  Oh my gosh! I would have been so mad! Did he at least clean it up? [Reward = -0.173]
-dialogue_models/GODEL_LARGE_v0: Oh no! I'm sorry to hear that. I'm sure you're a good parent. [Reward = -0.219]
-
-
----- Sample ID 3304 -----
-
-Speaker: my mom is supposed to call me regarding her test results.
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's a very stressful time for you. Is she worried about it? [Reward = 0.424]
-pretrained_models/GPT3: Oh, that must be really nerve-wracking. Is there anything I can do to help? [Reward = 0.201]
-dialogue_models/GODEL_LARGE_v0: Oh no! Is she going to be able to do that? [Reward = 0.087]
-RLHF_tuned_models/BlenderBot_v1:  Oh no, I'm sorry to hear that. Is there anything you can do to help? [Reward = -0.002]
-pretrained_models/GOLD: I hope she hears some good news. Is it pretty serious? [Reward = -0.105]
-pretrained_models/BlenderBot:  Oh no, I'm sorry to hear that. Do you know what the results will be? [Reward = -0.128]
-
-
----- Sample ID 1934 -----
-
-Speaker: My mom is so great! She is always there for me and her grandchildren. I can't think of anyone that loves us as much as she does!
-Listener: That is wonderful! Moms are truly a gift! I miss my Mom at times. We are workcamping in the mountains of NM and my Mom lives in TX.
-Speaker: I'm sure that's hard at times. I've always lived close to my mom so I can't really imagine being too far away.
-
-pretrained_models/GOLD: We have always moved frequently with my husbands job but my parents usually end up following us lol. Now that we are fulltime RVers, they dont follow. I miss that sometimes. I am glad you have your Mom close! Cherish those times!! [Reward = 0.445]
-RLHF_tuned_models/GODEL_LARGE_v2: It is. I am sure you will be able to find a way to be with your mom. [Reward = 0.394]
-pretrained_models/GPT3: Yes, it can be difficult. But I'm grateful for technology that allows us to stay connected. We talk on the phone and video chat often. It's not the same as being in the same room, but it's the next best thing. [Reward = 0.366]
-RLHF_tuned_models/BlenderBot_v1:  It is hard, but I try to make the most of the time I do get to see her. [Reward = 0.344]
-pretrained_models/BlenderBot:  It is hard, but I try to make the most of the time I do get to see her. [Reward = 0.344]
-dialogue_models/GODEL_LARGE_v0: I know what you mean. I'm sure she is very happy to see you. [Reward = 0.127]
-
-
----- Sample ID 1688 -----
-
-Speaker: My niece is super talented lately.
-
-RLHF_tuned_models/BlenderBot_v1:  That's great! What kind of things does she like to do with her talents?  [Reward = 0.218]
-RLHF_tuned_models/GODEL_LARGE_v2: That's great. Is she a musician? [Reward = 0.186]
-dialogue_models/GODEL_LARGE_v0: That's great! Is she a musician? [Reward = 0.174]
-pretrained_models/BlenderBot:  That's great! What kind of things does she like to do? I bet she's very talented. [Reward = 0.157]
-pretrained_models/GPT3: That's great! What kind of things is she doing? [Reward = 0.061]
-pretrained_models/GOLD: What is her best talent? [Reward = -0.051]
-
-
----- Sample ID 1828 -----
-
-Speaker: My friend just recently moved to California...It makes me sad because I have always wanted to live there.
-
-pretrained_models/GPT3: That must be really hard for you. It's understandable that you're feeling sad. Have you ever thought about visiting your friend in California? That might help you feel a little better. [Reward = 0.573]
-RLHF_tuned_models/GODEL_LARGE_v2: That's a great place to live. Is it a good place to live? [Reward = 0.366]
-RLHF_tuned_models/BlenderBot_v1:  I'm sorry to hear that. Do you think you'll be able to move there soon? [Reward = 0.285]
-pretrained_models/BlenderBot:  Why does it make you sad? California is a great place to live. It is the most populous state in the United States. [Reward = 0.198]
-dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. I'm sure you'll find a place to live soon. [Reward = 0.090]
-pretrained_models/GOLD: Oh thats good for your friend, but it sounds like you really would like to live there! I can imagine feeling jealous [Reward = 0.073]
-
-
----- Sample ID 2386 -----
-
-Speaker: My father passed away about 2 1/2 years ago. It was totally unexpected and really was very traumatic and hurtful to me. He was still quite young and my family and I had no idea he had a life threatening health issue.
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's terrible. It's so hard to lose someone you love. [Reward = 0.271]
-pretrained_models/GPT3: I'm so sorry to hear that. That must have been incredibly difficult. How have you been coping with the loss? [Reward = 0.232]
-RLHF_tuned_models/BlenderBot_v1:  I'm so sorry to hear that. That must have been so hard on you and your family. [Reward = 0.158]
-pretrained_models/BlenderBot:  I am so sorry to hear that. It must have been very hard on you and your family. [Reward = 0.155]
-pretrained_models/GOLD: I am sorry to hear that, I hope you had some time together before hand [Reward = -0.023]
-dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. I'm sure you're doing well. [Reward = -0.134]
-
-
----- Sample ID 3897 -----
-
-Speaker: I love thinking back to when I was growing up and the neighborhood we lived in. So many great memories.
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's a great thing to do. It's nice to have those memories. [Reward = 0.625]
-RLHF_tuned_models/BlenderBot_v1:  I know what you mean. It's nice to reminisce about the good old days. [Reward = 0.264]
-pretrained_models/BlenderBot:  I know what you mean. It's nice to reminisce about the good old days. [Reward = 0.264]
-pretrained_models/GOLD: That's such a great feeling. [Reward = 0.232]
-dialogue_models/GODEL_LARGE_v0: That's great. I'm sure you have some great memories. [Reward = 0.231]
-pretrained_models/GPT3: That sounds really nice. What kind of memories do you have? [Reward = 0.083]
-
-
----- Sample ID 3433 -----
-
-Speaker: I saved up the money to buy a certain dress that I had been wanting for a while. When I finally got the money saved, it was sold out everywhere, except Ebay. The problem was, the price was doubled.
-Listener: Oh My!! What are you going to do? I would buy it anyway.
-Speaker: I may buy it still, but I have to save up more money now.
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's a good thing to do. It's always good to save up. [Reward = 0.264]
-pretrained_models/GPT3: That's too bad. Have you tried looking online for a similar dress at a more reasonable price? [Reward = -0.061]
-pretrained_models/BlenderBot:  That's too bad. I'm sure you'll find something else that will suit you soon. [Reward = -0.217]
-pretrained_models/GOLD: Well thats unfortunate. Hopefully you will be able to buy it soon. [Reward = -0.223]
-RLHF_tuned_models/BlenderBot_v1:  I'm sorry to hear that. I hope you will be able to get another one soon. [Reward = -0.285]
-dialogue_models/GODEL_LARGE_v0: I hope you get it. [Reward = -0.639]
-
-
----- Sample ID 644 -----
-
-Speaker: It has been very quiet in here since she went on vacation. No one to talk to.
-Listener: Did you got bored?
-Speaker: I kept myself occupied with movies and video games. But it wasn't the same as having real company.
-
-pretrained_models/GPT3: That must have been so lonely. Did you miss having someone to talk to? [Reward = 0.513]
-RLHF_tuned_models/GODEL_LARGE_v2: That's a good thing. It's nice to have some time to yourself. [Reward = 0.407]
-pretrained_models/BlenderBot:  I'm sorry to hear that. Do you have any hobbies to keep your mind off of it? [Reward = 0.148]
-RLHF_tuned_models/BlenderBot_v1:  I'm sorry to hear that. Do you have any hobbies to keep your mind off it? [Reward = 0.115]
-dialogue_models/GODEL_LARGE_v0: I know what you mean. I'm sure you'll find someone soon. [Reward = -0.015]
-pretrained_models/GOLD: I understand. [Reward = -0.409]
-
-
----- Sample ID 1847 -----
-
-Speaker: That horror movie made me terrified
-
-pretrained_models/GPT3: I'm sorry to hear that. It can be really scary when you watch horror movies. Did it give you nightmares afterwards? [Reward = 0.327]
-RLHF_tuned_models/GODEL_LARGE_v2: That's a good thing. It's a good way to get a good feeling. [Reward = 0.267]
-pretrained_models/BlenderBot:  I love horror movies, but I can understand why it would scare you. What was it about? [Reward = 0.080]
-RLHF_tuned_models/BlenderBot_v1:  Why did it make you so scared? Did you watch it alone or with someone else?  [Reward = 0.075]
-dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. What movie was it? [Reward = -0.161]
-pretrained_models/GOLD: What movie was it ? [Reward = -0.362]
-
-
----- Sample ID 4713 -----
-
-Speaker: My dad dies when I was 33 years old.
-Listener: am sorry to hear that, may he rest in peace
-Speaker: Thank you. I was crushed, and it left me with questions about my own mortality.
-
-pretrained_models/GPT3: I can only imagine how difficult it must have been for you. Do you have any support systems that you can lean on during this time? [Reward = 0.458]
-RLHF_tuned_models/BlenderBot_v1:  I am so sorry for your loss. It is never easy to lose someone close to you. [Reward = 0.111]
-pretrained_models/BlenderBot:  I am so sorry for your loss. It is never easy to lose someone close to you. [Reward = 0.111]
-pretrained_models/GOLD: I hope you getting better now [Reward = -0.143]
-dialogue_models/GODEL_LARGE_v0: i am sorry to hear that, i hope you are ok [Reward = -0.203]
-RLHF_tuned_models/GODEL_LARGE_v2: i am sorry to hear that, may he rest in peace [Reward = -0.286]
-
-
----- Sample ID 3760 -----
-
-Speaker: I bought 100 packs of magic cards and didn't get a single good card.
-
-pretrained_models/GPT3: That sounds really disappointing. Is there anything I can do to help? [Reward = 0.457]
-RLHF_tuned_models/GODEL_LARGE_v2: That's a shame. Is it because you're a fan of the game? [Reward = 0.192]
-RLHF_tuned_models/BlenderBot_v1:  I'm sorry to hear that. Have you tried calling your bank to see if they can help you? [Reward = 0.177]
-pretrained_models/BlenderBot:  I'm sorry to hear that. Did you try calling the store to see if they could help you? [Reward = 0.084]
-dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. I'm sure you'll find one eventually. [Reward = -0.143]
-pretrained_models/GOLD: What are magic cards? [Reward = -0.343]
-
-
----- Sample ID 3018 -----
-
-Speaker: When I heard Anthony Bourdin had taken his own life, I was so shocked and upset. He gave so much pleasure to a lot of people, yet was miserable in his own life.
-Listener: I think we never really know what is going on inside people's mind. Celebrities like Anthony and Robin Williams seems to live a good life, but in reality, they are suffering.
-Speaker: It's awful. I really wish far more resources were put toward mental health facilities and counselling in this country!
-
-pretrained_models/GPT3: I agree. Mental health is so important, yet it's not given the attention it deserves. We need to do more to make sure people have access to the help they need. [Reward = 0.385]
-pretrained_models/BlenderBot:  I agree, I think it would help a lot to have more resources available to help people with mental health issues. [Reward = 0.284]
-RLHF_tuned_models/BlenderBot_v1:  Me too. It's so sad that so many people are suffering from mental illnesses these days. [Reward = 0.226]
-RLHF_tuned_models/GODEL_LARGE_v2: I agree. I think it's important to have a good mental health system. [Reward = 0.212]
-dialogue_models/GODEL_LARGE_v0: I agree. I think we should do more to help people who are suffering. [Reward = 0.149]
-pretrained_models/GOLD: I completely agree! I think it would even help lower crime rates. [Reward = 0.064]
-
-
----- Sample ID 561 -----
-
-Speaker: I have a great picture from my wedding where my friends and I are in a circle having a shot, makes me want to go hang out with them again.
-Listener: I assume you don't get to see them often?
-Speaker: Yeah, we moved away a few months after the wedding for my wife to go to Graduate school.
-
-pretrained_models/GPT3: That must be hard. Do you miss them a lot? [Reward = 0.567]
-RLHF_tuned_models/GODEL_LARGE_v2: That's a great thing to do. It's nice to have a good group of friends to spend time with. [Reward = 0.483]
-RLHF_tuned_models/BlenderBot_v1:  I'm sorry to hear that. Do you think you'll be able to visit them soon? [Reward = 0.323]
-pretrained_models/GOLD: That's too bad. I bet you miss them. [Reward = 0.195]
-dialogue_models/GODEL_LARGE_v0: That's a bummer. I hope you get to see them again soon. [Reward = 0.169]
-pretrained_models/BlenderBot:  I'm sorry to hear that. I hope you can make it up to her somehow.  [Reward = 0.037]
-
-
----- Sample ID 5050 -----
-
-Speaker: My husband has been out of town a few weeks for work but is coming back next weekend. I have a surprise night planned for just us. I am optimistic and sure he will really enjoy it.
-Listener: How exciting! I hope everything goes as planned!
-Speaker: Thanks! We've been married almost 23 years but I try to keep things fun and spend time together.
-
-pretrained_models/GPT3: That's wonderful! It's so important to make time for each other and keep things fresh. What kind of surprise night do you have planned? [Reward = 0.513]
-RLHF_tuned_models/GODEL_LARGE_v2: That's great. I'm sure you two will have a great time together. [Reward = 0.368]
-RLHF_tuned_models/BlenderBot_v1:  That's a long time! I'm sure you guys will have a great time. What are you guys going to do? [Reward = 0.317]
-dialogue_models/GODEL_LARGE_v0: That's great! I hope you guys have a great time! [Reward = 0.161]
-pretrained_models/GOLD: Sounds like you have a good relationship. I hope when I get married it turns out just as good. [Reward = 0.158]
-pretrained_models/BlenderBot:  Congratulations! That's a long time. I hope you have a great time.  [Reward = 0.021]
-
-
----- Sample ID 2900 -----
-
-Speaker: I've felt excited when I found out I had won a place on a prestigious creative writing course, taught by someone who I knew could help me in ways that I would I not be able to through self-study alone.
-Listener: You are so lucky to be talented enough to achieve such an honor. Was it as wonderful as you had imagined it would be?
-Speaker: Thank you for the kind words. You know what? It was, but not for the reasons I imagined! It turned out that everyone in the class developed a really close bond and while the advice from the teacher was wonderful, it was the lifelong friendships and mutual edits that the students do for each other that has proved equally special!
-
-pretrained_models/GPT3: That's amazing! It's so great to hear that you have been able to make such strong connections with your peers. It sounds like you have gained so much from this experience. [Reward = 0.289]
-RLHF_tuned_models/BlenderBot_v1:  That's great to hear. It's always nice to have a good relationship with your classmates. [Reward = 0.095]
-RLHF_tuned_models/GODEL_LARGE_v2: That is so great to hear. I am sure you will be able to use the lessons you learned to help you in the future. [Reward = 0.003]
-pretrained_models/GOLD: Sounds like it was a once in a lifetime experience. [Reward = -0.071]
-dialogue_models/GODEL_LARGE_v0: That is so wonderful. I hope you have a great time in the future. [Reward = -0.172]
-pretrained_models/BlenderBot:  I am so happy for you. I wish I had a teacher like that in high school. [Reward = -0.276]
-
-
----- Sample ID 1561 -----
-
-Speaker: When my mom had breast cancer a few years ago. I wanted to do everything I could to be there for her.
-
-pretrained_models/GPT3: That must have been a difficult time for you. How did you manage to show your support? [Reward = 0.539]
-RLHF_tuned_models/BlenderBot_v1:  I'm so sorry to hear that. It must have been very hard for you to go through that. [Reward = 0.220]
-pretrained_models/GOLD: That's terrible to hear. Were you eventually able to be there? [Reward = 0.200]
-RLHF_tuned_models/GODEL_LARGE_v2: That's a very difficult time to be in. I'm sorry to hear that. [Reward = 0.187]
-pretrained_models/BlenderBot:  I am so sorry to hear that. Cancer is a terrible disease. I hope she is doing better now. [Reward = 0.073]
-dialogue_models/GODEL_LARGE_v0: That's so sweet of you. I'm so sorry to hear that. [Reward = -0.030]
-
-
----- Sample ID 3814 -----
-
-Speaker: We just adopted a dog from the shelter last week and I think she is sick with parvo.
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's terrible. Is she a stray? [Reward = -0.162]
-pretrained_models/GPT3: Oh no, that sounds really serious. What are the symptoms you have noticed? [Reward = -0.173]
-dialogue_models/GODEL_LARGE_v0: Oh no! I'm sorry to hear that. Is she a rescue? [Reward = -0.270]
-RLHF_tuned_models/BlenderBot_v1:  Oh no, I'm so sorry to hear that.  I hope she gets better soon. [Reward = -0.381]
-pretrained_models/BlenderBot:  Oh no, I'm so sorry to hear that.  I hope she gets better soon. [Reward = -0.381]
-pretrained_models/GOLD: What is parvo? [Reward = -0.535]
-
-
----- Sample ID 2871 -----
-
-Speaker: I have been having a rough week!
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's a good thing. It's hard to be in a bad mood. [Reward = 0.285]
-pretrained_models/GPT3: I'm so sorry to hear that. Is there anything I can do to help? [Reward = 0.122]
-pretrained_models/GOLD: Are you glad its over? [Reward = -0.271]
-RLHF_tuned_models/BlenderBot_v1:  I'm sorry to hear that. What's going on? I hope it gets better for you. [Reward = -0.291]
-pretrained_models/BlenderBot:  I'm sorry to hear that. What's going on? I hope it gets better for you. [Reward = -0.291]
-dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. What happened? [Reward = -0.294]
-
-
----- Sample ID 2993 -----
-
-Speaker: School starts a week from tomorrow and I am getting fairly nervous for it!
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's a good thing. It's always a good time to be nervous. [Reward = 0.295]
-pretrained_models/GOLD: how come? it will probably be an exciting adventure for you to start [Reward = 0.280]
-pretrained_models/GPT3: That's understandable. It's natural to feel anxious when starting something new. Is there anything in particular that you are worried about? [Reward = 0.265]
-RLHF_tuned_models/BlenderBot_v1:  I'm sure you'll do great! What are you going to be studying at school? [Reward = 0.001]
-pretrained_models/BlenderBot:  I'm sure you'll do great! What are you going to be studying at school? [Reward = 0.001]
-dialogue_models/GODEL_LARGE_v0: I'm sure you will do great! [Reward = -0.207]
-
-
----- Sample ID 1198 -----
-
-Speaker: I got my four year old daughter her first tricycle yesterday.
-
-dialogue_models/GODEL_LARGE_v0: That's awesome! I'm sure she'll love it! [Reward = 0.184]
-RLHF_tuned_models/GODEL_LARGE_v2: That's awesome. Is she excited? [Reward = 0.151]
-pretrained_models/GPT3: That sounds like so much fun! How did she react when she saw it? [Reward = 0.123]
-RLHF_tuned_models/BlenderBot_v1:  That is so exciting! I bet you are so proud of her. How old is she? [Reward = 0.021]
-pretrained_models/BlenderBot:  That is so exciting! I bet you are so proud of her. How old is she? [Reward = 0.021]
-pretrained_models/GOLD: thats so sweet of you [Reward = -0.079]
-
-
----- Sample ID 774 -----
-
-Speaker: Someone broke into my apartment last week. I was not home at the time, but now I worry that they will come back.
-Listener: Wow, that's terrible. Was anything stolen or damaged?
-Speaker: Yes, my TV was stolen. They also clogged every toilet in my apartment. I think they have just eaten Thai food.
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's a really bad idea. I'm sure you'll be able to find a new TV. [Reward = 0.126]
-pretrained_models/GPT3: That's awful. Have you reported the break-in to the police? [Reward = 0.040]
-dialogue_models/GODEL_LARGE_v0: That's terrible. I hope you find a new place to live. [Reward = -0.024]
-pretrained_models/GOLD: What a story, it's just unbelievable how these robbers have absolutely no morals. [Reward = -0.038]
-RLHF_tuned_models/BlenderBot_v1:  That's awful. I'm sorry to hear that. I hope they don't come back! [Reward = -0.104]
-pretrained_models/BlenderBot:  I'm sorry to hear that. I hope they don't come back and steal anything else. [Reward = -0.108]
-
-
----- Sample ID 4085 -----
-
-Speaker: Sometimes it's impossible to shove more food down my gullet
-Listener: Do you have a medical condition?
-Speaker: Nah, I'm trying to gain some pounds, I just haven't acclimated to the quantity yet
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's a good thing to do. It's a good way to get healthy. [Reward = 0.333]
-pretrained_models/GPT3: That makes sense. Have you tried eating smaller meals more frequently? That might help you adjust to the larger portions. [Reward = 0.174]
-RLHF_tuned_models/BlenderBot_v1:  I'm sorry to hear that. Are you trying to lose weight for health reasons or for other reasons? [Reward = 0.096]
-pretrained_models/GOLD: Are you trying to gain muscle? [Reward = 0.047]
-pretrained_models/BlenderBot:  I'm sorry to hear that. I hope you find something that works for you. [Reward = -0.199]
-dialogue_models/GODEL_LARGE_v0: I'm sure you'll get there eventually. [Reward = -0.236]
-
-
----- Sample ID 256 -----
-
-Speaker: I am now going to be a master's student. I will got to he University of Florida
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's a great school. I'm sure you will be a great student. [Reward = 0.190]
-pretrained_models/GPT3: Congratulations! That's a great accomplishment! How do you feel about it? [Reward = 0.124]
-dialogue_models/GODEL_LARGE_v0: That's great! What are you studying? [Reward = 0.068]
-pretrained_models/BlenderBot:  Congratulations! That's a great accomplishment. What are you going to study there? [Reward = 0.045]
-RLHF_tuned_models/BlenderBot_v1:  Congratulations! That's a great accomplishment. What are you going to school for? [Reward = 0.028]
-pretrained_models/GOLD: awwww. congratulations. what is your major [Reward = -0.244]
-
-
----- Sample ID 2073 -----
-
-Speaker: I fell down in a mud puddle today while walking to lunch. I was covered in mud for the rest of the work day.
-Listener: Oh no! That is awful, that can mess with your mood.
-Speaker: No kidding! It was hard to keep a good attitude for the rest of the day.
-
-RLHF_tuned_models/GODEL_LARGE_v2: That is a good thing, it is a good thing to have a good attitude. [Reward = 0.201]
-pretrained_models/GPT3: I can imagine. That sounds really frustrating. Is there anything I can do to help you feel better? [Reward = 0.179]
-pretrained_models/BlenderBot:  I am sorry to hear that. I hope you are feeling better.    What do you do for a living? [Reward = -0.167]
-pretrained_models/GOLD: I can understand that! [Reward = -0.258]
-RLHF_tuned_models/BlenderBot_v1:  I'm sorry to hear that. I hope you didn't get too many stitches. [Reward = -0.333]
-dialogue_models/GODEL_LARGE_v0: I hope you got a new job soon! [Reward = -0.516]
-
-
----- Sample ID 4390 -----
-
-Speaker: I let my friend babysit my kid last week.
-Listener: How did they do?
-Speaker: Awesome. I usually have a hard time letting anyone watch my child but he had a great time with her.
-
-pretrained_models/GPT3: That's great to hear! It's always a relief when you can find someone you trust to look after your little one. [Reward = 0.237]
-RLHF_tuned_models/BlenderBot_v1:  That's good to hear. It's always nice to have someone you can trust with your kids. [Reward = 0.228]
-pretrained_models/BlenderBot:  That's good to hear. It's always good to have a good friend to watch your child. [Reward = 0.202]
-RLHF_tuned_models/GODEL_LARGE_v2: That's great. It's nice to have a friend who cares about your child. [Reward = 0.178]
-dialogue_models/GODEL_LARGE_v0: That's great. I'm glad you had a good time. [Reward = -0.025]
-pretrained_models/GOLD: How old's your child? [Reward = -0.259]
-
-
----- Sample ID 2236 -----
-
-Speaker: I recently heard a music artist for the first time in a long time that brought me back to my childhood.
-Listener: Awww, what fun.  That must have been so nostalgic for you!  I wish I was back in childhood again sometimes.
-Speaker: It sure was! I enjoy reliving the memories, things were often simpler and more carefree back then.
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's a great thing to do. It's nice to be able to look back on those times. [Reward = 0.430]
-pretrained_models/GOLD: I saw a toy that they are bringing back from a couple decades ago when I was a kid and wow, it was so neat to see! [Reward = 0.311]
-pretrained_models/GPT3: Yes, it's true. Childhood really was a simpler time. It's nice to have those memories to look back on and appreciate. [Reward = 0.283]
-RLHF_tuned_models/BlenderBot_v1:  I know what you mean.  It's nice to be able to look back and remember the good times. [Reward = 0.088]
-dialogue_models/GODEL_LARGE_v0: I agree. I remember being a kid and being a kid. I'm sure it was a lot more fun back then. [Reward = -0.009]
-pretrained_models/BlenderBot:  I know what you mean.  Those were the days.  What kind of music did they play? [Reward = -0.090]
-
-
----- Sample ID 2313 -----
-
-Speaker: I am sad that my parents didn't attend my birthday
-Listener: Do they live in a different state than you?
-Speaker: No, they just are not wanting to come to it
-
-pretrained_models/GPT3: I'm sorry to hear that. Is there any way you can talk to them about it? Maybe they can explain why they don't want to come. [Reward = 0.431]
-RLHF_tuned_models/GODEL_LARGE_v2: That's a really bad thing to do. [Reward = 0.372]
-pretrained_models/GOLD: Sorry to hear that.  Remember those who mind don't matter and those who matter don't mind [Reward = 0.136]
-RLHF_tuned_models/BlenderBot_v1:  I'm sorry to hear that. Do you have any plans to make it up to them? [Reward = 0.125]
-pretrained_models/BlenderBot:  I'm sorry to hear that. Do you have any plans to make it up to them? [Reward = 0.125]
-dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. I hope you have a good time with them. [Reward = -0.063]
-
-
----- Sample ID 3860 -----
-
-Speaker: I got a new type of pizza I wanted to try
-Listener: What kind of pizza is it?
-Speaker: A normal pepperoni but it was terrible!
-
-pretrained_models/GPT3: I'm sorry to hear that. Is there a particular reason why you didn't like it? [Reward = 0.343]
-pretrained_models/GOLD: Thats never good, I love pizza [Reward = 0.328]
-RLHF_tuned_models/GODEL_LARGE_v2: That's a shame. I'm sure you'll find a better one. [Reward = 0.253]
-pretrained_models/BlenderBot:  Oh no, I'm sorry to hear that. I hope you didn't pay too much for it. [Reward = 0.118]
-RLHF_tuned_models/BlenderBot_v1:  Oh no, I'm sorry to hear that. I hope it wasn't too bad.  [Reward = 0.050]
-dialogue_models/GODEL_LARGE_v0: Oh no! I'm sorry to hear that. I'm sure you'll find something better. [Reward = 0.027]
-
-
----- Sample ID 4871 -----
-
-Speaker: My girlfriend's leg was bitten off by a bull shark last summer.
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's awful. Did you have to get it fixed? [Reward = 0.243]
-RLHF_tuned_models/BlenderBot_v1:  Oh my goodness! That's terrifying! Did she have to go to the hospital? [Reward = 0.047]
-pretrained_models/BlenderBot:  Oh my goodness! That's terrifying! Did she have to go to the hospital? [Reward = 0.047]
-pretrained_models/GPT3: Oh, my goodness. That's horrible! How is she doing now? [Reward = -0.002]
-pretrained_models/GOLD: Oh my! Is she ok, and was it while surfing? [Reward = -0.003]
-dialogue_models/GODEL_LARGE_v0: Oh no! That's terrible. Did she survive? [Reward = -0.054]
-
-
----- Sample ID 4346 -----
-
-Speaker: The other day I was running late. So, I jumped up and threw on some clothes then ran out of the house.
-Listener: Well I hope you got there in time and nothing bad happened.
-Speaker: I did but when after I was out for a while I noticed the shirt I was wearing was covered in grease stains. I apparently washed it with my husbands work clothes.
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's a really bad thing to do. I'm sure you'll be able to get it cleaned up soon. [Reward = 0.154]
-pretrained_models/GPT3: Oh no, that sounds like it was embarrassing. Did you have to go back home and change? [Reward = 0.090]
-RLHF_tuned_models/BlenderBot_v1:  That must have been embarassing. I hope it didn't ruin your outfit. [Reward = 0.025]
-dialogue_models/GODEL_LARGE_v0: That's a bummer. I hope you got it cleaned up. [Reward = -0.087]
-pretrained_models/BlenderBot:  Oh no! I'm sorry to hear that. Did you end up getting it cleaned up? [Reward = -0.237]
-pretrained_models/GOLD: Oh know! I hope you weren't heading to a job interview, haha. [Reward = -0.321]
-
-
----- Sample ID 1025 -----
+---- Sample ID 1024 -----
 
 Speaker: I just graduated from college! I feel so accomplished.
-Listener: That is SO exciting! I remember how that felt!
-Speaker: I am very excited about it! Although I am a bit nervous about what is to come. I still need to find a job.
 
-pretrained_models/GPT3: That is totally understandable. Finding a job can be an intimidating process. But I'm sure you'll find something that's perfect for you. Have you been doing any networking or reaching out to people in your field? [Reward = 0.228]
-RLHF_tuned_models/GODEL_LARGE_v2: That is a good thing to do. It is always a good feeling to have a job. [Reward = 0.217]
-pretrained_models/GOLD: That will come! The hardest part is over now! [Reward = 0.060]
-dialogue_models/GODEL_LARGE_v0: I am sure you will find one! I am sure you will be fine! [Reward = -0.141]
-RLHF_tuned_models/BlenderBot_v1:  I'm sure you'll do great! What kind of job are you applying for?  [Reward = -0.142]
-pretrained_models/BlenderBot:  Congratulations on graduating! I'm sure you'll find a great job. What kind of job are you looking for? [Reward = -0.142]
+pretrained_models/BlenderBot:  Congratulations! That's a big accomplishment. What did you graduate in, if you don't mind me asking? [Reward = -0.058]
+RLHF_tuned_models/BlenderBot_v2:  Congratulations! That's a great accomplishment. What are you going to do now? [Reward = -0.104]
+pretrained_models/GPT3: That's amazing! Congratulations on all your hard work! How does it feel to have completed your degree? [Reward = -0.130]
+RLHF_tuned_models/GODEL_LARGE_v0: That's great. I'm sure you'll be a great teacher. [Reward = -0.238]
+dialogue_models/GODEL_LARGE_v0: Congratulations! What did you study? [Reward = -0.273]
+pretrained_models/GOLD: That is SO exciting! I remember how that felt! [Reward = -0.285]
 
 
----- Sample ID 3499 -----
+---- Sample ID 615 -----
 
-Speaker: I got a cup of coffee the other day and on my way back to my desk I tripped on thin air
-Listener: Oh no! I hope you did not burn yourself.
-Speaker: I thankfully didn't burn myself bad but I spilled it all over myself! I was so shy afterwards
+Speaker: I know I'm not a perfect parent but some just aren't good at it or don't care.
+Listener: There are some bad parents out there, that's for sure. Is it hard to be a parent?
+Speaker: It is when it comes to all the unexpected stuff. Went to the mall today and lady was letting her toddler run all over the mall smelling like a dirty litter box. It smelled horrible.
 
-pretrained_models/GPT3: That sounds really embarrassing. Is there anything I can do to help? [Reward = 0.310]
-RLHF_tuned_models/GODEL_LARGE_v2: That's a good thing. It's always a good thing to be able to be confident in yourself. [Reward = 0.188]
-RLHF_tuned_models/BlenderBot_v1:  I'm glad you didn't spill it all on yourself. That would have been embarrassing. [Reward = 0.017]
-pretrained_models/BlenderBot:  I'm glad you didn't get burned. That would have been embarassing. [Reward = -0.048]
-pretrained_models/GOLD: Hopefully you were wearing dark clothing, coffee on light colors stinks! [Reward = -0.293]
-dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. I'm sure you'll be fine. [Reward = -0.366]
-
-
----- Sample ID 2777 -----
-
-Speaker: I recently went down memory lane was looked at all my high school yearbooks.
-Listener: Oh yeah?  Do you still look awesome like you did back then?
-Speaker: Well.... maybe not as awesome. lol But I do try to keep in shape. It was good seeing all my old friends.
-Listener: Yeah I bet.  Do you still keep in touch with any of them?
-Speaker: I do a lot of them but some have moved away and we just lost touch.
-Listener: Yeah.  Maybe you should hit them up on FB for a reunion?
-Speaker: That's a good idea!
-
-pretrained_models/GOLD: I bet you all would live it up and have a blast! [Reward = 0.296]
-RLHF_tuned_models/GODEL_LARGE_v2: I'm sure you'll have a great time. It's always nice to see old friends. [Reward = 0.289]
-RLHF_tuned_models/BlenderBot_v1:  That would be a great idea.  It would be nice to catch up and catch up. [Reward = 0.242]
-dialogue_models/GODEL_LARGE_v0: I'm sure they'll be happy to see you. [Reward = 0.234]
-pretrained_models/BlenderBot:  I think I will.  It's been a long time since I've spoken to them. [Reward = 0.103]
-pretrained_models/GPT3: Great! Let me know how it goes.  Good luck! [Reward = 0.052]
+RLHF_tuned_models/GODEL_LARGE_v0: That's a terrible thing to do. I'm sure you're a good parent. [Reward = 0.139]
+pretrained_models/GPT3: That must have been so unpleasant. It sounds like you handled the situation well though. [Reward = 0.135]
+RLHF_tuned_models/BlenderBot_v2:  That's disgusting. I don't understand how people can be so irresponsible with their kids. [Reward = -0.014]
+dialogue_models/GODEL_LARGE_v0: That's so sad. I'm sure she was very upset. [Reward = -0.026]
+pretrained_models/BlenderBot:  Oh my gosh, I would have been so grossed out. Did you say anything to her? [Reward = -0.123]
+pretrained_models/GOLD: Lol, that is terrible. She should have changed his diaper before leaving the house what the heck... [Reward = -0.185]
 
 
----- Sample ID 4312 -----
+---- Sample ID 5106 -----
 
-Speaker: I had to let my dad borrow my car the other day. His truck is in the shop.
-Listener: That was kind of you! Has his truck been repaired?
-Speaker: Yeah it has. And, he took good care of my car, as always.
+Speaker: Going out today to learn a new route for my job and I'm hoping that I don't get lost.
+Listener: Are you able to learn the route first before you have to take it for your job or are they kind of just throwing you into it?
+Speaker: I got the assignment yesterday, and I told myself that I'd go drive around it today and tomorrow.  My boss is supposed to ride along with me the first week, and then after that I'll be on my own.
 
-RLHF_tuned_models/GODEL_LARGE_v2: That's great. It's nice to have a family that values you. [Reward = 0.176]
-pretrained_models/GPT3: That's great to hear! It must have been nice to help him out. [Reward = 0.150]
-pretrained_models/BlenderBot:  That's good to hear. It's always nice to have a reliable vehicle. What kind of car is it? [Reward = -0.032]
-RLHF_tuned_models/BlenderBot_v1:  That's good to hear. What kind of car is it, if you don't mind me asking? [Reward = -0.141]
-dialogue_models/GODEL_LARGE_v0: That's great! I hope he's able to fix it soon! [Reward = -0.238]
-pretrained_models/GOLD: Of course! Your dad is very trustworthy. [Reward = -0.310]
-
-
----- Sample ID 1981 -----
-
-Speaker: I remember just taking a deep breath the other day in the garden and just feeling happy
-Listener: That sounds lovely. Do you have many flowers?
-Speaker: I have a garden so fully packed that I can't see my neighbors at all!
-
-RLHF_tuned_models/GODEL_LARGE_v2: That's a great feeling. I love it when I have a garden that is so full. [Reward = 0.411]
-pretrained_models/GPT3: That sounds like a wonderful escape from the outside world. What kind of flowers do you have? [Reward = 0.185]
-RLHF_tuned_models/BlenderBot_v1:  That's great. I love gardening. It's so relaxing. What kind of flowers do you grow? [Reward = 0.103]
-pretrained_models/GOLD: That is quite impressive! You must be very proud of your work! [Reward = 0.071]
-pretrained_models/BlenderBot:  I love gardening. It's so relaxing. What kind of flowers do you grow? [Reward = 0.049]
-dialogue_models/GODEL_LARGE_v0: That's awesome. I love to garden too. [Reward = -0.112]
+pretrained_models/GPT3: That sounds like a great plan. It's always helpful to get familiar with a route before you have to take it on your own. Is there anything I can do to help you out? [Reward = 0.334]
+RLHF_tuned_models/GODEL_LARGE_v0: That's a good plan. It's always good to have a buddy to help you out. [Reward = 0.127]
+RLHF_tuned_models/BlenderBot_v2:  That's a good way to go about it. I'm sure you'll do just fine. [Reward = 0.030]
+pretrained_models/BlenderBot:  That sounds like a good plan. I hope it goes well for you. I'm sure you'll do great. [Reward = -0.117]
+pretrained_models/GOLD: Well hopefully you're able to familiarize yourself quickly. Good luck! [Reward = -0.243]
+dialogue_models/GODEL_LARGE_v0: I'm sure you'll be fine. I'm sure you'll be fine. [Reward = -0.274]
 
 
----- Sample ID 942 -----
+---- Sample ID 4991 -----
 
-Speaker: I can't wait to get a new car soon
+Speaker: I have an interview for a job that I don't feel qualified for
 
-RLHF_tuned_models/GODEL_LARGE_v2: That's a great feeling. Is it a new car? [Reward = -0.153]
-pretrained_models/GPT3: That sounds exciting! Are you looking for something specific? [Reward = -0.283]
-pretrained_models/BlenderBot:  That's exciting! What kind of car are you looking for? I'm looking for a new one myself. [Reward = -0.371]
-pretrained_models/GOLD: That's exciting! What kind are you looking for? [Reward = -0.402]
-dialogue_models/GODEL_LARGE_v0: I'm sure you will love it! [Reward = -0.404]
-RLHF_tuned_models/BlenderBot_v1:  What kind of car are you going to get? I'm looking for a new one myself. [Reward = -0.437]
-
-
----- Sample ID 492 -----
-
-Speaker: I'm so sleep deprived and my baby wanted to play in the middle of the night and i just yelled at him :( i feel so terrible
-
-pretrained_models/GPT3: I'm sorry to hear that. It can be really challenging to take care of a baby when you're sleep deprived. Is there anything I can do to help? [Reward = 0.238]
-RLHF_tuned_models/GODEL_LARGE_v2: That's a terrible thing to do. I'm sorry to hear that. [Reward = 0.099]
-pretrained_models/GOLD: that is why I am scared to have kids, that sounds terrible [Reward = 0.006]
-RLHF_tuned_models/BlenderBot_v1:  Don't feel too bad. It happens to the best of us. I'm sure he understands. [Reward = -0.022]
-pretrained_models/BlenderBot:  Oh no, I'm sorry to hear that. I hope you're able to get some sleep soon. [Reward = -0.317]
-dialogue_models/GODEL_LARGE_v0: Oh no! I'm sorry to hear that. I'm sure you'll get over it. [Reward = -0.342]
+RLHF_tuned_models/GODEL_LARGE_v0: That's a tough one. Are you nervous? [Reward = 0.099]
+pretrained_models/GPT3: That sounds intimidating! What makes you feel unqualified for the job? [Reward = 0.012]
+RLHF_tuned_models/BlenderBot_v2:  Why do you think you don't qualify for the job? Is it because you aren't qualified? [Reward = 0.004]
+dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. Is it a job you're not qualified for? [Reward = -0.029]
+pretrained_models/GOLD: Just be confident and you will do great! [Reward = -0.054]
+pretrained_models/BlenderBot:  I'm sorry to hear that. I hope it goes well for you. What kind of job is it? [Reward = -0.177]
 
 
----- Sample ID 4888 -----
+---- Sample ID 753 -----
 
-Speaker: I was loyal to the same company for 10 years.
-Listener: That's rare these days, I was with mine for 7
-Speaker: Nice. I wasn't rewarded though. They laid me off.
+Speaker: I just got a puppy, but I have to leave him at home while I go to work. I feel so bad.
 
-RLHF_tuned_models/BlenderBot_v1:  I'm sorry to hear that. It's hard to find a good job these days. Do you have another job lined up? [Reward = 0.233]
-pretrained_models/GPT3: That's really tough. Are you looking for another job? [Reward = 0.204]
-pretrained_models/BlenderBot:  I'm sorry to hear that. I hope you find a new job soon. What do you do now? [Reward = 0.065]
-RLHF_tuned_models/GODEL_LARGE_v2: That's a shame, I hope you find a new job [Reward = 0.020]
-dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that, I'm sure you'll find another job soon [Reward = -0.027]
-pretrained_models/GOLD: I hope you at least got a severance package! [Reward = -0.296]
+RLHF_tuned_models/GODEL_LARGE_v0: That's a terrible thing to have to do. Is it a good thing you have to leave him? [Reward = 0.250]
+pretrained_models/GPT3: That must be really hard for you. Is there someone you can leave him with during the day? [Reward = 0.121]
+pretrained_models/GOLD: That would be sad, do you keep him in a cage? [Reward = -0.063]
+dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. I'm sure you'll be able to find someone to take care of him. [Reward = -0.214]
+RLHF_tuned_models/BlenderBot_v2:  What kind of puppy is it? I love puppies, they're so cute. [Reward = -0.334]
+pretrained_models/BlenderBot:  Aww, I'm sure he'll be fine. What kind of puppy is it? [Reward = -0.354]
 
 
----- Sample ID 3838 -----
+---- Sample ID 99 -----
 
-Speaker: My mom sent my daughter a toy I played with when I was a child!
-Listener: Oh thoughtful ! Did she enjoy playing with it ?
-Speaker: Yes, it was neat to see her play with it. It'll make some great photos, since I have one of me playing with it at her age.
+Speaker: My family and I are going on vacation in a few weeks. We rented a largo beachfront condo and I can't wait!
+Listener: OH I love the beach!!  Which beach are you going to go to?
+Speaker: We are going to be staying at Miramar Beach in Florida, about an  hour Panama City Beach. The view is amazing from our balcony and we are so ready!
 
-pretrained_models/GPT3: That's so cool! It's nice to have something to pass down to the next generation. [Reward = 0.694]
-RLHF_tuned_models/GODEL_LARGE_v2: That's great. It's nice to have memories of your childhood. [Reward = 0.632]
-pretrained_models/GOLD: Its quite wonderful to share your childhood memories with your children isn't it ? [Reward = 0.588]
-RLHF_tuned_models/BlenderBot_v1:  That's so sweet of her. I bet you'll treasure it for a long time. [Reward = 0.384]
-pretrained_models/BlenderBot:  That's so sweet of her. I'm sure you'll treasure it for a long time. [Reward = 0.364]
-dialogue_models/GODEL_LARGE_v0: That's so sweet of her! I hope she enjoys it! [Reward = 0.188]
+RLHF_tuned_models/GODEL_LARGE_v0: That's a great place to go. I love the beach. [Reward = 0.417]
+pretrained_models/GPT3: That sounds like a great vacation spot! What kind of activities do you have planned?  [Reward = 0.328]
+RLHF_tuned_models/BlenderBot_v2:  That sounds like a great place to go.  I have never been there.  Have you been there before? [Reward = 0.317]
+dialogue_models/GODEL_LARGE_v0: That sounds like a great place to go! I've never been there. [Reward = 0.254]
+pretrained_models/BlenderBot:  That sounds like a lot of fun!  I've never been to Florida, but I've always wanted to go. [Reward = 0.133]
+pretrained_models/GOLD: PCB is where we always go! If you want to drive a little bit, go to HUNTS in PCB - it's off the beaten path but THE best seafood and prices - just go early (like 4oclock) for dinner or you won't get in!! [Reward = 0.094]
 
 
----- Sample ID 1204 -----
+---- Sample ID 308 -----
 
-Speaker: I was so scared of going onto the train!
+Speaker: Have anything to tell me about?
+Listener: Not being able to fit into an old wedding dress, is one of a womans worst nightmare.
+Speaker: Oh wow, I can imagine. How old was it?
 
-RLHF_tuned_models/GODEL_LARGE_v2: That's a good thing to be afraid of. [Reward = 0.265]
-pretrained_models/GOLD: Was it your first time riding on one? Is there something in particular that makes you afraid? [Reward = 0.239]
-RLHF_tuned_models/BlenderBot_v1:  Why were you scared to go on the train? Did you have a bad experience with it? [Reward = 0.027]
-pretrained_models/BlenderBot:  Why were you scared of the train? Did you have a bad experience with it or something? [Reward = -0.027]
-dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. Did you get a ticket? [Reward = -0.135]
-pretrained_models/GPT3: Why were you scared? [Reward = -0.333]
+pretrained_models/GPT3: It was an old family heirloom that was passed down for generations. It was probably at least 50 years old. [Reward = 0.321]
+RLHF_tuned_models/BlenderBot_v2:  It was a few years ago, but it still makes me cringe to think about it. [Reward = 0.238]
+pretrained_models/BlenderBot:  It was a few years ago, but it still makes me cringe to think about it. [Reward = 0.238]
+RLHF_tuned_models/GODEL_LARGE_v0: It was a very old one. I think it was around 1900. [Reward = 0.192]
+pretrained_models/GOLD: The dress was a few years old, I couldnt believe it didnt fit. [Reward = 0.029]
+dialogue_models/GODEL_LARGE_v0: It was a few years old. [Reward = -0.027]
+
+
+---- Sample ID 977 -----
+
+Speaker: i have always felt really guilty about lying to my parents
+
+RLHF_tuned_models/GODEL_LARGE_v0: That's a very difficult thing to deal with. [Reward = 0.600]
+pretrained_models/BlenderBot:  I'm sorry to hear that. Why did you lie to them? Did they find out? [Reward = 0.292]
+RLHF_tuned_models/BlenderBot_v2:  I'm sorry to hear that. Why do you feel guilty about it, if you don't mind me asking? [Reward = 0.265]
+pretrained_models/GPT3: That sounds really hard. Can you tell me more about what's been going on? [Reward = 0.250]
+dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. I'm sure you're not alone. [Reward = -0.004]
+pretrained_models/GOLD: oh.. well i understand. but that was a long time ago right? [Reward = -0.024]
+
+
+---- Sample ID 1121 -----
+
+Speaker: I don't watch a lot of kids movies these days, but they always bring back fond memories
+Listener: Same. What are your favorites?
+Speaker: I've seen the movie Trolls probably 100 times, that and Harry Potter!
+Listener: That's funny. I've also seen Trolls about 100 times. My daughter is now sick of it!
+Speaker: Yeah, sometimes there's more to those movies than you think, like they actually considered how adults would react
+Listener: I've noticed a lot of the newer kids movies have adult jokes in them.
+Speaker: Yeah, maybe kids are just getting smarter with the internet and everything
+
+pretrained_models/GPT3: That could be it. It's definitely a different world for them. [Reward = 0.563]
+RLHF_tuned_models/GODEL_LARGE_v0: That's a good point. I think it's a good thing that kids are getting more and more involved in the world. [Reward = 0.433]
+dialogue_models/GODEL_LARGE_v0: I think it's a combination of both. I'm sure they're getting smarter. [Reward = 0.157]
+RLHF_tuned_models/BlenderBot_v2:  I think so too. It's hard to believe that the first movie came out in 1997. I can't believe it's been so long. [Reward = 0.140]
+pretrained_models/GOLD: Yeah maybe that... they are also lazier. [Reward = 0.047]
+pretrained_models/BlenderBot:  I think so too. I remember when the first movie came out in 1997. That was a long time ago. [Reward = 0.010]
+
+
+---- Sample ID 157 -----
+
+Speaker: My best friend did amazing in school, despite having 2 children and not doing great academically in school. She ended up getting honors in her first 2 semesters.
+Listener: She sounds like a person with great ability. Great choice of friend.
+Speaker: She has been my friend for 19 years. She pushes me to do better too.
+
+RLHF_tuned_models/BlenderBot_v2:  That's great to have a friend like that. It's always nice to have someone you can count on. [Reward = 0.206]
+RLHF_tuned_models/GODEL_LARGE_v0: That's great. It's nice to have a friend that you can trust. [Reward = 0.162]
+pretrained_models/GPT3: That’s wonderful! It’s great to have someone who can motivate and encourage you. She must be a great friend. [Reward = 0.151]
+pretrained_models/BlenderBot:  That's great. It's always good to have a friend that you can rely on.  [Reward = 0.116]
+pretrained_models/GOLD: That's great. I wish I had someone so close like that! [Reward = -0.109]
+dialogue_models/GODEL_LARGE_v0: That's great. I hope you continue to be a good friend. [Reward = -0.161]
+
+
+---- Sample ID 3370 -----
+
+Speaker: my daughter went on vacation with her friends and the house feels so lonely
+Listener: Where did they go?
+Speaker: they went to the beach for 1 week
+
+pretrained_models/GPT3: That sounds like a great way to spend a week! I'm sure you miss her, but it's nice to have a little break from the daily routine. Have you been able to keep in touch with her while she's away? [Reward = 0.607]
+RLHF_tuned_models/GODEL_LARGE_v0: That's great. It's nice to have friends to spend time with. [Reward = 0.513]
+RLHF_tuned_models/BlenderBot_v2:  That sounds like a lot of fun. I bet they had a great time. Did you go with them? [Reward = 0.281]
+dialogue_models/GODEL_LARGE_v0: That's great. I hope you guys have a good time. [Reward = 0.202]
+pretrained_models/GOLD: That sounds like so much fun! [Reward = 0.148]
+pretrained_models/BlenderBot:  That sounds like a lot of fun. I hope they had a good time and didn't get too lonely. [Reward = 0.139]
+
+
+---- Sample ID 2449 -----
+
+Speaker: My cat was playing last nigh and brought it to me.
+Listener: That sounds like fun. what did it bring to you?
+Speaker: Well, it wasn't one of his toys like I thought. It was a dead mouse
+
+RLHF_tuned_models/GODEL_LARGE_v0: That is a good thing. It is a good thing to have a cat. [Reward = 0.138]
+RLHF_tuned_models/BlenderBot_v2:  Oh no, that's not good. Did you get rid of it or did you have to clean it up? [Reward = -0.025]
+pretrained_models/GPT3: Oh, no! That must have been quite a shock. Is your cat okay? [Reward = -0.027]
+dialogue_models/GODEL_LARGE_v0: That is a good thing. I hope you are able to get it back. [Reward = -0.093]
+pretrained_models/GOLD: Eww... that's pretty gross. I had a cat once that would bring me dead birds too. I think that means they like you! [Reward = -0.127]
+pretrained_models/BlenderBot:  Aww, I'm sorry to hear that. Did you take it to the vet? [Reward = -0.202]
+
+
+---- Sample ID 616 -----
+
+Speaker: I always feel like no one hears me. Like When I speak it falls on deaf ears.
+
+RLHF_tuned_models/GODEL_LARGE_v0: That's a very common feeling. Is it something you need to work on? [Reward = 0.352]
+pretrained_models/GPT3: That must be really frustrating. Is there anyone in particular you feel like isn't listening? [Reward = 0.261]
+pretrained_models/GOLD: That sucks. Maybe it's time to get new friends? [Reward = 0.006]
+RLHF_tuned_models/BlenderBot_v2:  I'm sorry to hear that. Have you ever talked to a therapist about it?  [Reward = -0.015]
+pretrained_models/BlenderBot:  Oh no, I'm sorry to hear that. Have you been to a doctor about it? [Reward = -0.185]
+dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. I'm sure you're not alone. [Reward = -0.215]
+
+
+---- Sample ID 196 -----
+
+Speaker: Have you ever had a surprise birthday party planned for you? I did a few years back.
+Listener: Yes.My first was when i turned 18.
+Speaker: That's awesome! What a good year to do it. I remember begging my husband to throw me one every year.
+
+RLHF_tuned_models/GODEL_LARGE_v0: That's a great idea.It's always nice to have a birthday party. [Reward = 0.320]
+RLHF_tuned_models/BlenderBot_v2:  That is so nice of him. It is always nice to have a surprise party for your kids. [Reward = 0.294]
+pretrained_models/GPT3: That sounds like a lot of fun! How did he make it special? [Reward = 0.156]
+pretrained_models/GOLD: LOL.You had to beg your husband for a surprise party?? [Reward = 0.133]
+pretrained_models/BlenderBot:  It was a lot of fun. I wish I could do it again. What did you do for your birthday? [Reward = -0.035]
+dialogue_models/GODEL_LARGE_v0: I wish i could do that now. [Reward = -0.244]
+
+
+---- Sample ID 3604 -----
+
+Speaker: I broke up with my boyfriend last week, and nothing is the same without him.
+Listener: Time will make it better. You just have to move on.
+Speaker: Yeah, I know but we were planning to start our lives together. We were moving in and now I have to rethink everything.
+
+pretrained_models/GPT3: That must be really tough. I'm sorry you're going through this. Have you talked to any of your friends or family about it? [Reward = 0.455]
+RLHF_tuned_models/GODEL_LARGE_v0: That's a tough time. It's hard to be in a relationship. [Reward = 0.420]
+pretrained_models/GOLD: Better to find out now then move in and invest your time. Trust me it's worse. [Reward = 0.417]
+RLHF_tuned_models/BlenderBot_v2:  I'm sorry to hear that. It will take some time, but it will get better. [Reward = 0.157]
+pretrained_models/BlenderBot:  I'm sorry to hear that. I know it's hard, but it will get better. [Reward = 0.039]
+dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. I hope you find someone who will be a good partner. [Reward = -0.062]
+
+
+---- Sample ID 1593 -----
+
+Speaker: So my brother is turning 16 soon which means I don't have to drive him around anymore. Score!
+
+RLHF_tuned_models/GODEL_LARGE_v0: That's great. It's nice to have a brother that you can be there for. [Reward = 0.391]
+pretrained_models/GPT3: That's awesome! It must feel great to have some more freedom. [Reward = 0.278]
+dialogue_models/GODEL_LARGE_v0: That's great! I'm sure he'll be happy to have you around. [Reward = 0.160]
+pretrained_models/BlenderBot:  Wow, that's a big age difference. How long have you guys been friends? Do you see each other often? [Reward = -0.022]
+RLHF_tuned_models/BlenderBot_v2:  Wow, that's a big age difference. Do you have a lot of siblings? [Reward = -0.045]
+pretrained_models/GOLD: That is nice. [Reward = -0.457]
+
+
+---- Sample ID 2078 -----
+
+Speaker: I hate that people hit on others they know are married.
+
+RLHF_tuned_models/GODEL_LARGE_v0: That's a really bad thing to do. Is it a problem for you? [Reward = 0.692]
+pretrained_models/GPT3: That must be really frustrating. Is there anything you can do to make it stop? [Reward = 0.594]
+RLHF_tuned_models/BlenderBot_v2:  I hate it too. It's so disrespectful. I don't understand why people feel the need to do that. [Reward = 0.401]
+pretrained_models/BlenderBot:  I do too. It's so disrespectful. I don't know why people feel the need to do that. [Reward = 0.359]
+pretrained_models/GOLD: Ugh, why do people do that? It's annoying. [Reward = 0.271]
+dialogue_models/GODEL_LARGE_v0: I agree. I'm married and I've never been hit on. [Reward = -0.092]
+
+
+---- Sample ID 1112 -----
+
+Speaker: I'm seeing my orthopedic surgeon soon and he'll tell me if he can operate on my hip. I so hope he says yes, but the suspense is killing me!
+Listener: Oh man! What happened to your hip?
+Speaker: I fell and fractured it two years ago. My then surgeon botched the operation and I have to use a walker to get around. If this new guy can do something I could walk properly again!
+Listener: Oh my god..I had doctors really mess me up too. I am in a lawsuit. Have you thought about contacting an attorney?
+Speaker: From what I've read, unless it's a class-action lawsuit my chances are practically nil. The surgeon'll just lawyer up. What happened to you?
+
+pretrained_models/GPT3: I had a botched surgery that left me with permanent nerve damage. I'm in the process of suing the doctor and hospital for medical malpractice. It's been a long, difficult process but I'm hoping to finally get some justice. [Reward = 0.329]
+pretrained_models/GOLD: If it's medical malpractice actually you can get a good amount. Mine is still in talks, it's only been 6 months. Medical malpractice lawyers usually take you on for free if they like your case :) You can always try and you won't be charged if you don't win. It's pretty painless..people killed my child and almost me.. [Reward = 0.136]
+RLHF_tuned_models/BlenderBot_v2:  I was in a motorcycle accident when I was a teenager. It was a long time ago, but it still haunts me to this day. [Reward = 0.082]
+RLHF_tuned_models/GODEL_LARGE_v0: I'm sorry to hear that. I'm sure you'll be able to get a settlement. I'm sure you'll be able to get a new surgeon. [Reward = -0.027]
+dialogue_models/GODEL_LARGE_v0: I had a hip replacement surgery. I am not sure what happened to it. [Reward = -0.109]
+pretrained_models/BlenderBot:  I was in a car accident when I was a teenager. I broke both my legs. [Reward = -0.270]
+
+
+---- Sample ID 3995 -----
+
+Speaker: My dog died of old age last year and I miss her
+
+pretrained_models/GPT3: I'm so sorry to hear that. It must have been very difficult to lose her. Is there anything I can do to help you through this time? [Reward = 0.438]
+RLHF_tuned_models/BlenderBot_v2:  I'm sorry to hear that. It's always hard to lose a beloved pet. [Reward = 0.150]
+RLHF_tuned_models/GODEL_LARGE_v0: That's terrible. Is she still with you? [Reward = 0.091]
+pretrained_models/GOLD: How sad to lose a dog you love! Ta least she/he died of old age, she must be in doggy heaven. [Reward = 0.041]
+dialogue_models/GODEL_LARGE_v0: Oh no, I'm so sorry to hear that. I'm sure you'll be able to find someone to take care of her. [Reward = -0.050]
+pretrained_models/BlenderBot:  I'm so sorry to hear that. I know how you feel, I lost my dog a few years ago. [Reward = -0.193]
+
+
+---- Sample ID 3709 -----
+
+Speaker: Our local organic store now stocks Indian food made by a local Indian lady - heaven, heaven, heaven!
+
+pretrained_models/GOLD: That is very cool!  I love when food is authentic.  Do you shop there often? [Reward = 0.288]
+pretrained_models/GPT3: That sounds amazing! Where is the store located? I'd love to check it out. [Reward = 0.165]
+RLHF_tuned_models/GODEL_LARGE_v0: That's awesome! I love Indian food. I'm sure you'll love it! [Reward = 0.156]
+RLHF_tuned_models/BlenderBot_v2:  I love indian food! It's one of my favorite cuisines. What's your favorite? [Reward = 0.089]
+pretrained_models/BlenderBot:  I love indian food! What is your favorite dish made by the indian lady?  [Reward = 0.078]
+dialogue_models/GODEL_LARGE_v0: That's awesome! I love Indian food. [Reward = 0.024]
+
+
+---- Sample ID 2856 -----
+
+Speaker: I just found out my husband is cheating on me..
+
+RLHF_tuned_models/GODEL_LARGE_v0: That's awful. Is it a big deal? [Reward = 0.221]
+RLHF_tuned_models/BlenderBot_v2:  I'm so sorry to hear that. Have you confronted him about it? How did you find out? [Reward = 0.221]
+pretrained_models/GOLD: That's terrible. Do you know how long it's been going on? [Reward = 0.194]
+pretrained_models/GPT3: I'm so sorry to hear that. How are you feeling right now? [Reward = 0.130]
+pretrained_models/BlenderBot:  Oh no, I am so sorry to hear that. I hope you are able to get through this. [Reward = -0.082]
+dialogue_models/GODEL_LARGE_v0: Oh no! What happened? [Reward = -0.279]
+
+
+---- Sample ID 2246 -----
+
+Speaker: So my brother got my dream vehicle as his first car. I am feeling a certain way about this!
+Listener: Oh my god, Do you think he got it just because you like it so much?
+Speaker: I don't think so actually, I haven't let him know that I love that type in particular so much haha. I am definitely wishing it was mine though!
+
+pretrained_models/GPT3: I can understand that. It must be hard to see something you want so much go to someone else. Have you talked to your brother about it? [Reward = 0.303]
+RLHF_tuned_models/GODEL_LARGE_v0: That's a good thing to do. It's nice to have a car that you can be proud of. [Reward = 0.241]
+RLHF_tuned_models/BlenderBot_v2:  I'm sorry to hear that. Maybe you can talk to him about it and see if he feels the same way. [Reward = 0.173]
+pretrained_models/GOLD: That is hilarious, In a cruel kind of way. [Reward = 0.008]
+dialogue_models/GODEL_LARGE_v0: I'm sure he'll appreciate it. I'm sure he'll appreciate it too. [Reward = -0.073]
+pretrained_models/BlenderBot:  What kind of car is it, if you don't mind me asking? I hope you get it! [Reward = -0.399]
+
+
+---- Sample ID 2130 -----
+
+Speaker: my son is teething and he is so cranky! I gave him tylenol and got some teething toys. I don
+Listener: Teething is a hard period for babies and moms
+Speaker: it is! his molars are coming so he is inconsolable! Doesn't sleep good, doesn't want to eat. poor little boy
+
+RLHF_tuned_models/GODEL_LARGE_v0: That's a bad time to have a baby [Reward = 0.169]
+pretrained_models/GOLD: Poor baby. I remember my kids teething too. It was horrible [Reward = -0.004]
+RLHF_tuned_models/BlenderBot_v2:  That's too bad. I hope he grows out of it soon. Is there anything you can do to help him? [Reward = -0.022]
+pretrained_models/GPT3: I'm sorry to hear that. Have you tried using a cold washcloth or a cold teething ring to help him out? That usually helps soothe the gums a bit. [Reward = -0.037]
+pretrained_models/BlenderBot:  I'm sorry to hear that. I hope he gets better soon. Is there anything you can do to help him? [Reward = -0.111]
+dialogue_models/GODEL_LARGE_v0: I hope he gets better soon [Reward = -0.517]
+
+
+---- Sample ID 5113 -----
+
+Speaker: My father passed away 2 years ago, but my mother lives in my neighborhood now. I'm so thankful she lives close by and still here with us. She's such a wonderful mother.
+
+RLHF_tuned_models/GODEL_LARGE_v0: That's great. It's nice to have a family that you can be close to. [Reward = 0.488]
+pretrained_models/GPT3: I'm so sorry to hear about your father. It must be so nice to have your mother close by. She sounds like a wonderful person. Is there anything I can do to help you or your mother during this difficult time? [Reward = 0.467]
+pretrained_models/GOLD: I am glad that she is living close to you. That must make you feel special. My mom is dead so I understand how you feel. [Reward = 0.320]
+RLHF_tuned_models/BlenderBot_v2:  I'm sorry to hear that. It's good that you have a good relationship with her. [Reward = 0.132]
+pretrained_models/BlenderBot:  I am so sorry to hear about your father passing away. I am glad you have such a good relationship with her. [Reward = -0.009]
+dialogue_models/GODEL_LARGE_v0: That's great. I'm so sorry to hear that. [Reward = -0.161]
+
+
+---- Sample ID 4019 -----
+
+Speaker: I have an amazing husband who is always there for me no matter what
+
+pretrained_models/GPT3: That's great to hear! It sounds like you have a really strong relationship. How do you make sure to stay connected? [Reward = 0.403]
+RLHF_tuned_models/BlenderBot_v2:  That's great to hear. It's always good to have a supportive partner in your life. [Reward = 0.364]
+RLHF_tuned_models/GODEL_LARGE_v0: That's great. It's nice to have someone who is there for you. [Reward = 0.348]
+dialogue_models/GODEL_LARGE_v0: That's great. I'm glad you have a husband like that. [Reward = 0.171]
+pretrained_models/BlenderBot:  That's great! I wish I had someone like that in my life. I'm happy for you. [Reward = 0.131]
+pretrained_models/GOLD: That sounds amazing! How'd you guys meet? [Reward = -0.010]
+
+
+---- Sample ID 139 -----
+
+Speaker: I'll always remember the day I learned I was pregnant with our first child -- Halloween in Chicago, and we were with friends at the Shedd Aquarium! I've loved baby belugas since ;-)
+Listener: Baby belugas are cute, but not as cute as your baby!
+Speaker: Ha! True that ;-) That's also the year that A Bug's Life came out, and we always thought of our young one as Dot, the spunky little girl ant in the movie.
+
+pretrained_models/GPT3: That's so sweet! It must have been a special time for you both. [Reward = 0.449]
+RLHF_tuned_models/GODEL_LARGE_v0: That's a great movie, I love that movie. I'm sure you'll have a great time with your baby. [Reward = 0.295]
+pretrained_models/BlenderBot:  I love that movie! It's one of my favorite animated movies of all time.  [Reward = 0.176]
+dialogue_models/GODEL_LARGE_v0: That movie is so cute! I love it! [Reward = 0.170]
+pretrained_models/GOLD: That is so funny! I don't think she'll want to be compared to an ant when she gets older. You'll have to remind her. [Reward = 0.082]
+RLHF_tuned_models/BlenderBot_v2:  That's so cute! I remember when I was a little girl, I used to watch that movie all the time. [Reward = 0.024]
+
+
+---- Sample ID 2889 -----
+
+Speaker: I have to give a speech on Thursday.
+
+pretrained_models/GPT3: That sounds like a lot of pressure. Is there anything I can do to help you prepare? [Reward = 0.249]
+RLHF_tuned_models/GODEL_LARGE_v0: That's a great idea. Is it a big one? [Reward = 0.137]
+RLHF_tuned_models/BlenderBot_v2:  That's exciting! What are you going to be speaking about? Are you nervous about it? [Reward = 0.095]
+dialogue_models/GODEL_LARGE_v0: That's great! What is it about? [Reward = 0.015]
+pretrained_models/BlenderBot:  I hope it goes well for you. What are you going to talk about? Are you nervous? [Reward = -0.024]
+pretrained_models/GOLD: Are you prepared? [Reward = -0.213]
+
+
+---- Sample ID 4133 -----
+
+Speaker: Around 4 months ago, I had major surgery that caused me to be immobile for a few weeks.
+Listener: I'm so sorry you had to go through that! What happened?
+Speaker: Well, I had lots of support from my family, but I felt afraid of getting back into the swing of things for fear of failing. I felt so vulnerable.
+
+pretrained_models/GPT3: That must have been really tough. It's understandable to feel scared and vulnerable in such a situation. How did you manage to get back into your routine? [Reward = 0.358]
+RLHF_tuned_models/GODEL_LARGE_v0: That's a very common feeling. I'm sure you'll be able to get back to your normal life soon. [Reward = 0.213]
+pretrained_models/GOLD: I'm sure it was a very difficult experience. you must be a really strong person to have gotten through that. [Reward = 0.112]
+RLHF_tuned_models/BlenderBot_v2:  That's understandable. I'm glad you're doing better now though. I hope you're recovering well. [Reward = -0.016]
+pretrained_models/BlenderBot:  I am so sorry to hear that. I hope you are doing better now and that you are recovering well. [Reward = -0.087]
+dialogue_models/GODEL_LARGE_v0: I'm sure you'll be able to get back to normal soon! [Reward = -0.095]
+
+
+---- Sample ID 2841 -----
+
+Speaker: I love my husband so much I could never cheat on him.
+Listener: Love is a great thing, I am happy for you
+Speaker: Yea, I wouldnt want to hurt him, i cant understand anyone who does.
+
+pretrained_models/GPT3: It's understandable to feel that way. Cheating is a difficult thing to process and it can be hard to understand why someone would do it. It's good that you are so committed to your husband. [Reward = 0.596]
+RLHF_tuned_models/BlenderBot_v2:  That's a great attitude to have, I wish more people had that kind of self-control. [Reward = 0.377]
+RLHF_tuned_models/GODEL_LARGE_v0: I am sure you will be able to find a way to be with him [Reward = 0.100]
+pretrained_models/BlenderBot:  You are a good person, I wish you and your husband the best of luck in the future. [Reward = 0.030]
+pretrained_models/GOLD: Yeah, people can be unpredictable sometimes [Reward = -0.075]
+dialogue_models/GODEL_LARGE_v0: I am sure you will be happy for him [Reward = -0.082]
+
+
+---- Sample ID 2796 -----
+
+Speaker: One of my coworkers really ticked me off one day. She decided she would delegate some work to me by slamming on my desk and demanding I do it. She had some nerve!
+
+RLHF_tuned_models/GODEL_LARGE_v0: That's really annoying. Is it a common thing to do? [Reward = 0.536]
+RLHF_tuned_models/BlenderBot_v2:  That's not good. Did you talk to her about it or did you just let it go? [Reward = 0.397]
+pretrained_models/GPT3: That sounds really frustrating and disrespectful. How did you respond? [Reward = 0.269]
+dialogue_models/GODEL_LARGE_v0: That's really rude. I'm sure you're gonna be able to handle it. [Reward = 0.108]
+pretrained_models/GOLD: Did you get mad at her? [Reward = 0.030]
+pretrained_models/BlenderBot:  Oh my gosh, I would have been furious! Did you confront her about it? [Reward = -0.071]
+
+
+---- Sample ID 4077 -----
+
+Speaker: I was really sick the other day and I let my roommate pick me up and carry me down the stairs.
+Listener: Oh no! What was wrong? Are you feeling better?
+Speaker: I had an ovarian cyst, it hurt so bad. I almost went to the ER again.
+
+RLHF_tuned_models/GODEL_LARGE_v0: That's a really bad thing to have. I hope you're able to get it fixed soon. [Reward = 0.037]
+pretrained_models/GPT3: I'm so sorry to hear that. Is there anything I can do to help? [Reward = 0.003]
+RLHF_tuned_models/BlenderBot_v2:  I'm so sorry to hear that. I hope you feel better soon. Did you go to the doctor? [Reward = -0.278]
+pretrained_models/GOLD: Oh man! I had one when I was pregnant with my son. I feel your pain! [Reward = -0.298]
+dialogue_models/GODEL_LARGE_v0: Oh no! That's awful! I hope you feel better soon! [Reward = -0.369]
+pretrained_models/BlenderBot:  Oh my goodness, I'm so sorry to hear that. I hope you feel better soon! [Reward = -0.489]
+
+
+---- Sample ID 2645 -----
+
+Speaker: Yesterday my husband opened a window and a HUGE black bug flew in!! I almost died!!
+Listener: EW OMG Did you kill it?
+Speaker: heck no, i told my husband to deal with it. i ran in my bedroom and locked the door
+
+RLHF_tuned_models/GODEL_LARGE_v0: That's a good thing to do. It's a scary thing to have in your house. [Reward = 0.115]
+pretrained_models/GPT3: That must have been so scary! Did he get rid of it? [Reward = -0.123]
+RLHF_tuned_models/BlenderBot_v2:  I would have done the same thing. I hate spiders so much. They are the worst. [Reward = -0.219]
+pretrained_models/BlenderBot:  I would have done the same thing. I hate spiders so much. They are the worst. [Reward = -0.219]
+dialogue_models/GODEL_LARGE_v0: That's awesome! I hope you didn't get bitten. [Reward = -0.385]
+pretrained_models/GOLD: EEK! Sounds frightening! [Reward = -0.605]
+
+
+---- Sample ID 58 -----
+
+Speaker: I'm currently working for someone that is *such* a great example of a leader! It makes going into work inspiring every day / every way.
+Listener: Lucky you! That is rare. Maybe one day people will think of you like that?
+Speaker: That's a very kind statement, and certainly what I would strive for. And it's the rarity that *inspires* me. That should be the norm, not the exception! THAT'S what I'd like to inspire in people. How about you?
+Listener: I have something totally different. My boss is clueless to the world and have no business being a leader.
+Speaker: That is soul-sapping. What do you do to inspire yourself, and not let that kind of behavior drag you down?
+
+pretrained_models/GPT3: I try to stay positive and focus on what I can control. I remind myself that I can still learn and grow in spite of the environment. I also try to find a mentor or someone that I can look up to for guidance. That helps a lot. [Reward = 0.382]
+pretrained_models/BlenderBot:  I try not to let it get to me. I just try to be a good person. [Reward = 0.262]
+RLHF_tuned_models/BlenderBot_v2:  I don't let it get to me. I just try to be a good person.  [Reward = 0.139]
+RLHF_tuned_models/GODEL_LARGE_v0: I try to be a better person and try to be a better person. I'm sure it's hard to do that. [Reward = 0.039]
+dialogue_models/GODEL_LARGE_v0: I try to be a better person. I try to be a better person. [Reward = -0.005]
+pretrained_models/GOLD: Well I've been in the business all my life and have worked for some great people. So I pull from what I learned from them. [Reward = -0.034]
+
+
+---- Sample ID 4903 -----
+
+Speaker: Someone helped me move.
+
+pretrained_models/BlenderBot:  That was nice of them. How long did it take you to move, if you don't mind me asking? [Reward = 0.252]
+RLHF_tuned_models/BlenderBot_v2:  That's really nice of them. Where did you move to, if you don't mind me asking? [Reward = 0.241]
+RLHF_tuned_models/GODEL_LARGE_v0: That's great. It's nice to have someone to help you move. [Reward = 0.172]
+pretrained_models/GOLD: Were they a close friend? And did you pay them with pizza? [Reward = 0.111]
+dialogue_models/GODEL_LARGE_v0: That's great! I'm glad you had someone to help you move. [Reward = 0.003]
+pretrained_models/GPT3: That's great! Who helped you? [Reward = -0.136]
+
+
+---- Sample ID 89 -----
+
+Speaker: Too often, it's a health scare that makes us value health. It inspires me to try and do something to keep healthy every day.
+Listener: I understand. I am think the same thing. What is your health issue?
+Speaker: Happily, I don't have one! It's more seeing family and friends and the situations they're in. Not everything can be helped -- but there are some things we can all do to take care of ourselves, you know?
+
+RLHF_tuned_models/BlenderBot_v2:  That's a good attitude to have. I think it's important to have a healthy lifestyle. [Reward = 0.180]
+RLHF_tuned_models/GODEL_LARGE_v0: That's good. I think it's important to take care of yourself. [Reward = 0.044]
+pretrained_models/GPT3: Yes, I totally agree. Taking care of our health is so important, and it's great that you're taking steps to stay healthy. What kind of things do you do to stay healthy? [Reward = 0.043]
+pretrained_models/BlenderBot:  I know what you mean. I wish I had more time to spend with my family.  [Reward = -0.140]
+dialogue_models/GODEL_LARGE_v0: I agree. I am sure you will find something that works for you. [Reward = -0.187]
+pretrained_models/GOLD: Yes, we should try to yourself heathy [Reward = -0.332]
+
+
+---- Sample ID 2418 -----
+
+Speaker: You won't believe the day I've had! I got to sleep in this morning, I haven't done that in months!
+
+RLHF_tuned_models/BlenderBot_v2:  That's always a good thing. Sleep is the most important thing you can do to recharge. [Reward = 0.139]
+RLHF_tuned_models/GODEL_LARGE_v0: That's a great feeling. It's nice to have a day that you can enjoy. [Reward = 0.136]
+pretrained_models/GOLD: Its always nice to get some sleep [Reward = -0.164]
+pretrained_models/GPT3: That sounds like a great start to your day! What else happened? [Reward = -0.246]
+dialogue_models/GODEL_LARGE_v0: That's awesome! I'm glad you got to sleep in! [Reward = -0.310]
+pretrained_models/BlenderBot:  That's awesome! I hope you have a great rest of your day. What did you do? [Reward = -0.448]
+
+
+---- Sample ID 1870 -----
+
+Speaker: I saw a homeless lady and i felt so bad for her because it was so hot outside so went to five guys and bought her some food and cold drinks
+Listener: that's extremely sweet of you! you're a nice person. my wife and i made some blessing bags and we give them everytime we see homeless people
+Speaker: blessing bags?? what are those?
+
+pretrained_models/GPT3: Blessing bags are bags filled with items that homeless people need, like water bottles, snacks, socks, and other toiletries. We also put in a few inspirational quotes and a bible verse. We like to give them out to show our support and to let them know that someone cares. [Reward = 0.494]
+dialogue_models/GODEL_LARGE_v0: they are a kind of prayer bag that you can put your blessings in [Reward = 0.452]
+RLHF_tuned_models/BlenderBot_v2:  They are little plastic bags that remind me of my grandmother, she used to bring them to me when I was a kid. [Reward = 0.412]
+RLHF_tuned_models/GODEL_LARGE_v0: they are a kind of a blessing to give to the homeless [Reward = 0.388]
+pretrained_models/BlenderBot:  It's a type of plastic bag that you can put around your home to protect your belongings. [Reward = 0.385]
+pretrained_models/GOLD: basically it's a bag with necessities. we put some water, some non perishable foods, snacks, some wipes and a little bit of money [Reward = 0.298]
+
+
+---- Sample ID 4350 -----
+
+Speaker: My son got a remote control car for his birthday. Its really cool.
+Listener: That's awesome. Did you get him it? I bet he loves it.
+Speaker: No, his grandpa did. But, after he went to bed, I went outside and played with it for a while.
+
+RLHF_tuned_models/GODEL_LARGE_v0: That's really cool. It's a great way to spend time with your kids. [Reward = 0.470]
+RLHF_tuned_models/BlenderBot_v2:  That sounds like a great way to spend time with him. I'm sure he'll remember it for the rest of his life. [Reward = 0.360]
+pretrained_models/GOLD: Haha I would've done the same. Those toys always make me lose myself. They're so much fun! [Reward = 0.291]
+pretrained_models/GPT3: That's so sweet of you! I'm sure your son will appreciate it. [Reward = 0.249]
+pretrained_models/BlenderBot:  That sounds like a lot of fun. I wish I had a grandparent to play with. [Reward = 0.200]
+dialogue_models/GODEL_LARGE_v0: That's awesome. I bet he's excited to get it. [Reward = 0.105]
+
+
+---- Sample ID 2752 -----
+
+Speaker: My family is moving from Texas to Arkansas in a few months, Im worried for the change.
+
+RLHF_tuned_models/BlenderBot_v2:  That's a big change. Are you moving to a new state or to a different state? [Reward = 0.485]
+RLHF_tuned_models/GODEL_LARGE_v0: That's a great place to move to. It's a great place to live. [Reward = 0.444]
+pretrained_models/GPT3: That sounds like a big change! How are you feeling about it? [Reward = 0.394]
+pretrained_models/BlenderBot:  I'm sure you'll be fine. It's a big change, but you'll get used to it. [Reward = 0.336]
+pretrained_models/GOLD: That is a big change!  Are you moving due to a job or something like that? [Reward = 0.297]
+dialogue_models/GODEL_LARGE_v0: I'm sure you'll be fine. I'm sure you'll be fine. [Reward = 0.261]
+
+
+---- Sample ID 1062 -----
+
+Speaker: My sister is always the sibling that my parents talk about. Sometimes I wonder if they even notice me.
+Listener: I am sorry to hear that. Have you ever talked to your parents about that?
+Speaker: I haven't. I'm scared that it would just make the situation worse. Do you think I should tell them how I feel?
+
+pretrained_models/GPT3: It can be difficult to talk about these things, but I think it could be beneficial for you to express your feelings. You don't have to do it right away, but it might be worth considering in the future. [Reward = 0.566]
+dialogue_models/GODEL_LARGE_v0: I would. I think it is important to talk to them about it. [Reward = 0.517]
+RLHF_tuned_models/GODEL_LARGE_v0: I think you should. It is very important to talk to your parents. [Reward = 0.483]
+RLHF_tuned_models/BlenderBot_v2:  I think it would be good to talk to them about it. It might make you feel better. [Reward = 0.383]
+pretrained_models/BlenderBot:  I think that would be a good idea. I am sure they would love to hear from you. [Reward = 0.219]
+pretrained_models/GOLD: Yes, you do.Otherwise, you are going to carry that pain the rest of your life. [Reward = 0.174]
+
+
+---- Sample ID 5206 -----
+
+Speaker: When I was in elementary school I was envious of the kids who were popular!
+Listener: Yeah as a child it's hard to see other kids with a bunch of friends when you don't have that many.
+Speaker: Yeah, I just had trouble socializing is all
+
+RLHF_tuned_models/GODEL_LARGE_v0: That's a good thing to have. It's nice to have a group of people you can talk to. [Reward = 0.445]
+pretrained_models/GPT3: That can be tough. It can be hard to make friends when you don't know how to start a conversation or don't know what to talk about. Was there anything that you found helped you make friends? [Reward = 0.394]
+RLHF_tuned_models/BlenderBot_v2:  That's understandable, it can be hard to make new friends as an adult as well. [Reward = 0.213]
+pretrained_models/BlenderBot:  I know what you mean, it can be hard to make new friends as a kid. [Reward = 0.088]
+dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. I'm sure you'll find someone who can help you out. [Reward = 0.046]
+pretrained_models/GOLD: Well, I hope you got over that issue and ended up making lots of friends yourself. [Reward = -0.211]
+
+
+---- Sample ID 1251 -----
+
+Speaker: I always get sad thinking about my dad.
+Listener: Oh sorry, did he pass away?
+Speaker: Yeah.. he did. He had cancer.
+
+pretrained_models/GPT3: I'm sorry to hear that. It must be difficult for you to think about him. Is there anything I can do to help? [Reward = 0.588]
+RLHF_tuned_models/GODEL_LARGE_v0: That's awful, I'm sorry to hear that. It's hard to lose someone you love. [Reward = 0.305]
+pretrained_models/BlenderBot:  I'm so sorry to hear that. Cancer is a terrible disease. I hope he is in a better place now. [Reward = 0.263]
+RLHF_tuned_models/BlenderBot_v2:  I'm sorry to hear that. It's always hard to lose someone close to you.  [Reward = 0.256]
+pretrained_models/GOLD: Oh my god.. my hearty condolences. [Reward = -0.164]
+dialogue_models/GODEL_LARGE_v0: Oh no, I'm so sorry to hear that. [Reward = -0.244]
+
+
+---- Sample ID 5164 -----
+
+Speaker: 5
+Listener: What?
+Speaker: I recently got an A on my paper. I feel great.
+
+RLHF_tuned_models/BlenderBot_v2:  That's great! I'm happy for you. Are you going to celebrate with a nice dinner? [Reward = -0.103]
+RLHF_tuned_models/GODEL_LARGE_v0: That's great. I'm glad you're happy. [Reward = -0.140]
+pretrained_models/GPT3: That's fantastic! Congratulations on your hard work paying off! [Reward = -0.159]
+pretrained_models/BlenderBot:  Congratulations! That's a great accomplishment. What did you do to earn it? [Reward = -0.230]
+pretrained_models/GOLD: Congrats! I bet that feels great! [Reward = -0.274]
+dialogue_models/GODEL_LARGE_v0: That's great! What did you do? [Reward = -0.421]
+
+
+---- Sample ID 1074 -----
+
+Speaker: Hello the plants in my garden I water them, I move the earth, I try to keep them happy
+Listener: Gardening can be peaceful
+Speaker: Especially when you feel something special by nature
+
+RLHF_tuned_models/BlenderBot_v2:  That's a good way to look at it. Do you have a lot of plants in your garden? [Reward = 0.192]
+pretrained_models/GPT3: Yes, it can be very rewarding to watch your plants grow and thrive. What have you been able to grow in your garden? [Reward = 0.161]
+pretrained_models/GOLD: Nature is a wonderful thing [Reward = 0.111]
+pretrained_models/BlenderBot:  I agree, I love gardening. It's relaxing and it's very therapeutic. What kind of plants do you grow? [Reward = 0.082]
+RLHF_tuned_models/GODEL_LARGE_v0: That's a good thing [Reward = 0.073]
+dialogue_models/GODEL_LARGE_v0: I love nature [Reward = -0.175]
+
+
+---- Sample ID 5133 -----
+
+Speaker: I was at a meditation retreat last year for 10 days and I can say that I experienced a better feeling there than I could ever remembe
+
+RLHF_tuned_models/GODEL_LARGE_v0: That's a great feeling. Is it something you can do regularly? [Reward = 0.221]
+pretrained_models/GOLD: I've always liked the idea of meditation, but I feel like it'd be hard. My mind is always racing! [Reward = 0.167]
+RLHF_tuned_models/BlenderBot_v2:  That's good to hear. Meditation is a great way to clear your mind and relax. [Reward = 0.133]
+pretrained_models/BlenderBot:  That's awesome! I've never tried meditation, but I've heard it's really beneficial. [Reward = -0.017]
+dialogue_models/GODEL_LARGE_v0: That's great! I've been to a few meditation retreats and I've never felt so good. [Reward = -0.032]
+pretrained_models/GPT3: That sounds amazing! What was it like? [Reward = -0.150]
+
+
+---- Sample ID 954 -----
+
+Speaker: At the time I didn't think it was bad. But after she told me she didn't actually like it, that made me think differently
+
+RLHF_tuned_models/GODEL_LARGE_v0: That's a really bad thing to do. It's hard to be honest with someone. [Reward = 0.603]
+pretrained_models/GPT3: I'm sorry to hear that. It can be difficult to know how someone else will respond to something we do. How are you feeling now? [Reward = 0.478]
+dialogue_models/GODEL_LARGE_v0: That's a tough one. I'm sorry you had to go through that. [Reward = 0.371]
+pretrained_models/BlenderBot:  I'm sorry to hear that. Did you ever find out why she did not like it? [Reward = 0.154]
+RLHF_tuned_models/BlenderBot_v2:  I'm sorry to hear that. What did she say that made you think she wasn't going to like it? [Reward = 0.103]
+pretrained_models/GOLD: What didn't she like? [Reward = -0.115]
+
+
+---- Sample ID 3718 -----
+
+Speaker: Nothing in life is certain, the only control you have is to decide what to do with the time that has been given to you.
+Listener: I tend to believe that those who have Biblical faith do have a certainty, that God will bless them despite circumstances.
+Speaker: I have just bought a ticket to a britney spears live show in vegas.
+
+RLHF_tuned_models/GODEL_LARGE_v0: That's a great thing to do. I'm sure you'll have a great time. [Reward = 0.208]
+dialogue_models/GODEL_LARGE_v0: That sounds like a great time. I hope you enjoy it. [Reward = 0.069]
+pretrained_models/GPT3: That sounds like a lot of fun! Have you been to any of her concerts before? [Reward = 0.013]
+RLHF_tuned_models/BlenderBot_v2:  That sounds like a lot of fun. I've never been to Vegas, but I've always wanted to go. [Reward = -0.072]
+pretrained_models/BlenderBot:  That sounds like a lot of fun! I've never been to Vegas, but I've always wanted to go. [Reward = -0.093]
+pretrained_models/GOLD: Oh really, when are you going to go see her? [Reward = -0.251]
+
+
+---- Sample ID 1038 -----
+
+Speaker: We had to get out of the house because of Hurricane Matthew. It was a scary experience, but luckily we'd already packed what we needed into the car, so could just leave.
+
+RLHF_tuned_models/GODEL_LARGE_v0: That's a good thing. It's always a good idea to have a backup plan. [Reward = 0.050]
+pretrained_models/GPT3: That sounds really frightening. I'm glad you were able to get out of the house safely. Is there anything I can do to help you during this difficult time?  [Reward = 0.027]
+RLHF_tuned_models/BlenderBot_v2:  That must have been terrifying. I'm glad you were able to get away safely. [Reward = -0.263]
+pretrained_models/GOLD: I had Hurricane Matthew come through where I live too! NE FL, I know how you feel, only I couldn't get gas for my car because there was no gas anywhere! [Reward = -0.381]
+dialogue_models/GODEL_LARGE_v0: That's good. I hope you had a safe trip. [Reward = -0.410]
+pretrained_models/BlenderBot:  Oh no! I'm glad you made it out okay. Did you have to evacuate? [Reward = -0.431]
 

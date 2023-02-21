@@ -1,7 +1,6 @@
 # ------------------------- IMPORT MODULES ----------------------------------------
 
 # System Modules
-import os
 import json
 import string
 import numpy as np
@@ -58,6 +57,7 @@ class GODELTokenizer(HuggingFaceTokenizerBase):
         super().__init__(AutoTokenizer.from_pretrained(
             f"microsoft/GODEL-v1_1-{version}-seq2seq"
         ))
+        self.tokenizer.truncation_side = "left"
         self.default_instruction = "Given a dialog context, you need to response empathically."
         self.query_concept_net = query_concept_net
         if self.query_concept_net:
@@ -84,6 +84,17 @@ class GODELTokenizer(HuggingFaceTokenizerBase):
             dialogue = f' EOS '.join(text)
             token_ids = self.tokenizer(
                 f"Instruction: {instruction} {knowledge} [CONTEXT] {dialogue}")["input_ids"]
+            if len(token_ids) > self.tokenizer.model_max_length:
+                token_ids = self.tokenizer(
+                    f"Instruction: {instruction} [CONTEXT] ")["input_ids"]
+                length = len(token_ids)
+                token_ids.extend(
+                    self.tokenizer(
+                        dialogue,
+                        truncation=True,
+                        max_length=self.tokenizer.model_max_length - length
+                    )["input_ids"]
+                )
             if self.query_concept_net:
                 tokens = [token[1:] if token[0] == "▁" else token 
                           for token in self.tokenizer.convert_ids_to_tokens(token_ids)]
@@ -93,6 +104,7 @@ class GODELTokenizer(HuggingFaceTokenizerBase):
             token_ids = self.tokenizer(
                 f"{self.tokenizer.pad_token} {text}"
             )["input_ids"]
+            token_ids = token_ids[:self.tokenizer.model_max_length]
 
         return token_ids, external_knowledge
 

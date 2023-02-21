@@ -107,7 +107,7 @@ class DataModule(pl.LightningDataModule):
     def load_augmented_data(
         self, 
         fpath: str, 
-        erase_percentage: float = 0.333
+        erase_percentage: float = 0.35
     ) -> Optional[List[str]]:
         
         data = None

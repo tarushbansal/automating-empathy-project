@@ -70,16 +70,20 @@ class GODELTokenizer(HuggingFaceTokenizerBase):
     def encode_text(
         self,
         text: Union[str, List[str]],
-        instruction: Optional[str] = None
+        instruction: Optional[str] = None,
+        narrative: Optional[str] = None
     ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
 
         external_knowledge = None
         if type(text) == list:
             if instruction is None:
                 instruction = self.default_instruction
+            knowledge = ""
+            if narrative is not None:
+                knowledge = f"[KNOWLEDGE] {narrative}"
             dialogue = f' EOS '.join(text)
             token_ids = self.tokenizer(
-                f"Instruction: {instruction} [CONTEXT] {dialogue}")["input_ids"]
+                f"Instruction: {instruction} {knowledge} [CONTEXT] {dialogue}")["input_ids"]
             if self.query_concept_net:
                 tokens = [token[1:] if token[0] == "▁" else token 
                           for token in self.tokenizer.convert_ids_to_tokens(token_ids)]

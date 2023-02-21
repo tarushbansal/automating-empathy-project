@@ -28,7 +28,8 @@ class Dataset(data.Dataset):
         tokenizer: TokenizerBase,
         contexts: List[List[str]],
         targets: List[str],
-        instructions: Optional[str] = None,
+        instructions: Optional[List[str]] = None,
+        narratives: Optional[List[str]] = None,
         emotions: Optional[List[str]] = None
     ) -> None:
         
@@ -36,7 +37,10 @@ class Dataset(data.Dataset):
         self.contexts = contexts
         self.targets = targets
         self.instructions = instructions
+        self.narratives = narratives
         self.emotions = emotions
+
+        random.seed(42)
 
     def __len__(self) -> int:
         return len(self.contexts)
@@ -54,7 +58,8 @@ class Dataset(data.Dataset):
         # Tokenize dialogue context
         context, concept_net_data = self.tokenizer.encode_text(
             self.contexts[idx], 
-            None if self.instructions is None else self.instructions[idx]
+            None if self.instructions is None else self.instructions[idx],
+            None if self.narratives is None else self.narratives[idx]
         )
 
         # Tokenize response utterance
@@ -99,35 +104,50 @@ class DataModule(pl.LightningDataModule):
             data = json.load(f)
         return data
 
+    def load_augmented_data(
+        self, 
+        fpath: str, 
+        erase_percentage: float = 0.333
+    ) -> Optional[List[str]]:
+        
+        data = None
+        if os.path.isfile(fpath):
+            data = self.load_data(fpath)
+            for i in random.sample(
+                range(len(data)), 
+                k=int(erase_percentage*len(data))
+            ):
+                data[i] = None
+        return data
+
+
     def load_dataset(self, split: str):
         path_prefix = f"{self.dataset_dir}/{split}"
 
         contexts = self.load_data(f"{path_prefix}/contexts.json")
         targets = self.load_data(f"{path_prefix}/targets.json")
-            
-        instructions = None
-        if os.path.isfile(f"{path_prefix}/instructions.json"):
-            instructions = self.load_data(f"{path_prefix}/instructions.json")
         
-        emotions = None
-        emotions_fpath = f"{path_prefix}/emotions.json"
-        if os.path.isfile(emotions_fpath):
-            emotions = self.load_data(emotions_fpath)
+        random.seed(42)
+        # Load additional data if present
+        instructions = self.load_augmented_data(f"{path_prefix}/instructions.json")
+        narratives = self.load_augmented_data(f"{path_prefix}/narratives.json")
+        emotions = self.load_augmented_data(f"{path_prefix}/emotions.json")
         
-        if self.few_shot_training:
-            data = list(zip(contexts, targets, emotions, instructions))
-            random.seed(0)
-            if split == "train":
-                data = random.choices(data, k=80)
-            elif split == "val":
-                data = random.choices(data, k=20)
-            contexts, targets, emotions, instructions = zip(*data)
+        # TODO: Implement Few Shot training if required here !!!
+        # if self.few_shot_training:
+        #     data = list(zip(contexts, targets, emotions, instructions))
+        #     if split == "train":
+        #         data = random.choices(data, k=80)
+        #     elif split == "val":
+        #         data = random.choices(data, k=20)
+        #     contexts, targets, emotions, instructions = zip(*data)
 
         return Dataset(
             self.tokenizer,
             contexts,
             targets,
             instructions,
+            narratives,
             emotions
         )
 

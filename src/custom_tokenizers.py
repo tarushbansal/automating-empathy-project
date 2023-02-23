@@ -58,7 +58,6 @@ class GODELTokenizer(HuggingFaceTokenizerBase):
             f"microsoft/GODEL-v1_1-{version}-seq2seq"
         ))
         self.tokenizer.truncation_side = "left"
-        self.default_instruction = "Given a dialog context, you need to response empathically."
         self.query_concept_net = query_concept_net
         if self.query_concept_net:
             self.concept_net = QueryConceptNet(
@@ -71,28 +70,24 @@ class GODELTokenizer(HuggingFaceTokenizerBase):
         self,
         text: Union[str, List[str]],
         instruction: Optional[str] = None,
-        narrative: Optional[str] = None
+        knowledge: Optional[str] = None
     ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
 
         external_knowledge = None
         if type(text) == list:
-            if instruction is None:
-                instruction = self.default_instruction
-            knowledge = ""
-            if narrative is not None:
-                knowledge = f"[KNOWLEDGE] {narrative}"
+            instruction = f"Instruction: {instruction}" if instruction is not None else ""
+            knowledge = f"[KNOWLEDGE] {knowledge}" if knowledge is not None else ""
             dialogue = f' EOS '.join(text)
             token_ids = self.tokenizer(
-                f"Instruction: {instruction} {knowledge} [CONTEXT] {dialogue}")["input_ids"]
+                f"{instruction} {knowledge} [CONTEXT] {dialogue}".strip())["input_ids"]
             if len(token_ids) > self.tokenizer.model_max_length:
                 token_ids = self.tokenizer(
-                    f"Instruction: {instruction} [CONTEXT] ")["input_ids"]
-                length = len(token_ids)
+                    f"{instruction} [CONTEXT] ")["input_ids"]
                 token_ids.extend(
                     self.tokenizer(
                         dialogue,
                         truncation=True,
-                        max_length=self.tokenizer.model_max_length - length
+                        max_length=self.tokenizer.model_max_length - len(token_ids)
                     )["input_ids"]
                 )
             if self.query_concept_net:
@@ -102,8 +97,7 @@ class GODELTokenizer(HuggingFaceTokenizerBase):
 
         else:
             token_ids = self.tokenizer(
-                f"{self.tokenizer.pad_token} {text}"
-            )["input_ids"]
+                f"{self.tokenizer.pad_token} {text}")["input_ids"]
             token_ids = token_ids[:self.tokenizer.model_max_length]
 
         return token_ids, external_knowledge

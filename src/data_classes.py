@@ -40,13 +40,11 @@ class ModelRawData:
         context: List[int],
         target: List[int],
         raw_context: List[List[str]],
-        emotion: Optional[List[int]],
         concept_net_data: Optional[ConceptNetRawData]
     ):
         self.context = context
         self.target = target
         self.raw_context = raw_context
-        self.emotion = emotion
         self.concept_net_data = concept_net_data
 
 
@@ -71,7 +69,6 @@ class ModelBatch:
         targets: torch.LongTensor,
         target_mask: torch.BoolTensor,
         raw_contexts: List[List[str]],
-        emotions: Optional[torch.LongTensor],
         concept_net_data: Optional[ConceptNetBatchData]
     ) -> None:
 
@@ -80,7 +77,6 @@ class ModelBatch:
         self.targets = targets
         self.target_mask = target_mask
         self.raw_contexts = raw_contexts
-        self.emotions = emotions
         self.concept_net_data = concept_net_data
 
 

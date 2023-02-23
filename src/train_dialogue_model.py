@@ -2,16 +2,16 @@
 
 # System Modules
 import os
+import torch
 import argparse
 
-import torch
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
 
 # User-defined Modules
 from data_loader import DataModule
 from setup import get_model_supervisor_and_config
-from utils.train_utils import get_model_checkpoints, SaveConfigCallback
+from utils.train_utils import get_model_checkpoints
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -49,10 +49,12 @@ def main():
     )
 
     # Set up dialogue model and configuration
-    model_supervisor, config = get_model_supervisor_and_config(
-        cli_args.model,
-        cli_args.pretrained_model_dir,
-        cli_args.initial_lr
+    num_devices = cli_args.num_nodes * torch.cuda.device_count() if torch.cuda.is_available() else 1
+    model_supervisor = get_model_supervisor_and_config(
+        model=cli_args.model,
+        pretrained_model_dir=cli_args.pretrained_model_dir,
+        batch_size=cli_args.batch_size * num_devices,
+        initial_lr=cli_args.initial_lr
     )
 
     # Set up data module
@@ -69,12 +71,11 @@ def main():
     callbacks = []
     if checkpoint_callback is not None:
         callbacks.extend(checkpoint_callback)
-    callbacks.append(SaveConfigCallback(config=config))
 
     # Set up trainer
     trainer = pl.Trainer(
         accelerator="auto",
-        devices=-1 if torch.cuda.is_available() else 1,
+        devices="auto",
         num_nodes=cli_args.num_nodes,
         strategy="ddp_find_unused_parameters_false",
         max_epochs=cli_args.max_epochs,

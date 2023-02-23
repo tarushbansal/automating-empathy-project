@@ -1,50 +1,116 @@
 {
+    "BlenderBot": {
+        "model": {
+            "cls": "BlenderBot",
+            "kwargs": {}
+        },
+        "tokenizer": {
+            "cls": "BlenderBotTokenizer",
+            "kwargs": {}
+        }
+    },
     "DialoGPT_SMALL": {
-        "version": "small",
-        "tokenizer_kwargs": {
-            "version": "small"
+        "model": {
+            "cls": "DialoGPT",
+            "kwargs": {
+                "version": "small"
+            }
+        },
+        "tokenizer": {
+            "cls": "DialoGPTTokenizer",
+            "kwargs": {
+                "version": "small"
+            }
         }
     },
     "DialoGPT_MEDIUM": {
-        "version": "medium",
-        "tokenizer_kwargs": {
-            "version": "medium"
+        "model": {
+            "cls": "DialoGPT",
+            "kwargs": {
+                "version": "medium"
+            }
+        },
+        "tokenizer": {
+            "cls": "DialoGPTTokenizer",
+            "kwargs": {
+                "version": "medium"
+            }
         }
     },
     "DialoGPT_LARGE": {
-        "version": "large",
-        "tokenizer_kwargs": {
-            "version": "large"
+        "model": {
+            "cls": "DialoGPT",
+            "kwargs": {
+                "version": "large"
+            }
+        },
+        "tokenizer": {
+            "cls": "DialoGPTTokenizer",
+            "kwargs": {
+                "version": "large"
+            }
         }
     },
     "GODEL_SMALL": {
-        "version": "base",
-        "tokenizer_kwargs": {
-            "version": "base"
+        "model": {
+            "cls": "GODEL",
+            "kwargs": {
+                "version": "base"
+            }
+        },
+        "tokenizer": {
+            "cls": "GODELTokenizer",
+            "kwargs": {
+                "version": "base"
+            }
         }
     },
     "GODEL_LARGE": {
-        "version": "large",
-        "tokenizer_kwargs": {
-            "version": "large"
+        "model": {
+            "cls": "GODEL",
+            "kwargs": {
+                "version": "large"
+            }
+        },
+        "tokenizer": {
+            "cls": "GODELTokenizer",
+            "kwargs": {
+                "version": "large"
+            }
         }
     },
     "KnowledgeBridgedGODEL_SMALL": {
-        "version": "base",
-        "tokenizer_kwargs": {
-            "version": "base",
-            "query_concept_net": true,
-            "num_top_concepts": 5,
-            "max_num_concepts": 10
+        "model": {
+            "cls": "KnowledgeBridgedGODEL",
+            "kwargs": {
+                "version": "base"
+            }
+        },
+        "tokenizer": {
+            "cls": "GODELTokenizer",
+            "kwargs": {
+                "version": "base",
+                "query_concept_net": true,
+                "num_top_concepts": 5,
+                "max_num_concepts": 10
+            }
         }
     },
     "KnowledgeBridgedGODEL_LARGE": {
-        "version": "large",
-        "tokenizer_kwargs": {
-            "version": "large",
-            "query_concept_net": true,
-            "num_top_concepts": 5,
-            "max_num_concepts": 10
+        "model": {
+            "cls": "KnowledgeBridgedGODEL",
+            "kwargs": {
+                "version": "large"
+            }
+        },
+        "tokenizer": {
+            "cls": "GODELTokenizer",
+            "kwargs": {
+                "version": "large",
+                "query_concept_net": true,
+                "num_top_concepts": 5,
+                "max_num_concepts": 10
+            }
         }
     }
 }

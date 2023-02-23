@@ -4,7 +4,6 @@
 import os
 import argparse
 
-import torch
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import TensorBoardLogger
 
@@ -72,7 +71,7 @@ def main():
     # Set up trainer
     trainer = pl.Trainer(
         accelerator="auto",
-        devices=-1 if torch.cuda.is_available() else 1,
+        devices="auto",
         num_nodes=cli_args.num_nodes,
         strategy="ddp_find_unused_parameters_false",
         max_epochs=cli_args.max_epochs,

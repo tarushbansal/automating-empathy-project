@@ -6,7 +6,6 @@ import os
 from typing import Optional, Tuple, Union, Dict
 
 # User-defined Modules
-from base_classes import DialogueModelBase, TokenizerBase
 from reward_model_supervisor import RewardModelSupervisor
 from dialogue_model_supervisor import DialogueModelSupervisor
 from utils.train_utils import load_ckpt_path, load_config
@@ -17,6 +16,7 @@ from utils.train_utils import load_ckpt_path, load_config
 def get_model_supervisor_and_config(
         model: Optional[str] = None,
         pretrained_model_dir: Optional[str] = None,
+        batch_size: Optional[int] = None,
         initial_lr: Optional[float] = None,
         reward_model: bool = False
 ) -> Tuple[Union[DialogueModelSupervisor, RewardModelSupervisor, Dict]]:
@@ -32,65 +32,20 @@ def get_model_supervisor_and_config(
         # Instantiate new model from config.json file
         dirname = os.path.dirname(os.path.abspath(__file__))
         with open(f"{dirname}/configs.json") as f:
-            model_config = json.load(f).get(model, {})
+            config = json.load(f).get(model)
 
-        size_suffixes = ["_SMALL", "_MEDIUM", "_LARGE"]
-        for suffix in size_suffixes:
-            if model.endswith(suffix):
-                model = model.replace(suffix, "")
-                break
-
-        model_cls = getattr(__import__("dialogue_models"), model)
-
-        if not issubclass(model_cls, DialogueModelBase):
-            raise ValueError("Model must be derived from base class 'DialogueModelBase'!")
-        
-        tokenizer_name = model_cls.tokenizer_cls()
-        if tokenizer_name is None:
-            raise ValueError(
-                "Must specify the tokenizer associated with the model as a static method!")
-
-        tokenizer_cls = getattr(__import__("custom_tokenizers"), tokenizer_name)
-        if not issubclass(tokenizer_cls, TokenizerBase):
-            raise ValueError(
-                "Tokenizer must be derived from base class 'TokenizerBase'!")
-        tokenizer_kwargs = model_config.pop("tokenizer_kwargs", {})
-        tokenizer = tokenizer_cls(**tokenizer_kwargs)
-
-        model_kwargs = model_config
-        model = model_cls(tokenizer=tokenizer, **model_kwargs)
         model_supervisor = supervisor_cls(
-            tokenizer=tokenizer,
-            model=model,
+            config=config,
+            batch_size=batch_size,
             initial_lr=initial_lr
         )
     else:
-        # Load pretrained model from known configuration
-        config = load_config(pretrained_model_dir)
-        tokenizer_cls = getattr(__import__("custom_tokenizers"), config["tokenizer"]["cls"])
-        tokenizer_kwargs = config["tokenizer"]["kwargs"]
-        tokenizer = tokenizer_cls(**tokenizer_kwargs)
-
-        model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
-        model_kwargs = config["model"]["kwargs"]
-        model = model_cls(tokenizer=tokenizer, **model_kwargs)
+        # Load pretrained model
         model_supervisor = supervisor_cls.load_from_checkpoint(
             load_ckpt_path(pretrained_model_dir),
-            strict=False,
-            tokenizer=tokenizer,
-            model=model,
-            initial_lr=initial_lr
+            strict=False
         )
-    config = {
-        "model": {
-            "cls": model_cls.__name__,
-            "kwargs": model_kwargs
-        },
-        "tokenizer": {
-            "cls": tokenizer_cls.__name__,
-            "kwargs": tokenizer_kwargs,
-        }
-    }
-    return model_supervisor, config
+
+    return model_supervisor
 
 # -----------------------------------------------------------------------------

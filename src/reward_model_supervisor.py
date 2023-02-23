@@ -2,7 +2,7 @@
 
 # System Modules
 from collections import OrderedDict
-from typing import Optional, List, Tuple
+from typing import Optional, List, Tuple, Dict
 
 import torch
 import torch.nn as nn
@@ -18,18 +18,35 @@ from base_classes import DialogueModelBase, TokenizerBase
 class RewardModelSupervisor(pl.LightningModule):
     def __init__(
         self,
-        model: DialogueModelBase,
-        tokenizer: TokenizerBase,
+        config: Dict, # Must be in specificied format (See 'configs.json')
+        batch_size:  Optional[int] = None,
         initial_lr: Optional[float] = None,
         dropout_prob: Optional[float] = 0.6,
     ) -> None:
         super().__init__()
-        self.model = model
-        self.tokenizer = tokenizer
+        model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
+        tokenizer_cls = getattr(__import__("custom_tokenizers"), config["tokenizer"]["cls"])
+        self.tokenizer: TokenizerBase = tokenizer_cls(**config["tokenizer"]["kwargs"])
+        self.model: DialogueModelBase = model_cls(
+            vocab_size=self.tokenizer.vocab_size,
+            **config["model"]["kwargs"]
+        )
+
+        # Sanity checks
+        if not issubclass(model_cls, DialogueModelBase):
+            raise ValueError("Model must be derived from base class 'DialogueModelBase'!")
+        
+        if not issubclass(tokenizer_cls, TokenizerBase):
+            raise ValueError(
+                "Tokenizer must be derived from base class 'TokenizerBase'!")
+
+        self.batch_size = batch_size
         self.initial_lr = initial_lr
-        self.linear = nn.Linear(model.hidden_size, 1)
+        self.linear = nn.Linear(self.model.hidden_size, 1)
         self.dropout = nn.Dropout(dropout_prob)
         self.mean_offset = 0
+
+        self.save_hyperparameters("config", "batch_size", "initial_lr")
 
     def forward(self, batch: RewardModelBatch) -> torch.FloatTensor:
         if self.model.has_encoder:

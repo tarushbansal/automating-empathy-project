@@ -89,7 +89,8 @@ class TokenizerBase(ABC):
     def encode_text(
         self,
         text: Union[str, List[str]],
-        instruction: Optional[str] = None
+        instruction: Optional[str] = None,
+        knowledge: Optional[str] = None
     ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
         raise NotImplementedError
 
@@ -120,18 +121,13 @@ class HuggingFaceTokenizerBase(TokenizerBase):
 
 
 class DialogueModelBase(ABC, nn.Module):
-    def __init__(self, tokenizer: TokenizerBase) -> None:
+    def __init__(self, vocab_size: int) -> None:
         super().__init__()
-        self.tokenizer = tokenizer
+        self.vocab_size = vocab_size
         self._has_encoder = None
         self._hidden_size = None
         self._requires_emotion_label = False
         self._requires_concept_net_data = False
-    
-    @staticmethod
-    @abstractmethod
-    def tokenizer_cls():
-        raise NotImplementedError
 
     @property
     def has_encoder(self) -> bool:
@@ -160,16 +156,6 @@ class DialogueModelBase(ABC, nn.Module):
     @abstractmethod
     def word_embeddings(self) -> nn.Embedding:
         raise NotImplementedError
-        
-    @property
-    def requires_emotion_label(self) -> bool:
-        return self._requires_emotion_label
-    
-    @requires_emotion_label.setter
-    def requires_emotion_label(self, value: bool) -> None:
-        if type(value) != bool:
-            raise TypeError("Property must be of type 'bool'!")
-        self._requires_emotion_label = bool
     
     @property
     def requires_concept_net_data(self) -> bool:
@@ -192,8 +178,8 @@ class DialogueModelBase(ABC, nn.Module):
 
 
 class EncoderDecoderModel(DialogueModelBase):
-    def __init__(self, tokenizer: TokenizerBase) -> None:
-        super().__init__(tokenizer)
+    def __init__(self, vocab_size: int) -> None:
+        super().__init__(vocab_size)
     
     @property
     def has_encoder(self) -> bool:
@@ -212,8 +198,8 @@ class EncoderDecoderModel(DialogueModelBase):
 
 
 class DecoderModel(DialogueModelBase):
-    def __init__(self, tokenizer: TokenizerBase) -> None:
-        super().__init__(tokenizer)
+    def __init__(self, vocab_size: int) -> None:
+        super().__init__(vocab_size)
     
     @property
     def has_encoder(self) -> bool:

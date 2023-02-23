@@ -29,18 +29,14 @@ class Dataset(data.Dataset):
         contexts: List[List[str]],
         targets: List[str],
         instructions: Optional[List[str]] = None,
-        narratives: Optional[List[str]] = None,
-        emotions: Optional[List[str]] = None
+        knowledge: Optional[List[str]] = None
     ) -> None:
         
         self.tokenizer = tokenizer
         self.contexts = contexts
         self.targets = targets
         self.instructions = instructions
-        self.narratives = narratives
-        self.emotions = emotions
-
-        random.seed(42)
+        self.knowledge = knowledge
 
     def __len__(self) -> int:
         return len(self.contexts)
@@ -50,16 +46,11 @@ class Dataset(data.Dataset):
         idx: int
     ) -> ModelRawData:
 
-        # Map emotion label to token
-        emotion = None
-        if self.emotions is not None:
-            emotion = self.tokenizer.emo_map[self.emotions[idx]]
-
         # Tokenize dialogue context
         context, concept_net_data = self.tokenizer.encode_text(
             self.contexts[idx], 
             None if self.instructions is None else self.instructions[idx],
-            None if self.narratives is None else self.narratives[idx]
+            None if self.knowledge is None else self.knowledge[idx]
         )
 
         # Tokenize response utterance
@@ -69,7 +60,6 @@ class Dataset(data.Dataset):
             context=context,
             target=target,
             raw_context=self.contexts[idx],
-            emotion=emotion,
             concept_net_data=concept_net_data
         )
 
@@ -106,18 +96,20 @@ class DataModule(pl.LightningDataModule):
 
     def load_augmented_data(
         self, 
-        fpath: str, 
-        erase_percentage: float = 0.35
+        fpath: str,
+        erase: bool = True, 
+        erase_percentage: float = 0.3
     ) -> Optional[List[str]]:
         
         data = None
         if os.path.isfile(fpath):
             data = self.load_data(fpath)
-            for i in random.sample(
-                range(len(data)), 
-                k=int(erase_percentage*len(data))
-            ):
-                data[i] = None
+            if erase:
+                for i in random.sample(
+                    range(len(data)), 
+                    k=int(erase_percentage*len(data))
+                ):
+                    data[i] = None
         return data
 
 
@@ -128,27 +120,19 @@ class DataModule(pl.LightningDataModule):
         targets = self.load_data(f"{path_prefix}/targets.json")
         
         random.seed(42)
+        
         # Load additional data if present
         instructions = self.load_augmented_data(f"{path_prefix}/instructions.json")
-        narratives = self.load_augmented_data(f"{path_prefix}/narratives.json")
-        emotions = self.load_augmented_data(f"{path_prefix}/emotions.json")
+        knowledge = self.load_augmented_data(f"{path_prefix}/knowledge.json")
         
         # TODO: Implement Few Shot training if required here !!!
-        # if self.few_shot_training:
-        #     data = list(zip(contexts, targets, emotions, instructions))
-        #     if split == "train":
-        #         data = random.choices(data, k=80)
-        #     elif split == "val":
-        #         data = random.choices(data, k=20)
-        #     contexts, targets, emotions, instructions = zip(*data)
 
         return Dataset(
             self.tokenizer,
             contexts,
             targets,
             instructions,
-            narratives,
-            emotions
+            knowledge
         )
 
     def setup(self, stage: str) -> None:
@@ -164,8 +148,6 @@ class DataModule(pl.LightningDataModule):
             batch.context_mask = batch.context_mask.to(device)
             batch.targets = batch.targets.to(device)
             batch.target_mask = batch.target_mask.to(device)
-            if batch.emotions is not None:
-                batch.emotions = batch.emotions.to(device)
             data = batch.concept_net_data
             if data is not None:
                 data.concepts = data.concepts.to(device)
@@ -229,10 +211,6 @@ def collate_batch(
     )
     target_mask = (targets != tokenizer.PAD_IDX)
 
-    emotions =  None 
-    if batch[0].emotion is not None:
-        emotions = torch.LongTensor([item.emotion for item in batch])
-
     concept_net_data = None
     # if batch[0].concept_net_data is not None:
     #     concept_net_data = process_concept_net_data(
@@ -248,7 +226,6 @@ def collate_batch(
         targets=targets,
         target_mask=target_mask,
         raw_contexts=raw_contexts,
-        emotions=emotions,
         concept_net_data=concept_net_data
     )
 

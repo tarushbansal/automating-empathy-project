@@ -5,32 +5,9 @@ import os
 import json
 from typing import Optional, List
 
-import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint
-from pytorch_lightning.utilities import rank_zero_only
 
 # ------------------------- IMPLEMENTATION -----------------------------------
-
-class SaveConfigCallback(pl.Callback):
-    """Saves a config file to the log_dir when training starts."""
-    def __init__(self, config: dict,) -> None:
-        self.config = config
-
-    @rank_zero_only
-    def on_train_start(
-        self, 
-        trainer: pl.Trainer, 
-        *_
-    ) -> None:
-
-        if trainer.log_dir is None:
-            raise ValueError("No log directory specified to save config file!")
-        
-        os.makedirs(trainer.log_dir, exist_ok=True)
-        
-        output_fpath = f"{trainer.log_dir}/config.json"
-        with open(output_fpath, "w") as f:
-            json.dump(self.config, f)
 
 
 def load_config(trained_model_dir: str) -> dict:

@@ -1,0 +1,11 @@
+batch_size: 32
+config:
+  model:
+    cls: GODEL
+    kwargs:
+      version: large
+  tokenizer:
+    cls: GODELTokenizer
+    kwargs:
+      version: large
+initial_lr: 5.0e-06

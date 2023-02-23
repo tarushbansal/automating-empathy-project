@@ -20,14 +20,11 @@ from data_classes import ConceptNetBatchData
 
 
 class BlenderBot(EncoderDecoderModel):
-    def __init__(self, tokenizer: TokenizerBase) -> None:
-        super().__init__(tokenizer)
+    def __init__(self, vocab_size: int) -> None:
+        super().__init__(vocab_size)
         self.model = AutoModelForSeq2SeqLM.from_pretrained("facebook/blenderbot-400M-distill")
-        self.model.resize_token_embeddings(tokenizer.vocab_size)
+        self.model.resize_token_embeddings(vocab_size)
         self.hidden_size = self.model.config.hidden_size
-
-    def tokenizer_cls():
-        return "BlenderBotTokenizer"
 
     def word_embeddings(self) -> nn.Embedding:
         return self.model.get_input_embeddings()
@@ -63,17 +60,14 @@ class BlenderBot(EncoderDecoderModel):
 
 
 class GODEL(EncoderDecoderModel):
-    def __init__(self, tokenizer: TokenizerBase, version: str) -> None:
-        super().__init__(tokenizer)
+    def __init__(self, vocab_size: int, version: str) -> None:
+        super().__init__(vocab_size)
         if version not in ["base", "large"]:
             raise ValueError("Model version must be either 'base' or 'large'!")
         self.model = AutoModelForSeq2SeqLM.from_pretrained(f"microsoft/GODEL-v1_1-{version}-seq2seq")
-        self.model.resize_token_embeddings(tokenizer.vocab_size)
+        self.model.resize_token_embeddings(vocab_size)
         self.model.config.dropout_rate = 0.6
         self.hidden_size = self.model.config.hidden_size
-
-    def tokenizer_cls():
-        return "GODELTokenizer"
 
     def word_embeddings(self) -> nn.Embedding:
         return self.model.get_input_embeddings()
@@ -112,21 +106,17 @@ class GODEL(EncoderDecoderModel):
 
 
 class KnowledgeBridgedGODEL(EncoderDecoderModel):
-    def __init__(self, tokenizer: TokenizerBase, version: str) -> None:
-        super().__init__(tokenizer)
+    def __init__(self, vocab_size: int, version: str) -> None:
+        super().__init__(vocab_size)
         if version not in ["base", "large"]:
             raise ValueError("Model version must be either 'base' or 'large'!")
         self.model = AutoModelForSeq2SeqLM.from_pretrained(f"microsoft/GODEL-v1_1-{version}-seq2seq")
-        self.model.resize_token_embeddings(tokenizer.vocab_size)
+        self.model.resize_token_embeddings(vocab_size)
         self.model.config.dropout_rate = 0.8
         self.graph_embeddings = nn.Embedding(2, self.hidden_size)
-        self.emo_linear = nn.Linear(self.model.config.hidden_size, self.tokenizer.num_emo_labels)
         self.attn_loss = nn.MSELoss()
         self.hidden_size = self.model.config.hidden_size
         self.requires_concept_net_data = True
-
-    def tokenizer_cls():
-        return "GODELTokenizer"
 
     def word_embeddings(self) -> nn.Embedding:
         return self.model.get_input_embeddings()
@@ -173,16 +163,6 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
             output_hidden_states=True
         )
 
-        emo_intensities = torch.cat(
-            (concept_net_data.context_emo_intensity,
-             concept_net_data.concept_emo_intensity), dim=1)
-        sum_weights = torch.softmax(emo_intensities, dim=1).unsqueeze(2)
-        c = torch.sum(sum_weights * out.encoder_last_hidden_state, dim=1)
-        self.emo_logits = self.emo_linear(c)
-
-        average_attn_weights = torch.stack(out.cross_attentions).mean((0, 2, 3))
-        self.emo_attn_loss = self.attn_loss(emo_intensities, average_attn_weights)
-
         return out
 
     def generate(
@@ -199,17 +179,14 @@ class KnowledgeBridgedGODEL(EncoderDecoderModel):
 
 
 class DialoGPT(DecoderModel):
-    def __init__(self, tokenizer: TokenizerBase, version: str) -> None:
-        super().__init__(tokenizer)
+    def __init__(self, vocab_size: int, version: str) -> None:
+        super().__init__(vocab_size)
         if version not in ["small", "medium", "large"]:
             raise ValueError("Model version must be 'small', 'medium' or 'large'!")
         self.model = AutoModelForCausalLM.from_pretrained(f"microsoft/DialoGPT-{version}")
-        self.model.resize_token_embeddings(tokenizer.vocab_size)
+        self.model.resize_token_embeddings(vocab_size)
         self.model.config.resid_pdrop = self.model.config.attn_pdrop = self.model.config.embd_pdrop = 0.6
         self.hidden_size = self.model.config.hidden_size
-
-    def tokenizer_cls():
-        return "DialoGPTTokenizer"
 
     def word_embeddings(self) -> nn.Embedding:
         return self.model.get_input_embeddings()

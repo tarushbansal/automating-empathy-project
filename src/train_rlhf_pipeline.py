@@ -14,7 +14,7 @@ from data_loader import DataModule
 from rlhf_supervisor import RLHFSupervisor
 from data_classes import GenerationConfig, PPOConfig
 from setup import get_model_supervisor_and_config
-from utils.train_utils import get_model_checkpoints, SaveConfigCallback
+from utils.train_utils import get_model_checkpoints
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -78,13 +78,15 @@ def main():
     )
 
     # Set up dialogue and reward model as well as RLHF pipeline
-    dialogue_model, config = get_model_supervisor_and_config(
-        cli_args.dialogue_model,
-        cli_args.pretrained_dialogue_model_dir,
-        cli_args.initial_lr
+    num_devices = cli_args.num_nodes * torch.cuda.device_count() if torch.cuda.is_available() else 1
+    dialogue_model = get_model_supervisor_and_config(
+        model=cli_args.dialogue_model,
+        pretrained_model_dir=cli_args.pretrained_dialogue_model_dir,
+        batch_size=cli_args.batch_size * num_devices,
+        initial_lr=cli_args.initial_lr
     )
     dialogue_model.generation_config = generation_config
-    reward_model, _ = get_model_supervisor_and_config(
+    reward_model = get_model_supervisor_and_config(
         pretrained_model_dir=cli_args.pretrained_reward_model_dir,
         reward_model=True
     )
@@ -125,12 +127,11 @@ def main():
     callbacks = []
     if checkpoint_callback is not None:
         callbacks.extend(checkpoint_callback)
-    callbacks.append(SaveConfigCallback(config=config))
 
     # Set up trainer
     trainer = pl.Trainer(
         accelerator="auto",
-        devices=-1 if torch.cuda.is_available() else 1,
+        devices="auto",
         num_nodes=cli_args.num_nodes,
         strategy="ddp_find_unused_parameters_false",
         max_epochs=cli_args.max_epochs,

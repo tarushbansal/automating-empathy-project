@@ -1,0 +1,9 @@
+batch_size: 32
+config:
+  model:
+    cls: BlenderBot
+    kwargs: {}
+  tokenizer:
+    cls: BlenderBotTokenizer
+    kwargs: {}
+initial_lr: 5.0e-06

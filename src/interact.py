@@ -67,9 +67,9 @@ def main():
     )
 
     # Set up dialogue model and configuration
-    model_supervisor, _ = get_model_supervisor_and_config(
-        cli_args.model,
-        cli_args.pretrained_model_dir
+    model_supervisor = get_model_supervisor_and_config(
+        model=cli_args.model,
+        pretrained_model_dir=cli_args.pretrained_model_dir
     )
     model_supervisor.generation_config = generation_config
     tokenizer = model_supervisor.tokenizer
@@ -99,7 +99,6 @@ def main():
                 context=enc_context,
                 raw_context=context,
                 target=[],
-                emotion=None,
                 concept_net_data=concept_net_data
             )], 
             tokenizer, 

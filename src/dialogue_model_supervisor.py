@@ -3,7 +3,7 @@
 # System Modules
 import json
 import math
-from typing import Optional, Union, Tuple
+from typing import Optional, Union, Tuple, Dict
 
 import torch
 import torch.nn.functional as F
@@ -23,16 +23,32 @@ from data_classes import ModelBatch, GenerationConfig
 class DialogueModelSupervisor(pl.LightningModule):
     def __init__(
         self,
-        model: DialogueModelBase,
-        tokenizer: TokenizerBase,
+        config: Dict, # Must be in specificied format (See 'configs.json')
+        batch_size:  Optional[int] = None,
         initial_lr: Optional[float] = None,
         metric_n_grams: Optional[int] = None,
         test_output_dir: Optional[str] = None,
         generation_config: Optional[GenerationConfig] = None,
     ) -> None:
+        
         super().__init__()
-        self.model = model
-        self.tokenizer = tokenizer
+        model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
+        tokenizer_cls = getattr(__import__("custom_tokenizers"), config["tokenizer"]["cls"])
+        self.tokenizer: TokenizerBase = tokenizer_cls(**config["tokenizer"]["kwargs"])
+        self.model: DialogueModelBase = model_cls(
+            vocab_size=self.tokenizer.vocab_size,
+            **config["model"]["kwargs"]
+        )
+
+        # Sanity checks
+        if not issubclass(model_cls, DialogueModelBase):
+            raise ValueError("Model must be derived from base class 'DialogueModelBase'!")
+        
+        if not issubclass(tokenizer_cls, TokenizerBase):
+            raise ValueError(
+                "Tokenizer must be derived from base class 'TokenizerBase'!")
+
+        self.batch_size = batch_size
         self.initial_lr = initial_lr
         self.test_output_dir = test_output_dir
         self.generation_config = generation_config
@@ -42,14 +58,14 @@ class DialogueModelSupervisor(pl.LightningModule):
             "on_epoch": True,
             "sync_dist": True
         }
+        
+        self.save_hyperparameters("config", "batch_size", "initial_lr")
 
     def forward(
         self, 
         batch: ModelBatch,
     ) -> Tuple[Union[Seq2SeqLMOutput, CausalLMOutput, torch.Tensor]]:
         input_kwargs = {}
-        if self.model.requires_emotion_label:
-            input_kwargs["emotion_label"] = batch.emotions
         if self.model.requires_concept_net_data:
             input_kwargs["concept_net_data"] = batch.concept_net_data
         if self.model.has_encoder:
@@ -83,29 +99,7 @@ class DialogueModelSupervisor(pl.LightningModule):
         stage: str
     ) -> float:
         N = batch.contexts.size(dim=0)
-        _, lm_loss = self.forward(batch)
-        emo_loss, emo_attn_loss = 0, 0
-        if hasattr(self.model, "emo_logits"):
-            emo_loss = F.cross_entropy(
-                self.model.emo_logits,
-                batch.emotions
-            )
-            self.log(
-                f"{stage}_emo_loss", 
-                emo_loss,
-                batch_size=N, 
-                **self.default_log_config
-            )
-        if hasattr(self.model, "emo_attn_loss"):
-            emo_attn_loss = self.model.emo_attn_loss
-            self.log(
-                f"{stage}_emo_attn_loss", 
-                emo_attn_loss,
-                batch_size=N, 
-                **self.default_log_config
-            )
-        
-        loss = lm_loss + 1 * emo_loss + 0.1 * emo_attn_loss
+        _, loss = self.forward(batch)        
 
         self.log(
             f"{stage}_loss", 
@@ -114,14 +108,6 @@ class DialogueModelSupervisor(pl.LightningModule):
             batch_size=N, 
             **self.default_log_config
         )
-
-        if loss != lm_loss:
-            self.log(
-                f"{stage}_lm_loss", 
-                loss,
-                batch_size=N, 
-                **self.default_log_config
-            )
 
         return loss
 
@@ -142,16 +128,16 @@ class DialogueModelSupervisor(pl.LightningModule):
         return val_loss
 
     def on_test_start(self) -> None:
-        (self.contexts, self.targets, self.emotions,
-         self.predictions, self.enc_targets, self.enc_predictions,
-         self.emo_predictions, self.concepts, self.lm_loss) = ([] for _ in range(9))
+        (self.contexts, self.targets, self.predictions, 
+         self.enc_targets, self.enc_predictions, 
+         self.concepts, self.lm_loss) = ([] for _ in range(7))
 
     def test_step(
         self, 
         batch: ModelBatch,
         _
     ) -> None:
-        self.contexts.extend(batch.raw_contexts)
+        self.contexts.extend(self.tokenizer.decode(batch.contexts))
         self.enc_targets.extend([[token for token in target 
                                   if token != self.tokenizer.PAD_IDX] 
                                   for target in batch.targets.tolist()])
@@ -163,14 +149,6 @@ class DialogueModelSupervisor(pl.LightningModule):
                                       for prediction in enc_predictions.tolist()])
         self.predictions.extend(self.tokenizer.decode(enc_predictions))
     
-        if hasattr(self.model, "emo_logits"):
-            self.emo_predictions.extend(
-                [self.tokenizer.rev_emo_map[emo_idx]
-                    for emo_idx in torch.max(
-                    torch.softmax(self.model.emo_logits, dim=-1), dim=-1)[1].tolist()])
-        if batch.emotions is not None:
-            self.emotions.extend([self.tokenizer.rev_emo_map[emo_idx]
-                                  for emo_idx in batch.emotions.tolist()])
         if batch.concept_net_data is not None:
             self.concepts.extend([self.tokenizer.decode(concepts)
                                   for concepts in batch.concept_net_data.tolist()])
@@ -181,8 +159,6 @@ class DialogueModelSupervisor(pl.LightningModule):
     def test_epoch_end(self, _) -> None:
         N = len(self.contexts)
         test_data = []
-        accurate_emo_labels = 0
-        log_emo_accuracy = len(self.emotions) != 0 and len(self.emo_predictions) != 0
         for i in range(N):
             entry = {
                 "id": i,
@@ -190,15 +166,9 @@ class DialogueModelSupervisor(pl.LightningModule):
                 "target": self.targets[i],
                 "prediction": self.predictions[i]
             }
-            if len(self.emotions) != 0:
-                entry["emotion"] = self.emotions[i]
-            if len(self.emo_predictions) != 0:
-                entry["pred_emotion"] = self.emo_predictions[i]
             if len(self.concepts) != 0:
                 entry["concepts"] = self.concepts[i]
             test_data.append(entry)
-            if log_emo_accuracy and entry["emotion"] == entry["pred_emotion"]:
-                accurate_emo_labels += 1
 
         with open(f"{self.test_output_dir}/test_data.json", "w") as f:
             json.dump(test_data, f)
@@ -213,9 +183,6 @@ class DialogueModelSupervisor(pl.LightningModule):
         )
 
         test_metrics["ppl"] = math.exp(sum(self.lm_loss) / len(self.lm_loss))
-
-        if log_emo_accuracy:
-            test_metrics["emo_accuracy"] = accurate_emo_labels / N
 
         self.log_dict(test_metrics)
 
@@ -241,6 +208,7 @@ class DialogueModelSupervisor(pl.LightningModule):
                 "top_k":self.generation_config.top_k,
                 "length_penalty":self.generation_config.length_alpha
             }
+            config = {k:v for k,v in config.items() if v is not None}
         return self.model.generate(
             contexts=contexts,
             context_mask=context_mask,

@@ -57,9 +57,9 @@ def main():
     )
 
     # Set up dialogue model and configuration
-    model_supervisor, _ = get_model_supervisor_and_config(
-        cli_args.model,
-        cli_args.pretrained_model_dir
+    model_supervisor = get_model_supervisor_and_config(
+        model=cli_args.model,
+        pretrained_model_dir=cli_args.pretrained_model_dir
     )
     model_supervisor.metric_n_grams = cli_args.metric_n_grams
     if cli_args.pretrained_model_dir is None:

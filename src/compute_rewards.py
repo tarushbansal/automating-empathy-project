@@ -41,7 +41,7 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     # Initialise model and tokenizer
-    reward_model, _ = get_model_supervisor_and_config(
+    reward_model = get_model_supervisor_and_config(
         pretrained_model_dir=cli_args.pretrained_reward_model_dir,
         reward_model=True
     )
@@ -64,7 +64,7 @@ def main():
                 pad_token=reward_model.tokenizer.PAD_IDX
             )
             contexts = contexts.to(device)
-            targets = [reward_model.tokenizer.encode_text(item["prediction"])[0]
+            targets = [reward_model.tokenizer.encode_text(item["output"])[0]
                        for item in test_data[i:i+cli_args.batch_size]]
             max_len_target_seq = max([len(seq) for seq in targets])
             targets = pad_seq_and_convert_to_tensor(
@@ -88,7 +88,7 @@ def main():
     print(f"Variance in reward for dialogue model: {var_reward}")
     with open(f"{model_dir}/rewards.json", "w") as f:
         json.dump({"mean": mean_reward, "var": var_reward, "rewards": 
-                   {i: reward for i, reward in enumerate(rewards)}}, f)
+                   {id: rewards[i] for i, id in enumerate([item["id"] for item in test_data])}}, f)
         print(f"All rewards saved at {model_dir}/rewards.json")
 
 

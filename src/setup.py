@@ -9,16 +9,17 @@ from typing import Optional, Tuple, Union, Dict
 from reward_model_supervisor import RewardModelSupervisor
 from dialogue_model_supervisor import DialogueModelSupervisor
 from utils.train_utils import load_ckpt_path, load_config
+from data_classes import ModelConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
 
 def get_model_supervisor_and_config(
-        model: Optional[str] = None,
-        pretrained_model_dir: Optional[str] = None,
-        batch_size: Optional[int] = None,
-        initial_lr: Optional[float] = None,
-        reward_model: bool = False
+    model: Optional[str] = None,
+    pretrained_model_dir: Optional[str] = None,
+    batch_size: Optional[int] = None,
+    initial_lr: Optional[float] = None,
+    reward_model: bool = False
 ) -> Tuple[Union[DialogueModelSupervisor, RewardModelSupervisor, Dict]]:
     
     # Sanity checks
@@ -35,12 +36,22 @@ def get_model_supervisor_and_config(
             config = json.load(f).get(model)
 
         model_supervisor = supervisor_cls(
-            config=config,
+            config=ModelConfig(
+                model_cls=config["model"]["cls"],
+                model_kwargs=config["model"]["kwargs"],
+                tokenizer_cls=config["tokenizer"]["cls"],
+                tokenizer_kwargs=config["tokenizer"]["kwargs"]
+            ),
             batch_size=batch_size,
             initial_lr=initial_lr
         )
     else:
         # Load pretrained model
+        kwargs = {}
+        if batch_size is not None:
+            kwargs["batch_size"] = batch_size
+        if initial_lr is not None:
+            kwargs["initial_lr"] = initial_lr
         model_supervisor = supervisor_cls.load_from_checkpoint(
             load_ckpt_path(pretrained_model_dir),
             strict=False

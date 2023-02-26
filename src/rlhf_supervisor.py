@@ -27,7 +27,8 @@ class RLHFSupervisor(pl.LightningModule):
         dialogue_model: DialogueModelSupervisor,
         reward_model: RewardModelSupervisor,
         ppo_config: Optional[PPOConfig] = None,   
-        initial_lr: Optional[float] = None
+        initial_lr: Optional[float] = None,
+        batch_size: Optional[int] = None
     ) -> None:
         super().__init__()
         self.ref_model = dialogue_model
@@ -35,6 +36,7 @@ class RLHFSupervisor(pl.LightningModule):
         self.tuned_model = copy.deepcopy(dialogue_model)
         self.ppo_config = ppo_config
         self.initial_lr = initial_lr
+        self.batch_size = batch_size
         self.dropout = nn.Dropout()
         self.value_head = nn.Linear(dialogue_model.model.hidden_size, 1)
         self.default_log_config = {
@@ -47,6 +49,14 @@ class RLHFSupervisor(pl.LightningModule):
             param.requires_grad = False
         for param in self.reward_model.parameters():
             param.requires_grad = False
+
+        self.save_hyperparameters({
+            "config": dialogue_model.hparams["config"],
+            "initial_lr": self.initial_lr,
+            "batch_size": self.batch_size,
+            "generation_config": dialogue_model.generation_config.__dict__,
+            "ppo_config": ppo_config.__dict__
+        })
 
     def log_probs(
         self, 

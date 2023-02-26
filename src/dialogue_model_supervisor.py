@@ -15,7 +15,7 @@ from transformers.modeling_outputs import Seq2SeqLMOutput, CausalLMOutput
 # User-defined Modules
 from base_classes import DialogueModelBase, TokenizerBase
 from utils.metric_utils import compute_test_metrics
-from data_classes import ModelBatch, GenerationConfig
+from data_classes import ModelConfig, ModelBatch, GenerationConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -23,7 +23,7 @@ from data_classes import ModelBatch, GenerationConfig
 class DialogueModelSupervisor(pl.LightningModule):
     def __init__(
         self,
-        config: Dict, # Must be in specificied format (See 'configs.json')
+        config: ModelConfig.__dict__,
         batch_size:  Optional[int] = None,
         initial_lr: Optional[float] = None,
         metric_n_grams: Optional[int] = None,
@@ -32,12 +32,12 @@ class DialogueModelSupervisor(pl.LightningModule):
     ) -> None:
         
         super().__init__()
-        model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
-        tokenizer_cls = getattr(__import__("custom_tokenizers"), config["tokenizer"]["cls"])
-        self.tokenizer: TokenizerBase = tokenizer_cls(**config["tokenizer"]["kwargs"])
+        model_cls = getattr(__import__("dialogue_models"), config["model_cls"])
+        tokenizer_cls = getattr(__import__("custom_tokenizers"), config["tokenizer_cls"])
+        self.tokenizer: TokenizerBase = tokenizer_cls(**config["tokenizer_kwargs"])
         self.model: DialogueModelBase = model_cls(
             vocab_size=self.tokenizer.vocab_size,
-            **config["model"]["kwargs"]
+            **config["model_kwargs"]
         )
 
         # Sanity checks
@@ -128,26 +128,32 @@ class DialogueModelSupervisor(pl.LightningModule):
         return val_loss
 
     def on_test_start(self) -> None:
-        (self.contexts, self.targets, self.predictions, 
-         self.enc_targets, self.enc_predictions, 
-         self.concepts, self.lm_loss) = ([] for _ in range(7))
+        (self.inputs, self.raw_contexts, self.targets,
+         self.outputs, self.enc_targets, self.enc_outputs, 
+         self.concepts, self.lm_loss) = ([] for _ in range(8))
 
     def test_step(
         self, 
         batch: ModelBatch,
         _
     ) -> None:
-        self.contexts.extend(self.tokenizer.decode(batch.contexts))
+        self.raw_contexts.extend(batch.raw_contexts)
+        self.inputs.extend(self.tokenizer.decode(
+            [[token for token in context 
+              if token != self.tokenizer.PAD_IDX] 
+              for context in batch.contexts.tolist()
+            ], skip_special_tokens=False)
+        )
         self.enc_targets.extend([[token for token in target 
                                   if token != self.tokenizer.PAD_IDX] 
                                   for target in batch.targets.tolist()])
         self.targets.extend(self.tokenizer.decode(batch.targets))
 
-        enc_predictions = self.generate(batch.contexts, batch.context_mask)
-        self.enc_predictions.extend([[token for token in prediction 
+        enc_outputs = self.generate(batch.contexts, batch.context_mask)
+        self.enc_outputs.extend([[token for token in output 
                                       if token != self.tokenizer.PAD_IDX] 
-                                      for prediction in enc_predictions.tolist()])
-        self.predictions.extend(self.tokenizer.decode(enc_predictions))
+                                      for output in enc_outputs.tolist()])
+        self.outputs.extend(self.tokenizer.decode(enc_outputs))
     
         if batch.concept_net_data is not None:
             self.concepts.extend([self.tokenizer.decode(concepts)
@@ -157,14 +163,15 @@ class DialogueModelSupervisor(pl.LightningModule):
         self.lm_loss.append(lm_loss)
 
     def test_epoch_end(self, _) -> None:
-        N = len(self.contexts)
+        N = len(self.outputs)
         test_data = []
         for i in range(N):
             entry = {
                 "id": i,
-                "context": self.contexts[i],
+                "input": self.inputs[i],
+                "context": self.raw_contexts[i],
                 "target": self.targets[i],
-                "prediction": self.predictions[i]
+                "output": self.outputs[i]
             }
             if len(self.concepts) != 0:
                 entry["concepts"] = self.concepts[i]
@@ -175,9 +182,9 @@ class DialogueModelSupervisor(pl.LightningModule):
 
         test_metrics = compute_test_metrics(
             self.targets,
-            self.predictions,
+            self.outputs,
             self.enc_targets,
-            self.enc_predictions,
+            self.enc_outputs,
             self.model.word_embeddings(),
             self.metric_n_grams,
         )

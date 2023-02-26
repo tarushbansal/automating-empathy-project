@@ -10,7 +10,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 # User-defined Modules
 from reward_data_loader import RewardDataModule
 from setup import get_model_supervisor_and_config
-from utils.train_utils import get_model_checkpoints, SaveConfigCallback
+from utils.train_utils import get_model_checkpoints
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -46,11 +46,12 @@ def main():
     )
 
     # Set up reward model and configuration
-    model_supervisor, config = get_model_supervisor_and_config(
-        cli_args.model,
-        cli_args.pretrained_model_dir,
-        cli_args.initial_lr,
-        True
+    model_supervisor = get_model_supervisor_and_config(
+        model=cli_args.model,
+        pretrained_model_dir=cli_args.pretrained_model_dir,
+        batch_size=1,
+        initial_lr=cli_args.initial_lr,
+        reward_model=True
     )
 
     # Set up data module
@@ -66,7 +67,6 @@ def main():
     callbacks = []
     if checkpoint_callback is not None:
         callbacks.extend(checkpoint_callback)
-    callbacks.append(SaveConfigCallback(config=config))
 
     # Set up trainer
     trainer = pl.Trainer(

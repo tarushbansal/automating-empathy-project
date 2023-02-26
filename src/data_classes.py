@@ -2,9 +2,24 @@
 
 # System Modules
 import torch
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Dict
 
 # ------------------------- IMPLEMENTATION ----------------------------------------
+
+
+class ModelConfig:
+    def __init__(
+        self,
+        model_cls: str,
+        model_kwargs: Dict,
+        tokenizer_cls: str,
+        tokenizer_kwargs: Dict
+    ) -> None:
+        self.model_cls = model_cls
+        self.model_kwargs = model_kwargs
+        self.tokenizer_cls = tokenizer_cls
+        self.tokenizer_kwargs = tokenizer_kwargs
+
 
 class ConceptNetRawData:
     def __init__(
@@ -13,7 +28,7 @@ class ConceptNetRawData:
         concept_mask: List[List[bool]],
         context_emo_intensity: List[float],
         concept_emo_intensity: List[float]
-    ):
+    ) -> None:
         self.concepts = concepts
         self.concept_mask = concept_mask
         self.context_emo_intensity = context_emo_intensity
@@ -27,7 +42,7 @@ class ConceptNetBatchData:
         adjacency_mask: torch.BoolTensor,
         context_emo_intensity: torch.FloatTensor,
         concept_emo_intensity: torch.FloatTensor
-    ):
+    ) -> None:
         self.concepts = concepts
         self.adjacency_mask = adjacency_mask
         self.context_emo_intensity = context_emo_intensity
@@ -41,7 +56,7 @@ class ModelRawData:
         target: List[int],
         raw_context: List[List[str]],
         concept_net_data: Optional[ConceptNetRawData]
-    ):
+    ) -> None:
         self.context = context
         self.target = target
         self.raw_context = raw_context

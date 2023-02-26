@@ -13,6 +13,7 @@ import argparse
 def parse_args() -> argparse.Namespace:
 
     parser = argparse.ArgumentParser()
+
     parser.add_argument("--num_samples", type=int, default=5)
     parser.add_argument("--dump", action="store_true")
     cli_args = parser.parse_args()
@@ -20,26 +21,35 @@ def parse_args() -> argparse.Namespace:
     return cli_args
 
 
-def main():
+def main(
+    cli_args: argparse.Namespace
+) -> None:
     print(f"\n----- Reward Statistics (mean, var) -----\n")
     comparison_data = {}
     src = os.path.abspath("/home/tb662/rds/hpc-work")
 
     for root, _, filenames in os.walk(src):
-        if ("rewards.json" in filenames) and ("test_data.json" in filenames) and ("ignore" not in filenames):
+        if ("test_data.json" in filenames) and ("ignore" not in filenames):
             test_data = json.load(open(f"{root}/test_data.json"))
-            rewards = json.load(open(f"{root}/rewards.json"))
-            mean_reward, var_reward = rewards["mean"], rewards["var"]
             model_name = root.replace(src, "")[1:]
             model_name = model_name.replace("automating-empathy-project/", "")
             model_name = model_name.replace(f"/tensorboard_logs/version_", "_v")
-            print(f"{model_name}: ({mean_reward:.3f}, {var_reward:.3f})")
-            for item, reward in list(zip(test_data, rewards["rewards"].values())):
-                id, context, response = item["id"], item["context"], item["prediction"]
+            rewards = None
+            if os.path.isfile(f"{root}/rewards.json"):
+                rewards = json.load(open(f"{root}/rewards.json"))
+                mean_reward, var_reward = rewards["mean"], rewards["var"]
+                print(f"{model_name}: ({mean_reward:.3f}, {var_reward:.3f})")
+            for item in test_data:
+                id, context, output = item["id"], item["context"], item["output"]
+                reward = float("nan") if rewards is None else rewards["rewards"][str(id)]
                 if id not in comparison_data:
                     comparison_data[id] = {"context": context}
-                comparison_data[id][model_name] = (response, reward)
+                comparison_data[id][model_name] = (output, reward)
     
+    for id in list(comparison_data.keys()):
+        if len(comparison_data[id].keys()) <= 2:
+            del comparison_data[id]
+
     for id in random.sample(list(comparison_data.keys()), cli_args.num_samples):
         print(f"\n---- Sample ID {id} -----\n")
         context = comparison_data[id].pop("context")
@@ -50,9 +60,9 @@ def main():
                 print("Listener:", end=" ")
             print(context[i])
         print("")
-        for model in sorted(comparison_data[id], key = lambda x: comparison_data[id][x][1], reverse=True):
-            response, reward = comparison_data[id][model]
-            print(f"{model}: {response} [Reward = {reward:.3f}]")
+        for model in comparison_data[id]:
+            output, reward = comparison_data[id][model]
+            print(f"{model}: {output} [Reward = {reward:.3f}]")
         print("")
 
 
@@ -64,9 +74,9 @@ if __name__ == "__main__":
         dirname = os.path.dirname(os.path.abspath(__file__))
         fname = f"{dirname}/results.txt"
         with open(fname, "w") as sys.stdout:
-            main()
+            main(cli_args)
     else:
-        main()
+        main(cli_args)
         
 
 # -----------------------------------------------------------------------------

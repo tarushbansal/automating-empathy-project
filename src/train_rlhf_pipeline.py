@@ -81,9 +81,7 @@ def main():
     num_devices = cli_args.num_nodes * torch.cuda.device_count() if torch.cuda.is_available() else 1
     dialogue_model = get_model_supervisor_and_config(
         model=cli_args.dialogue_model,
-        pretrained_model_dir=cli_args.pretrained_dialogue_model_dir,
-        batch_size=cli_args.batch_size * num_devices,
-        initial_lr=cli_args.initial_lr
+        pretrained_model_dir=cli_args.pretrained_dialogue_model_dir
     )
     dialogue_model.generation_config = generation_config
     reward_model = get_model_supervisor_and_config(
@@ -101,7 +99,8 @@ def main():
             vf_coeff=cli_args.vf_coeff,
             entropy_coeff=cli_args.entropy_coeff
         ),
-        initial_lr=cli_args.initial_lr
+        initial_lr=cli_args.initial_lr,
+        batch_size=cli_args.batch_size * num_devices
     )
 
     # Set up data module

@@ -115,9 +115,13 @@ class HuggingFaceTokenizerBase(TokenizerBase):
     
     def decode(
         self, 
-        sequences: Union[List[int], List[List[int]], torch.Tensor]
+        sequences: Union[List[int], List[List[int]], torch.Tensor],
+        skip_special_tokens=True
     ) -> List[str]:
-        return self.tokenizer.batch_decode(sequences, skip_special_tokens=True)
+        return self.tokenizer.batch_decode(
+            sequences, 
+            skip_special_tokens=skip_special_tokens
+        )
 
 
 class DialogueModelBase(ABC, nn.Module):

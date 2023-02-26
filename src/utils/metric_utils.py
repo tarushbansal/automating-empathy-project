@@ -16,9 +16,9 @@ from nltk.translate.nist_score import corpus_nist
 
 def compute_test_metrics(
     targets: List[str],
-    predictions: List[str],
+    outputs: List[str],
     encoded_targets: Optional[List[List[int]]] = None,
-    encoded_predictions: Optional[List[List[int]]] = None,
+    encoded_outputs: Optional[List[List[int]]] = None,
     word_embeddings: Optional[nn.Module] = None,
     metric_n_grams: int = 4,
 ) -> Dict[str, float]:
@@ -29,22 +29,22 @@ def compute_test_metrics(
 
     for i in range(len(targets)):
         targets[i] = [targets[i].strip().split(" ")]
-        predictions[i] = predictions[i].strip().split(" ")
+        outputs[i] = outputs[i].strip().split(" ")
 
         # DIST calculation
         for n in range(metric_n_grams):
-            count = len(predictions[i]) - n
+            count = len(outputs[i]) - n
             count_n_grams[n] += count
-            unique_n_grams[n].update([tuple(predictions[i][j:j+n+1])
+            unique_n_grams[n].update([tuple(outputs[i][j:j+n+1])
                                       for j in range(count)])
 
         if word_embeddings is not None:
-            # Embed both targets and predictions
+            # Embed both targets and outputs
             device = word_embeddings.weight.device
             target_embeddings = word_embeddings(
                 torch.LongTensor(encoded_targets[i:i+1]).to(device))
             pred_embeddings = word_embeddings(
-                torch.LongTensor(encoded_predictions[i:i+1]).to(device))
+                torch.LongTensor(encoded_outputs[i:i+1]).to(device))
 
             # Average BOW
             avg_target_embed = target_embeddings.mean(dim=1)
@@ -73,8 +73,8 @@ def compute_test_metrics(
                 float(sim.max(dim=0)[0].mean() + sim.max(dim=1)[0].mean() / 2))
 
     test_metrics = {
-        "bleu": corpus_bleu(targets, predictions, weights=[1/metric_n_grams]*metric_n_grams),
-        "nist": corpus_nist(targets, predictions, n=metric_n_grams),
+        "bleu": corpus_bleu(targets, outputs, weights=[1/metric_n_grams]*metric_n_grams),
+        "nist": corpus_nist(targets, outputs, n=metric_n_grams),
     }
 
     for n in range(metric_n_grams):

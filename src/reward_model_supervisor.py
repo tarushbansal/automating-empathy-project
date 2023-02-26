@@ -9,7 +9,7 @@ import torch.nn as nn
 import pytorch_lightning as pl
 
 # User-defined Modules
-from data_classes import RewardModelBatch
+from data_classes import RewardModelBatch, ModelConfig
 from base_classes import DialogueModelBase, TokenizerBase
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -18,18 +18,18 @@ from base_classes import DialogueModelBase, TokenizerBase
 class RewardModelSupervisor(pl.LightningModule):
     def __init__(
         self,
-        config: Dict, # Must be in specificied format (See 'configs.json')
+        config: ModelConfig.__dict__,
         batch_size:  Optional[int] = None,
         initial_lr: Optional[float] = None,
         dropout_prob: Optional[float] = 0.6,
     ) -> None:
         super().__init__()
-        model_cls = getattr(__import__("dialogue_models"), config["model"]["cls"])
-        tokenizer_cls = getattr(__import__("custom_tokenizers"), config["tokenizer"]["cls"])
-        self.tokenizer: TokenizerBase = tokenizer_cls(**config["tokenizer"]["kwargs"])
+        model_cls = getattr(__import__("dialogue_models"), config["model_cls"])
+        tokenizer_cls = getattr(__import__("custom_tokenizers"), config["tokenizer_cls"])
+        self.tokenizer: TokenizerBase = tokenizer_cls(**config["tokenizer_kwargs"])
         self.model: DialogueModelBase = model_cls(
             vocab_size=self.tokenizer.vocab_size,
-            **config["model"]["kwargs"]
+            **config["model_kwargs"]
         )
 
         # Sanity checks

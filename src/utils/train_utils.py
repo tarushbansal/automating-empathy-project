@@ -10,18 +10,6 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 # ------------------------- IMPLEMENTATION -----------------------------------
 
 
-def load_config(trained_model_dir: str) -> dict:
-    config = None
-    config_fpath = os.path.join(trained_model_dir, "config.json")
-    if os.path.isfile(config_fpath):
-        with open(config_fpath) as f:
-            config = json.load(f)
-    else:
-        raise ValueError("Specified directory does not have a 'config.json' file!")
-    
-    return config
-
-
 def load_ckpt_path(trained_model_dir: Optional[str]) -> Optional[str]:
     ckpt_path = None
     if trained_model_dir is not None:

@@ -8,7 +8,7 @@ from typing import Optional, Tuple, Union, Dict
 # User-defined Modules
 from reward_model_supervisor import RewardModelSupervisor
 from dialogue_model_supervisor import DialogueModelSupervisor
-from utils.train_utils import load_ckpt_path, load_config
+from utils.train_utils import load_ckpt_path
 from data_classes import ModelConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -40,8 +40,7 @@ def get_model_supervisor_and_config(
                 model_cls=config["model"]["cls"],
                 model_kwargs=config["model"]["kwargs"],
                 tokenizer_cls=config["tokenizer"]["cls"],
-                tokenizer_kwargs=config["tokenizer"]["kwargs"]
-            ),
+                tokenizer_kwargs=config["tokenizer"]["kwargs"]).__dict__,
             batch_size=batch_size,
             initial_lr=initial_lr
         )

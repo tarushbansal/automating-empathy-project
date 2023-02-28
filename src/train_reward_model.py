@@ -10,7 +10,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 # User-defined Modules
 from reward_data_loader import RewardDataModule
 from setup import get_model_supervisor_and_config
-from utils.train_utils import get_model_checkpoints
+from utils.train import get_model_checkpoints
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -49,8 +49,10 @@ def main():
     model_supervisor = get_model_supervisor_and_config(
         model=cli_args.model,
         pretrained_model_dir=cli_args.pretrained_model_dir,
-        batch_size=1,
-        initial_lr=cli_args.initial_lr,
+        kwargs={
+            "batch_size": 1,
+            "initial_lr": cli_args.initial_lr
+        },
         reward_model=True
     )
 

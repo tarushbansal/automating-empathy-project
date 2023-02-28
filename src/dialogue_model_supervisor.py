@@ -3,7 +3,7 @@
 # System Modules
 import json
 import math
-from typing import Optional, Union, Tuple, Dict
+from typing import Optional, Union, Tuple
 
 import torch
 import torch.nn.functional as F
@@ -13,8 +13,9 @@ from transformers.optimization import get_linear_schedule_with_warmup
 from transformers.modeling_outputs import Seq2SeqLMOutput, CausalLMOutput
 
 # User-defined Modules
+from reward_model_supervisor import RewardModelSupervisor
 from base_classes import DialogueModelBase, TokenizerBase
-from utils.metric_utils import compute_test_metrics
+from utils.metrics.full_suite import compute_test_metrics
 from data_classes import ModelConfig, ModelBatch, GenerationConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -28,9 +29,13 @@ class DialogueModelSupervisor(pl.LightningModule):
         initial_lr: Optional[float] = None,
         metric_n_grams: Optional[int] = None,
         test_output_dir: Optional[str] = None,
+        emo_classifier_dir: Optional[str] = None,
+        intent_classifier_dir: Optional[str] = None,
+        epitome_model_dir: Optional[str] = None,
+        reward_model: Optional[RewardModelSupervisor] = None,
         generation_config: Optional[GenerationConfig] = None,
     ) -> None:
-        
+
         super().__init__()
         model_cls = getattr(__import__("dialogue_models"), config["model_cls"])
         tokenizer_cls = getattr(__import__("custom_tokenizers"), config["tokenizer_cls"])
@@ -51,6 +56,10 @@ class DialogueModelSupervisor(pl.LightningModule):
         self.batch_size = batch_size
         self.initial_lr = initial_lr
         self.test_output_dir = test_output_dir
+        self.emo_classifier_dir = emo_classifier_dir
+        self.intent_classifier_dir = intent_classifier_dir
+        self.epitome_model_dir = epitome_model_dir
+        self.reward_model = reward_model
         self.generation_config = generation_config
         self.metric_n_grams = metric_n_grams
         self.default_log_config = {
@@ -93,7 +102,7 @@ class DialogueModelSupervisor(pl.LightningModule):
         
         return output, lm_loss
 
-    def forward_and_log_metrics(
+    def _forward_and_log_metrics(
         self, 
         batch: ModelBatch,
         stage: str
@@ -116,7 +125,7 @@ class DialogueModelSupervisor(pl.LightningModule):
         batch: ModelBatch,
         _
     ) -> float:
-        train_loss = self.forward_and_log_metrics(batch, "train")
+        train_loss = self._forward_and_log_metrics(batch, "train")
         return train_loss
 
     def validation_step(
@@ -124,7 +133,7 @@ class DialogueModelSupervisor(pl.LightningModule):
         batch: ModelBatch,
         _
     ) -> float:
-        val_loss = self.forward_and_log_metrics(batch, "val")
+        val_loss = self._forward_and_log_metrics(batch, "val")
         return val_loss
 
     def on_test_start(self) -> None:
@@ -177,12 +186,13 @@ class DialogueModelSupervisor(pl.LightningModule):
                 entry["concepts"] = self.concepts[i]
             test_data.append(entry)
 
-        with open(f"{self.test_output_dir}/test_data.json", "w") as f:
-            json.dump(test_data, f)
-
         test_metrics = compute_test_metrics(
-            self.targets,
-            self.outputs,
+            test_data,
+            next(self.model.parameters()).device,
+            self.emo_classifier_dir,
+            self.intent_classifier_dir,
+            self.epitome_model_dir,
+            self.reward_model,
             self.enc_targets,
             self.enc_outputs,
             self.model.word_embeddings(),
@@ -194,8 +204,13 @@ class DialogueModelSupervisor(pl.LightningModule):
         self.log_dict(test_metrics)
 
         if self.test_output_dir is not None:
+            with open(f"{self.test_output_dir}/test_data.json", "w") as f:
+                json.dump(test_data, f)
+
             with open(f"{self.test_output_dir}/test_metrics.json", "w") as f:
                 json.dump(test_metrics, f)
+        else:
+            raise ValueError("No directory specified to output test results!")
 
     @torch.no_grad()
     def generate(

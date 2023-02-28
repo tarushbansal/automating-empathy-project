@@ -22,6 +22,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--model", type=str, default=None)
     parser.add_argument("--output_dir", type=str, default=None)
     parser.add_argument("--pretrained_model_dir", type=str, default=None)
+    parser.add_argument("--emo_classifier_dir", type=str, default=None)
+    parser.add_argument("--intent_classifier_dir", type=str, default=None)
+    parser.add_argument("--epitome_model_dir", type=str, default=None)
+    parser.add_argument("--reward_model_dir", type=str, default=None)
     parser.add_argument("--batch_size", type=int, default=32)
     parser.add_argument("--metric_n_grams", type=int, default=4)
     parser.add_argument("--beam_width", type=int, default=None)
@@ -57,27 +61,44 @@ def main():
     )
 
     # Set up dialogue model and configuration
-    model_supervisor = get_model_supervisor_and_config(
-        model=cli_args.model,
-        pretrained_model_dir=cli_args.pretrained_model_dir
-    )
-    model_supervisor.metric_n_grams = cli_args.metric_n_grams
+    reward_model = None
+    if cli_args.reward_model_dir is not None:
+        reward_model = get_model_supervisor_and_config(
+            pretrained_model_dir=cli_args.reward_model_dir,
+            reward_model=True
+        )
+
     if cli_args.pretrained_model_dir is None:
         if cli_args.output_dir is None:
             raise ValueError(
                 "Output directory must be specified for saving test results for new models!")
         os.makedirs(cli_args.output_dir, exist_ok=True)
-        model_supervisor.test_output_dir = cli_args.output_dir
+        test_output_dir = cli_args.output_dir
     else:
-        model_supervisor.test_output_dir = cli_args.pretrained_model_dir
-    model_supervisor.generation_config = generation_config
+        test_output_dir = cli_args.pretrained_model_dir
+
+    model_supervisor = get_model_supervisor_and_config(
+        model=cli_args.model,
+        pretrained_model_dir=cli_args.pretrained_model_dir,
+        kwargs={
+            "metric_n_grams": cli_args.metric_n_grams,
+            "test_output_dir": test_output_dir,
+            "emo_classifier_dir": cli_args.emo_classifier_dir,
+            "intent_classifier_dir": cli_args.intent_classifier_dir,
+            "epitome_model_dir": cli_args.epitome_model_dir,
+            "reward_model": reward_model,
+            "generation_config": generation_config
+        }
+    )
 
     # Set up data module
-    data_module = DataModule(dataset_dir=cli_args.dataset_dir,
-                             batch_size=cli_args.batch_size,
-                             tokenizer=model_supervisor.tokenizer,
-                             model_has_encoder=model_supervisor.model.has_encoder,
-                             num_workers=max(1, os.cpu_count() // 4))
+    data_module = DataModule(
+        dataset_dir=cli_args.dataset_dir,
+        batch_size=cli_args.batch_size,
+        tokenizer=model_supervisor.tokenizer,
+        model_has_encoder=model_supervisor.model.has_encoder,
+        num_workers=max(1, os.cpu_count() // 4)
+    )
 
     # Set up trainer
     trainer = pl.Trainer(

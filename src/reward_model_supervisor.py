@@ -71,7 +71,7 @@ class RewardModelSupervisor(pl.LightningModule):
             rewards -= self.mean_offset
         return rewards
 
-    def compute_loss_and_accuracy(
+    def _compute_loss_and_accuracy(
         self, 
         rewards: torch.FloatTensor, 
         pairwise_ratings: List[Tuple[int]]
@@ -91,13 +91,13 @@ class RewardModelSupervisor(pl.LightningModule):
         accuracy = num_correct / total
         return mean_loss, accuracy
 
-    def forward_and_log_metrics(
+    def _forward_and_log_metrics(
         self, 
         batch: RewardModelBatch,
         stage: str
     ) -> float:
         pred_rewards = self.forward(batch)
-        loss, accuracy = self.compute_loss_and_accuracy(pred_rewards, batch.ratings)
+        loss, accuracy = self._compute_loss_and_accuracy(pred_rewards, batch.ratings)
         N1 = batch.contexts.size(dim=0)
         N2 = len([rating for _, _, rating in batch.ratings if rating != 0])
         self.log(
@@ -129,7 +129,7 @@ class RewardModelSupervisor(pl.LightningModule):
         batch: RewardModelBatch,
         _
     ) -> float:
-        train_loss = self.forward_and_log_metrics(batch, "train")
+        train_loss = self._forward_and_log_metrics(batch, "train")
         return train_loss
 
     def on_validation_epoch_start(self) -> None:
@@ -140,7 +140,7 @@ class RewardModelSupervisor(pl.LightningModule):
         batch: RewardModelBatch,
         _
     ) -> float:
-        val_loss = self.forward_and_log_metrics(batch, "val")
+        val_loss = self._forward_and_log_metrics(batch, "val")
         return val_loss
     
     def on_load_checkpoint(self, ckpt: OrderedDict) -> None:

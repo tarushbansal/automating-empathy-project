@@ -151,7 +151,7 @@ class QueryConceptNet:
         with open(f"{knowledge_dir}/concepts.json") as f:
             self.concepts = json.load(f)
 
-    def emotion_intensity(self, word):
+    def _emotion_intensity(self, word):
         if word not in self.vad:
             return 0
         v, a, _ = self.vad[word]
@@ -172,7 +172,7 @@ class QueryConceptNet:
 
         for i, token in enumerate(tokens):
             token = singularize(token.lower())
-            context_emo_intensity.append(self.emotion_intensity(token))
+            context_emo_intensity.append(self._emotion_intensity(token))
             if (token not in self.stopwords) and (token in self.concepts):
                 num_concepts_added = 0
                 for concept in self.concepts[token]:

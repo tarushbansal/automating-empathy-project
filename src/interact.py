@@ -69,9 +69,9 @@ def main():
     # Set up dialogue model and configuration
     model_supervisor = get_model_supervisor_and_config(
         model=cli_args.model,
-        pretrained_model_dir=cli_args.pretrained_model_dir
+        pretrained_model_dir=cli_args.pretrained_model_dir,
+        kwargs={"generation_config": generation_config}
     )
-    model_supervisor.generation_config = generation_config
     tokenizer = model_supervisor.tokenizer
 
     # Run main interface loop

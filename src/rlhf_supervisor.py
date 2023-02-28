@@ -58,7 +58,7 @@ class RLHFSupervisor(pl.LightningModule):
             "ppo_config": ppo_config.__dict__
         })
 
-    def log_probs(
+    def _log_probs(
         self, 
         logits: torch.FloatTensor, 
         labels: torch.LongTensor
@@ -70,7 +70,7 @@ class RLHFSupervisor(pl.LightningModule):
         return logp
 
     @torch.no_grad()
-    def compute_rewards(
+    def _compute_rewards(
         self, 
         scores: torch.FloatTensor, 
         new_log_probs: torch.FloatTensor, 
@@ -84,7 +84,7 @@ class RLHFSupervisor(pl.LightningModule):
         return rewards
 
     @torch.no_grad()
-    def estimate_advantages_and_returns(
+    def _estimate_advantages_and_returns(
         self,
         rewards: torch.FloatTensor,
         values: torch.FloatTensor,
@@ -109,7 +109,7 @@ class RLHFSupervisor(pl.LightningModule):
         
         return advantages, returns
 
-    def forward_and_log_metrics(
+    def _forward_and_log_metrics(
         self,
         batch: ModelBatch,
         stage: str
@@ -177,7 +177,7 @@ class RLHFSupervisor(pl.LightningModule):
         labels = batch.targets[:, 1:] if self.tuned_model.model.has_encoder else batch.targets
         mask = batch.target_mask[:, 1:] if self.tuned_model.model.has_encoder else batch.target_mask
         gen_len = torch.sum(mask, dim=-1)
-        new_log_probs = self.log_probs(target_logits, labels)
+        new_log_probs = self._log_probs(target_logits, labels)
         entropy = -torch.sum(torch.softmax(target_logits, dim=-1) * 
                              torch.log_softmax(target_logits, dim=-1), dim=-1)
         values = self.value_head(self.dropout(last_hidden_states)).squeeze(-1)
@@ -190,13 +190,13 @@ class RLHFSupervisor(pl.LightningModule):
                 if self.tuned_model.model.has_encoder 
                 else output.logits[:, batch.contexts.size(dim=1)-1:-1]
             )
-            ref_log_probs = self.log_probs(target_logits, labels)
+            ref_log_probs = self._log_probs(target_logits, labels)
 
         ratios = torch.exp(new_log_probs - ref_log_probs)
         clipped_ratios = torch.clip(
             ratios, 1 - self.ppo_config.clip_epsilon, 1 + self.ppo_config.clip_epsilon)
-        rewards = self.compute_rewards(scores, new_log_probs, ref_log_probs, gen_len)
-        advantages, returns = self.estimate_advantages_and_returns(rewards, values, gen_len)
+        rewards = self._compute_rewards(scores, new_log_probs, ref_log_probs, gen_len)
+        advantages, returns = self._estimate_advantages_and_returns(rewards, values, gen_len)
 
         # Apply PPO Algorithm (With ppo clip, value function and entropy losses)
         num_tokens = torch.sum(mask)
@@ -224,7 +224,7 @@ class RLHFSupervisor(pl.LightningModule):
         batch: ModelBatch,
         _
     ) -> float:
-        train_loss = self.forward_and_log_metrics(batch, "train")
+        train_loss = self._forward_and_log_metrics(batch, "train")
         return train_loss
 
     def validation_step(
@@ -232,7 +232,7 @@ class RLHFSupervisor(pl.LightningModule):
         batch: ModelBatch,
         _
     ) -> float:
-        val_loss = self.forward_and_log_metrics(batch, "val")
+        val_loss = self._forward_and_log_metrics(batch, "val")
         return val_loss
 
     def configure_optimizers(self) -> torch.optim.Optimizer:

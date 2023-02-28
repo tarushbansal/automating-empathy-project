@@ -11,7 +11,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 # User-defined Modules
 from data_loader import DataModule
 from setup import get_model_supervisor_and_config
-from utils.train_utils import get_model_checkpoints
+from utils.train import get_model_checkpoints
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -53,17 +53,21 @@ def main():
     model_supervisor = get_model_supervisor_and_config(
         model=cli_args.model,
         pretrained_model_dir=cli_args.pretrained_model_dir,
-        batch_size=cli_args.batch_size * num_devices,
-        initial_lr=cli_args.initial_lr
+        kwargs={
+            "batch_size": cli_args.batch_size * num_devices,
+            "initial_lr": cli_args.initial_lr
+        }
     )
 
     # Set up data module
-    data_module = DataModule(dataset_dir=cli_args.dataset_dir,
-                             batch_size=cli_args.batch_size,
-                             tokenizer=model_supervisor.tokenizer,
-                             num_workers=max(1, os.cpu_count() // 4),
-                             model_has_encoder=model_supervisor.model.has_encoder,
-                             few_shot_training=cli_args.few_shot_training)
+    data_module = DataModule(
+        dataset_dir=cli_args.dataset_dir,
+        batch_size=cli_args.batch_size,
+        tokenizer=model_supervisor.tokenizer,
+        num_workers=max(1, os.cpu_count() // 4),
+        model_has_encoder=model_supervisor.model.has_encoder,
+        few_shot_training=cli_args.few_shot_training
+    )
 
     # Set up model checkpointing
     ckpt_dir = f"{logger.log_dir}/checkpoints"

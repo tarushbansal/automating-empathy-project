@@ -8,7 +8,7 @@ from typing import Optional, Tuple, Union, Dict
 # User-defined Modules
 from reward_model_supervisor import RewardModelSupervisor
 from dialogue_model_supervisor import DialogueModelSupervisor
-from utils.train_utils import load_ckpt_path
+from utils.train import load_ckpt_path
 from data_classes import ModelConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -17,8 +17,7 @@ from data_classes import ModelConfig
 def get_model_supervisor_and_config(
     model: Optional[str] = None,
     pretrained_model_dir: Optional[str] = None,
-    batch_size: Optional[int] = None,
-    initial_lr: Optional[float] = None,
+    kwargs: Dict = {},
     reward_model: bool = False
 ) -> Tuple[Union[DialogueModelSupervisor, RewardModelSupervisor, Dict]]:
     
@@ -27,7 +26,7 @@ def get_model_supervisor_and_config(
         raise ValueError( "Either a pretrained or a new model must be specified!")
     if model is not None and pretrained_model_dir is not None:
         raise ValueError("Cannot specify both a new and a pretrained model!")
-    
+
     supervisor_cls = RewardModelSupervisor if reward_model else DialogueModelSupervisor
     if model is not None:
         # Instantiate new model from config.json file
@@ -41,19 +40,14 @@ def get_model_supervisor_and_config(
                 model_kwargs=config["model"]["kwargs"],
                 tokenizer_cls=config["tokenizer"]["cls"],
                 tokenizer_kwargs=config["tokenizer"]["kwargs"]).__dict__,
-            batch_size=batch_size,
-            initial_lr=initial_lr
+            **kwargs
         )
     else:
         # Load pretrained model
-        kwargs = {}
-        if batch_size is not None:
-            kwargs["batch_size"] = batch_size
-        if initial_lr is not None:
-            kwargs["initial_lr"] = initial_lr
         model_supervisor = supervisor_cls.load_from_checkpoint(
             load_ckpt_path(pretrained_model_dir),
-            strict=False
+            strict=False,
+            **kwargs
         )
 
     return model_supervisor

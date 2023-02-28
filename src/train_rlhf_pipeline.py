@@ -14,7 +14,7 @@ from data_loader import DataModule
 from rlhf_supervisor import RLHFSupervisor
 from data_classes import GenerationConfig, PPOConfig
 from setup import get_model_supervisor_and_config
-from utils.train_utils import get_model_checkpoints
+from utils.train import get_model_checkpoints
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -25,9 +25,9 @@ def parse_args() -> argparse.Namespace:
 
     parser.add_argument("--dataset_dir", type=str, default=None, required=True)
     parser.add_argument("--output_dir", type=str, default=None, required=True)
-    parser.add_argument("--pretrained_reward_model_dir", type=str, default=None, required=True)
-    parser.add_argument("--dialogue_model", type=str, default=None)
-    parser.add_argument("--pretrained_dialogue_model_dir", type=str, default=None)
+    parser.add_argument("--reward_model_dir", type=str, default=None, required=True)
+    parser.add_argument("--model", type=str, default=None)
+    parser.add_argument("--pretrained_model_dir", type=str, default=None)
     parser.add_argument("--num_nodes", type=int, default=1)
     parser.add_argument("--max_epochs", type=int, default=10)
     parser.add_argument("--batch_size", type=int, default=8)
@@ -78,16 +78,18 @@ def main():
     )
 
     # Set up dialogue and reward model as well as RLHF pipeline
-    num_devices = cli_args.num_nodes * torch.cuda.device_count() if torch.cuda.is_available() else 1
     dialogue_model = get_model_supervisor_and_config(
-        model=cli_args.dialogue_model,
-        pretrained_model_dir=cli_args.pretrained_dialogue_model_dir
+        model=cli_args.model,
+        pretrained_model_dir=cli_args.pretrained_model_dir,
+        kwargs={"generation_config": generation_config}
     )
-    dialogue_model.generation_config = generation_config
+
     reward_model = get_model_supervisor_and_config(
-        pretrained_model_dir=cli_args.pretrained_reward_model_dir,
+        pretrained_model_dir=cli_args.reward_model_dir,
         reward_model=True
     )
+
+    num_devices = cli_args.num_nodes * torch.cuda.device_count() if torch.cuda.is_available() else 1
     rlhf_supervisor = RLHFSupervisor(
         dialogue_model=dialogue_model,
         reward_model=reward_model,
@@ -104,12 +106,14 @@ def main():
     )
 
     # Set up data module
-    data_module = DataModule(dataset_dir=cli_args.dataset_dir,
-                             batch_size=cli_args.batch_size,
-                             tokenizer=dialogue_model.tokenizer,
-                             num_workers=max(1, os.cpu_count() // 4),
-                             model_has_encoder=dialogue_model.model.has_encoder,
-                             few_shot_training=cli_args.few_shot_training)
+    data_module = DataModule(
+        dataset_dir=cli_args.dataset_dir,
+        batch_size=cli_args.batch_size,
+        tokenizer=dialogue_model.tokenizer,
+        num_workers=max(1, os.cpu_count() // 4),
+        model_has_encoder=dialogue_model.model.has_encoder,
+        few_shot_training=cli_args.few_shot_training
+    )
 
     # Set up model checkpointing
     ckpt_dir = f"{logger.log_dir}/checkpoints"

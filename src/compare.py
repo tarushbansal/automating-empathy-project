@@ -30,9 +30,11 @@ def main(
     src = os.path.abspath("/home/tb662/rds/hpc-work")
 
     for root, _, filenames in os.walk(src):
-        if ("test_data.json" in filenames) and ("test_metrics.json" in filenames) and ("ignore" not in filenames):
+        if ("test_data.json" in filenames) and ("ignore" not in filenames):
             test_data = json.load(open(f"{root}/test_data.json"))
-            test_metrics = json.load(open(f"{root}/test_metrics.json"))
+            test_metrics = {}
+            if os.path.isfile(f"{root}/test_metrics.json"):
+                test_metrics = json.load(open(f"{root}/test_metrics.json"))
             model_name = root.replace(src, "")[1:]
             model_name = model_name.replace("automating-empathy-project/", "")
             model_name = model_name.replace(f"/tensorboard_logs/version_", "_v")
@@ -48,7 +50,7 @@ def main(
                     text_data[id] = {"context": item["context"]}
                 text_data[id][model_name] = (
                     item["output"], 
-                    item.get("reward", float("nan")),
+                    item.get("reward_output", float("nan")),
                     item.get("emotion_output", "unk"),
                     item.get("epitome_IP_output", "unk"),
                     item.get("epitome_EX_output", "unk"),

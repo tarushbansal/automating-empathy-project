@@ -3,7 +3,7 @@
 # System Modules
 import sys
 from tqdm import tqdm
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Tuple
 
 import torch
 import torch.nn as nn
@@ -24,17 +24,20 @@ from reward_model_supervisor import RewardModelSupervisor
 
 
 def compute_test_metrics(
-    test_data: Dict[str, Union[List[str], str]],
-    device: torch.device,
+    test_data: Optional[Dict] = None,
+    device: Optional[torch.device] = None,
     emo_classifier_dir: Optional[str] = None,
     intent_classifier_dir: Optional[str] = None,
-    epitome_model_dir: Optional[str] = None,
-    reward_model: Optional[RewardModelSupervisor] = None,
+    epitome_dir: Optional[str] = None,
+    reward_model_dir: Optional[RewardModelSupervisor] = None,
     encoded_targets: Optional[List[List[int]]] = None,
     encoded_outputs: Optional[List[List[int]]] = None,
     word_embeddings: Optional[nn.Module] = None,
     metric_n_grams: int = 4
-) -> Dict[str, float]:
+) -> Tuple[Dict[str, float]]:
+
+    if test_data is None:
+        raise ValueError("No test data supplied to compute metrics!")
 
     print("Computing test metrics...")
 
@@ -44,12 +47,9 @@ def compute_test_metrics(
     avg_bow, extrema_bow, greedy_bow = [], [], []
 
     targets, outputs = [], []
-    for item, encoded_target, encoded_output in tqdm(
-        zip(test_data, encoded_targets, encoded_outputs), 
-        total=len(test_data)
-    ):
-        targets.append(item["target"].strip().split(" "))
-        outputs.append(item["output"].strip().split(" "))
+    for item in test_data:
+        targets.append([item["target"].split(" ")])
+        outputs.append(item["output"].split(" "))
 
         for n in range(metric_n_grams):
             count = len(outputs[-1]) - n
@@ -58,10 +58,14 @@ def compute_test_metrics(
                                       for j in range(count)])
 
         if word_embeddings is not None:
+            if encoded_targets is None or encoded_outputs is None:
+                raise ValueError("Must provide encoded target and output responses for BOW calculation!")
+            if device is None:
+                raise ValueError("Must specify device for BOW calculation")
             target_embeddings = word_embeddings(
-                torch.LongTensor(encoded_target).unsqueeze(0).to(device))
+                torch.LongTensor(encoded_targets[item["id"]]).unsqueeze(0).to(device))
             pred_embeddings = word_embeddings(
-                torch.LongTensor(encoded_output).unsqueeze(0).to(device))
+                torch.LongTensor(encoded_outputs[item["id"]]).unsqueeze(0).to(device))
 
             # Average BOW
             avg_target_embed = target_embeddings.mean(dim=1)
@@ -89,36 +93,36 @@ def compute_test_metrics(
             greedy_bow.append(
                 float(sim.max(dim=0)[0].mean() + sim.max(dim=1)[0].mean() / 2))
 
-    test_metrics = {
+    main_metrics = {
         "bleu": corpus_bleu(targets, outputs, weights=[1/metric_n_grams]*metric_n_grams),
         "nist": corpus_nist(targets, outputs, n=metric_n_grams),
     }
 
     for n in range(metric_n_grams):
-        test_metrics[f"dist-{n+1}"] = len(unique_n_grams[n]) / count_n_grams[n]
+        main_metrics[f"dist-{n+1}"] = len(unique_n_grams[n]) / count_n_grams[n]
 
     if word_embeddings is not None:
-        test_metrics["avg_bow"] = sum(avg_bow) / len(avg_bow)
-        test_metrics["extrema_bow"] = sum(extrema_bow) / len(extrema_bow)
-        test_metrics["greedy_bow"] = sum(greedy_bow) / len(greedy_bow)
+        main_metrics["avg_bow"] = sum(avg_bow) / len(avg_bow)
+        main_metrics["extrema_bow"] = sum(extrema_bow) / len(extrema_bow)
+        main_metrics["greedy_bow"] = sum(greedy_bow) / len(greedy_bow)
 
-    test_metrics.update(compute_empathy_metrics(
-        test_data,
-        device,
+    main, classwise_metrics = compute_empathy_metrics(
         emo_classifier_dir,
         intent_classifier_dir,
-        epitome_model_dir
-    ))
+        epitome_dir,
+        test_data,
+        device
+    )
+    main_metrics.update(main)
 
-    if reward_model is not None:
-        test_metrics.update(compute_reward_metrics(
-            test_data,
-            reward_model,
-            device
-        ))
+    main_metrics.update(compute_reward_metrics(
+        reward_model_dir,
+        test_data,
+        device
+    ))
 
     print("Successfully computed all test metrics!")
 
-    return test_metrics
+    return main_metrics, classwise_metrics
 
 # ------------------------------------------------------------------------------------

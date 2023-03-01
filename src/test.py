@@ -9,7 +9,7 @@ import pytorch_lightning as pl
 # User-defined Modules
 from data_loader import DataModule
 from data_classes import GenerationConfig
-from setup import get_model_supervisor_and_config
+from setup import get_model_supervisor
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -24,9 +24,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--pretrained_model_dir", type=str, default=None)
     parser.add_argument("--emo_classifier_dir", type=str, default=None)
     parser.add_argument("--intent_classifier_dir", type=str, default=None)
-    parser.add_argument("--epitome_model_dir", type=str, default=None)
+    parser.add_argument("--epitome_dir", type=str, default=None)
     parser.add_argument("--reward_model_dir", type=str, default=None)
     parser.add_argument("--batch_size", type=int, default=32)
+    parser.add_argument("--data_erasure_level", type=float, default=0.3)
     parser.add_argument("--metric_n_grams", type=int, default=4)
     parser.add_argument("--beam_width", type=int, default=None)
     parser.add_argument('--sample', action='store_true', default=None)
@@ -61,13 +62,6 @@ def main():
     )
 
     # Set up dialogue model and configuration
-    reward_model = None
-    if cli_args.reward_model_dir is not None:
-        reward_model = get_model_supervisor_and_config(
-            pretrained_model_dir=cli_args.reward_model_dir,
-            reward_model=True
-        )
-
     if cli_args.pretrained_model_dir is None:
         if cli_args.output_dir is None:
             raise ValueError(
@@ -77,7 +71,7 @@ def main():
     else:
         test_output_dir = cli_args.pretrained_model_dir
 
-    model_supervisor = get_model_supervisor_and_config(
+    model_supervisor = get_model_supervisor(
         model=cli_args.model,
         pretrained_model_dir=cli_args.pretrained_model_dir,
         kwargs={
@@ -85,8 +79,8 @@ def main():
             "test_output_dir": test_output_dir,
             "emo_classifier_dir": cli_args.emo_classifier_dir,
             "intent_classifier_dir": cli_args.intent_classifier_dir,
-            "epitome_model_dir": cli_args.epitome_model_dir,
-            "reward_model": reward_model,
+            "epitome_dir": cli_args.epitome_dir,
+            "reward_model_dir": cli_args.reward_model_dir,
             "generation_config": generation_config
         }
     )
@@ -97,7 +91,8 @@ def main():
         batch_size=cli_args.batch_size,
         tokenizer=model_supervisor.tokenizer,
         model_has_encoder=model_supervisor.model.has_encoder,
-        num_workers=max(1, os.cpu_count() // 4)
+        num_workers=max(1, os.cpu_count() // 4),
+        data_erasure_level=cli_args.data_erasure_level
     )
 
     # Set up trainer

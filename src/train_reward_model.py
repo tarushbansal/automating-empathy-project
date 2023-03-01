@@ -9,7 +9,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 
 # User-defined Modules
 from reward_data_loader import RewardDataModule
-from setup import get_model_supervisor_and_config
+from setup import get_model_supervisor
 from utils.train import get_model_checkpoints
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -46,7 +46,7 @@ def main():
     )
 
     # Set up reward model and configuration
-    model_supervisor = get_model_supervisor_and_config(
+    model_supervisor = get_model_supervisor(
         model=cli_args.model,
         pretrained_model_dir=cli_args.pretrained_model_dir,
         kwargs={

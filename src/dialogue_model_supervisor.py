@@ -31,8 +31,8 @@ class DialogueModelSupervisor(pl.LightningModule):
         test_output_dir: Optional[str] = None,
         emo_classifier_dir: Optional[str] = None,
         intent_classifier_dir: Optional[str] = None,
-        epitome_model_dir: Optional[str] = None,
-        reward_model: Optional[RewardModelSupervisor] = None,
+        epitome_dir: Optional[str] = None,
+        reward_model_dir: Optional[RewardModelSupervisor] = None,
         generation_config: Optional[GenerationConfig] = None,
     ) -> None:
 
@@ -58,8 +58,8 @@ class DialogueModelSupervisor(pl.LightningModule):
         self.test_output_dir = test_output_dir
         self.emo_classifier_dir = emo_classifier_dir
         self.intent_classifier_dir = intent_classifier_dir
-        self.epitome_model_dir = epitome_model_dir
-        self.reward_model = reward_model
+        self.epitome_dir = epitome_dir
+        self.reward_model_dir = reward_model_dir
         self.generation_config = generation_config
         self.metric_n_grams = metric_n_grams
         self.default_log_config = {
@@ -160,8 +160,8 @@ class DialogueModelSupervisor(pl.LightningModule):
 
         enc_outputs = self.generate(batch.contexts, batch.context_mask)
         self.enc_outputs.extend([[token for token in output 
-                                      if token != self.tokenizer.PAD_IDX] 
-                                      for output in enc_outputs.tolist()])
+                                  if token != self.tokenizer.PAD_IDX] 
+                                  for output in enc_outputs.tolist()])
         self.outputs.extend(self.tokenizer.decode(enc_outputs))
     
         if batch.concept_net_data is not None:
@@ -179,36 +179,40 @@ class DialogueModelSupervisor(pl.LightningModule):
                 "id": i,
                 "input": self.inputs[i],
                 "context": self.raw_contexts[i],
-                "target": self.targets[i],
-                "output": self.outputs[i]
+                "target": self.targets[i].strip(),
+                "output": self.outputs[i].strip()
             }
             if len(self.concepts) != 0:
                 entry["concepts"] = self.concepts[i]
             test_data.append(entry)
 
-        test_metrics = compute_test_metrics(
+        main_metrics, classwise_metrics = compute_test_metrics(
             test_data,
             next(self.model.parameters()).device,
             self.emo_classifier_dir,
             self.intent_classifier_dir,
-            self.epitome_model_dir,
-            self.reward_model,
+            self.epitome_dir,
+            self.reward_model_dir,
             self.enc_targets,
             self.enc_outputs,
             self.model.word_embeddings(),
             self.metric_n_grams,
         )
 
-        test_metrics["ppl"] = math.exp(sum(self.lm_loss) / len(self.lm_loss))
+        main_metrics["ppl"] = math.exp(sum(self.lm_loss) / len(self.lm_loss))
 
-        self.log_dict(test_metrics)
+        self.log_dict(main_metrics)
 
         if self.test_output_dir is not None:
             with open(f"{self.test_output_dir}/test_data.json", "w") as f:
                 json.dump(test_data, f)
 
             with open(f"{self.test_output_dir}/test_metrics.json", "w") as f:
-                json.dump(test_metrics, f)
+                json.dump(main_metrics, f)
+
+            if len(classwise_metrics) > 0:
+                with open(f"{self.test_output_dir}/classwise_test_metrics.json", "w") as f:
+                    json.dump(classwise_metrics, f)
         else:
             raise ValueError("No directory specified to output test results!")
 

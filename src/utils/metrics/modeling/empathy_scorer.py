@@ -3,7 +3,6 @@
 # System Modules
 import os
 import numpy as np
-from typing import Optional
 
 import torch
 import torch.nn as nn
@@ -18,11 +17,15 @@ from utils.metrics.modeling.models import  BiEncoderAttentionWithRationaleClassi
 class EmpathyScorer(nn.Module):
     def __init__(
         self, 
-        model_dir: str, 
+        dir: str, 
         batch_size: int, 
-        device: Optional[torch.device] = None
+        device: torch.device
     ) -> None:
         super().__init__()
+
+        if device is None:
+            raise ValueError("Must specify device for loading epitome models!")
+
         self.tokenizer = RobertaTokenizer.from_pretrained('roberta-base', do_lower_case=True)
         self.batch_size = batch_size
 
@@ -30,20 +33,20 @@ class EmpathyScorer(nn.Module):
         self.model_EX = BiEncoderAttentionWithRationaleClassification()
         self.model_ER = BiEncoderAttentionWithRationaleClassification()
 
-        IP_weights = torch.load(os.path.join(model_dir, 'finetuned_IP.pth'))
+        print(f"Loading IP model from '{dir}'")
+        IP_weights = torch.load(os.path.join(dir, 'finetuned_IP.pth'), map_location=device)
         self.model_IP.load_state_dict(IP_weights)
         self.model_IP.to(device)
-        print(f"Loaded IP model from '{model_dir}'")
 
-        EX_weights = torch.load(os.path.join(model_dir, 'finetuned_EX.pth'))
+        print(f"Loading EX model from '{dir}'")
+        EX_weights = torch.load(os.path.join(dir, 'finetuned_EX.pth'), map_location=device)
         self.model_EX.load_state_dict(EX_weights)
         self.model_EX.to(device)
-        print(f"Loaded EX model from '{model_dir}'")
         
-        ER_weights = torch.load(os.path.join(model_dir, 'finetuned_ER.pth'))
+        print(f"Loading ER model from '{dir}'")
+        ER_weights = torch.load(os.path.join(dir, 'finetuned_ER.pth'), map_location=device)
         self.model_ER.load_state_dict(ER_weights)
         self.model_ER.to(device)
-        print(f"Loaded ER model from '{model_dir}'")
 
         self.device = device
 

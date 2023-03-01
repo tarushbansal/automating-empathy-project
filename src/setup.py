@@ -14,7 +14,7 @@ from data_classes import ModelConfig
 # ------------------------- IMPLEMENTATION -----------------------------------
 
 
-def get_model_supervisor_and_config(
+def get_model_supervisor(
     model: Optional[str] = None,
     pretrained_model_dir: Optional[str] = None,
     kwargs: Dict = {},

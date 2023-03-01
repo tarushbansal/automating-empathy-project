@@ -1,475 +1,381 @@
 
------ Reward Statistics (mean, var) -----
+---- bleu ----- 
+
+pretrained_models/BlenderBot: 0.021
+dialogue_models/GODEL_LARGE_v0: 0.017
+RLHF_tuned_models/BlenderBot_v1: 0.017
+pretrained_models/GPT3: 0.012
+RLHF_tuned_models/GODEL_LARGE_v1: 0.011
+pretrained_models/GODEL_LARGE: 0.008
+
+---- nist ----- 
+
+pretrained_models/BlenderBot: 0.975
+dialogue_models/GODEL_LARGE_v0: 0.887
+RLHF_tuned_models/BlenderBot_v1: 0.868
+RLHF_tuned_models/GODEL_LARGE_v1: 0.794
+pretrained_models/GPT3: 0.765
+pretrained_models/GODEL_LARGE: 0.559
+
+---- dist-1 ----- 
+
+pretrained_models/GODEL_LARGE: 0.089
+pretrained_models/GPT3: 0.057
+dialogue_models/GODEL_LARGE_v0: 0.056
+RLHF_tuned_models/GODEL_LARGE_v1: 0.052
+pretrained_models/BlenderBot: 0.046
+RLHF_tuned_models/BlenderBot_v1: 0.041
+
+---- dist-2 ----- 
+
+pretrained_models/GODEL_LARGE: 0.331
+pretrained_models/GPT3: 0.252
+RLHF_tuned_models/GODEL_LARGE_v1: 0.216
+dialogue_models/GODEL_LARGE_v0: 0.194
+pretrained_models/BlenderBot: 0.185
+RLHF_tuned_models/BlenderBot_v1: 0.167
+
+---- dist-3 ----- 
+
+pretrained_models/GODEL_LARGE: 0.548
+pretrained_models/GPT3: 0.462
+RLHF_tuned_models/GODEL_LARGE_v1: 0.402
+pretrained_models/BlenderBot: 0.348
+dialogue_models/GODEL_LARGE_v0: 0.342
+RLHF_tuned_models/BlenderBot_v1: 0.320
+
+---- dist-4 ----- 
+
+pretrained_models/GODEL_LARGE: 0.690
+pretrained_models/GPT3: 0.615
+RLHF_tuned_models/GODEL_LARGE_v1: 0.547
+pretrained_models/BlenderBot: 0.483
+dialogue_models/GODEL_LARGE_v0: 0.474
+RLHF_tuned_models/BlenderBot_v1: 0.451
+
+---- avg_bow ----- 
+
+pretrained_models/BlenderBot: 0.797
+RLHF_tuned_models/BlenderBot_v1: 0.792
+RLHF_tuned_models/GODEL_LARGE_v1: 0.686
+dialogue_models/GODEL_LARGE_v0: 0.668
+pretrained_models/GODEL_LARGE: 0.621
+
+---- extrema_bow ----- 
+
+pretrained_models/BlenderBot: 0.411
+RLHF_tuned_models/BlenderBot_v1: 0.407
+RLHF_tuned_models/GODEL_LARGE_v1: 0.325
+dialogue_models/GODEL_LARGE_v0: 0.313
+pretrained_models/GODEL_LARGE: 0.296
+
+---- greedy_bow ----- 
+
+pretrained_models/BlenderBot: 0.835
+RLHF_tuned_models/BlenderBot_v1: 0.818
+dialogue_models/GODEL_LARGE_v0: 0.732
+RLHF_tuned_models/GODEL_LARGE_v1: 0.711
+pretrained_models/GODEL_LARGE: 0.678
+
+---- emotion_accuracy ----- 
+
+pretrained_models/GPT3: 0.201
+pretrained_models/BlenderBot: 0.183
+RLHF_tuned_models/BlenderBot_v1: 0.178
+dialogue_models/GODEL_LARGE_v0: 0.162
+pretrained_models/GODEL_LARGE: 0.161
+RLHF_tuned_models/GODEL_LARGE_v1: 0.159
+
+---- emotion_f1 ----- 
+
+pretrained_models/GPT3: 0.199
+pretrained_models/BlenderBot: 0.177
+RLHF_tuned_models/BlenderBot_v1: 0.173
+dialogue_models/GODEL_LARGE_v0: 0.160
+pretrained_models/GODEL_LARGE: 0.158
+RLHF_tuned_models/GODEL_LARGE_v1: 0.158
+
+---- epitome_IP_output ----- 
+
+pretrained_models/GODEL_LARGE: 0.588
+RLHF_tuned_models/BlenderBot_v1: 0.480
+pretrained_models/BlenderBot: 0.380
+dialogue_models/GODEL_LARGE_v0: 0.330
+RLHF_tuned_models/GODEL_LARGE_v1: 0.265
+pretrained_models/GPT3: 0.038
 
-dialogue_models/GODEL_LARGE_v0: (-0.100, 0.029)
-RLHF_tuned_models/BlenderBot_v1: (-0.035, 0.031)
-RLHF_tuned_models/GODEL_LARGE_v1: (0.036, 0.039)
-pretrained_models/BlenderBot: (-0.065, 0.027)
-pretrained_models/GPT3: (0.155, 0.043)
-pretrained_models/GOLD: (-0.014, 0.039)
-pretrained_models/GODEL_LARGE: (-0.131, 0.038)
+---- epitome_EX_output ----- 
 
----- Sample ID 3366 -----
+pretrained_models/GPT3: 1.590
+pretrained_models/BlenderBot: 0.885
+RLHF_tuned_models/BlenderBot_v1: 0.567
+RLHF_tuned_models/GODEL_LARGE_v1: 0.543
+dialogue_models/GODEL_LARGE_v0: 0.235
+pretrained_models/GODEL_LARGE: 0.043
 
-Speaker: My wife has been out of the country for two months, and is coming back in a week!
+---- epitome_ER_output ----- 
 
-dialogue_models/GODEL_LARGE_v0: That's awesome! I hope you guys have a great time together! [Reward = -0.101]
-RLHF_tuned_models/BlenderBot_v1:  I hope you guys have a great time! Where are you going to be visiting when she comes back? [Reward = -0.109]
-RLHF_tuned_models/GODEL_LARGE_v1: That's great! What made you decide to go back? [Reward = 0.036]
-pretrained_models/BlenderBot:  Oh wow, that is a long time to be apart. I hope you guys have a great time! [Reward = -0.076]
-pretrained_models/GPT3: That's great news! How have you been doing while she's been away? [Reward = 0.045]
-pretrained_models/GOLD: Oh wow, I bet you can't wait! I remember when I had to spend a summer overseas and it was awful to be away from my husband. [Reward = 0.067]
-pretrained_models/GODEL_LARGE: I'm so excited for her! [Reward = -0.376]
+RLHF_tuned_models/BlenderBot_v1: 0.941
+pretrained_models/GPT3: 0.940
+dialogue_models/GODEL_LARGE_v0: 0.939
+pretrained_models/BlenderBot: 0.924
+pretrained_models/GODEL_LARGE: 0.808
+RLHF_tuned_models/GODEL_LARGE_v1: 0.800
 
+---- diff_IP ----- 
 
----- Sample ID 568 -----
+pretrained_models/GODEL_LARGE: 1.335
+RLHF_tuned_models/BlenderBot_v1: 1.130
+pretrained_models/BlenderBot: 1.002
+dialogue_models/GODEL_LARGE_v0: 0.941
+RLHF_tuned_models/GODEL_LARGE_v1: 0.867
+pretrained_models/GPT3: 0.639
 
-Speaker: Hello, tomorrow I have the cooking test and I feel safe. I am sure that I will approve with an excellent rating
-Listener: oh, how nice. What are your plans in that regard for the future?
+---- diff_EX ----- 
 
-dialogue_models/GODEL_LARGE_v0: I am going to study for the next test and I am sure I will pass. [Reward = -0.375]
-RLHF_tuned_models/BlenderBot_v1:  I am going to try my best. I have been studying for it for a long time. [Reward = -0.185]
-RLHF_tuned_models/GODEL_LARGE_v1: I am not sure yet. I am just going to focus on studying and getting good grades. I am also going to try to get a job in the kitchen. [Reward = -0.033]
-pretrained_models/BlenderBot:  I want to be a chef one day. I love to cook. What do you like to cook? [Reward = -0.232]
-pretrained_models/GOLD: have my own restaurant [Reward = -0.400]
-pretrained_models/GODEL_LARGE: I am going to study for the cooking test tomorrow. [Reward = -0.310]
+pretrained_models/GPT3: 2.025
+pretrained_models/BlenderBot: 1.341
+pretrained_models/GODEL_LARGE: 1.182
+RLHF_tuned_models/BlenderBot_v1: 1.141
+RLHF_tuned_models/GODEL_LARGE_v1: 1.122
+dialogue_models/GODEL_LARGE_v0: 1.016
 
+---- diff_ER ----- 
 
----- Sample ID 3307 -----
+pretrained_models/GODEL_LARGE: 1.149
+RLHF_tuned_models/BlenderBot_v1: 0.996
+dialogue_models/GODEL_LARGE_v0: 0.974
+pretrained_models/BlenderBot: 0.936
+pretrained_models/GPT3: 0.790
+RLHF_tuned_models/GODEL_LARGE_v1: 0.769
 
-Speaker: I hate it when other guys look at my girl
+---- mean_reward_output ----- 
 
-dialogue_models/GODEL_LARGE_v0: I know what you mean. I'm jealous of your girl. [Reward = 0.125]
-RLHF_tuned_models/BlenderBot_v1:  I'm sorry to hear that. I know how you feel. I've been there before. [Reward = 0.082]
-RLHF_tuned_models/GODEL_LARGE_v1: What do you mean? [Reward = 0.052]
-pretrained_models/BlenderBot:  Why do you feel that way? Is it because you feel like you are not good enough? [Reward = 0.224]
-pretrained_models/GPT3: That must make you feel really uncomfortable. Is there anything I can do to help you feel better? [Reward = 0.598]
-pretrained_models/GOLD: ooh, you should not be, she should be appreciated for looking good [Reward = 0.283]
-pretrained_models/GODEL_LARGE: I hate it when other guys look at my girl. [Reward = 0.078]
+pretrained_models/GPT3: 0.155
+RLHF_tuned_models/GODEL_LARGE_v1: 0.037
+RLHF_tuned_models/BlenderBot_v1: 0.023
+pretrained_models/BlenderBot: -0.009
+dialogue_models/GODEL_LARGE_v0: -0.100
+pretrained_models/GODEL_LARGE: -0.131
 
+---- var_reward_output ----- 
 
----- Sample ID 1713 -----
+pretrained_models/GPT3: 0.043
+RLHF_tuned_models/GODEL_LARGE_v1: 0.039
+pretrained_models/GODEL_LARGE: 0.039
+RLHF_tuned_models/BlenderBot_v1: 0.034
+dialogue_models/GODEL_LARGE_v0: 0.029
+pretrained_models/BlenderBot: 0.029
 
-Speaker: My girlfriend asked me to meet her parents next week
-Listener: Oh dang. How do you think that is going to go down?
-Speaker: I am not sure to be honest. i am feeling so nervous about it
+---- ppl ----- 
 
-dialogue_models/GODEL_LARGE_v0: I know what you mean. I hope you have a good time. [Reward = 0.149]
-RLHF_tuned_models/BlenderBot_v1:  I'm sure you'll be fine. Just be confident and you'll do great. I believe in you! [Reward = 0.215]
-RLHF_tuned_models/GODEL_LARGE_v1: It's normal to feel nervous about meeting new people. Just take a deep breath and relax. Everything will be fine. [Reward = 0.396]
-pretrained_models/BlenderBot:  I'm sure it will go well. Just be yourself and you'll be fine. I wish you the best of luck! [Reward = 0.071]
-pretrained_models/GPT3: That's understandable. Have you and your girlfriend talked about the meeting at all? What kind of things has she said? [Reward = 0.394]
-pretrained_models/GOLD: I'm sure everything will be fine. Just gotta be yourself! [Reward = 0.277]
-pretrained_models/GODEL_LARGE: I know what you mean. I am sure you will be fine. [Reward = 0.202]
+pretrained_models/GODEL_LARGE: 188.202
+RLHF_tuned_models/GODEL_LARGE_v1: 14.769
+RLHF_tuned_models/BlenderBot_v1: 12.825
+pretrained_models/BlenderBot: 11.762
+dialogue_models/GODEL_LARGE_v0: 10.588
 
+---- Sample ID 5038 -----
 
----- Sample ID 2570 -----
+Speaker: There was an incident where one of my back neighbors called my young son a name and made fun of him. I was so mad, beyond angry!
 
-Speaker: My eldest son just graduated High School I was so proud.
-Listener: How exciting! That is a great accomplishment.
+dialogue_models/GODEL_LARGE_v0: Oh no! That's terrible. I'm sorry to hear that. [Emotion: disappointed; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I'm sorry to hear that. What did you do to make him feel better about it? [Emotion: caring; IP: 0; EX: 2; ER: 2; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: What did the back neighbor say? [Emotion: disgusted; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: Oh my gosh, I would have been so mad too! Did you confront them about it? [Emotion: furious; IP: 2; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm so sorry. [Emotion: sad; IP: 0; EX: 0; ER: 2; Reward: nan]
 
-dialogue_models/GODEL_LARGE_v0: I am so happy for him. He is a great kid. [Reward = -0.139]
-RLHF_tuned_models/BlenderBot_v1:  I know, I am so proud of him. He is going to do great things in life. [Reward = 0.027]
-RLHF_tuned_models/GODEL_LARGE_v1: Yeah, he's been working hard and he's really enjoying it. He's been working hard and he's really enjoying it. [Reward = 0.212]
-pretrained_models/BlenderBot:  Thank you! I am so proud of him. He is going to go to college next year. [Reward = 0.083]
-pretrained_models/GOLD: It's kind of a surreal feeling tho, hard to accept that he is grown.  Now college is about to start. [Reward = 0.364]
-pretrained_models/GODEL_LARGE: Thank you. I am so happy for him. [Reward = -0.030]
 
+---- Sample ID 2026 -----
 
----- Sample ID 2062 -----
+Speaker: My wife flew home to see family. It is very quite at home now.
+Listener: I definitely relate to that feeling, why can't they take us with them!?
+Speaker: I know, that would of been nice! Instead I was all alone for the last few weeks. 
+Listener: Well, I hope she gets home soon, to make the home, a home again! :)
 
-Speaker: We went on our vacation about a week ago to the beach and it rained several days while we were there. We wanted to go to the beach every day!
-Listener: I hate when that happens! Especially when you have been waiting for the beach!
-Speaker: Yes, and when you pay a fortune to get beachfront! But, we still had a good time, just wished we could have had less rain!
+dialogue_models/GODEL_LARGE_v0: I hope so too! I am sure she will be able to make it a home again soon. [Emotion: hopeful; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I hope so too, but I'm not sure if I'll be able to make it. [Emotion: apprehensive; IP: 0; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: Yeah, me too. It's just been really hard to be away from her for so long. [Emotion: lonely; IP: 2; EX: 0; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: Thank you, I appreciate that. I am sure she will be home soon. I hope you have a great day! [Emotion: hopeful; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/GODEL_LARGE: I hope so too! [Emotion: hopeful; IP: 0; EX: 0; ER: 0; Reward: nan]
 
-dialogue_models/GODEL_LARGE_v0: I know! I'm sure you had a great time! [Reward = -0.150]
-RLHF_tuned_models/BlenderBot_v1:  I know what you mean. It can be a bummer when the weather is unpredictable. [Reward = 0.206]
-RLHF_tuned_models/GODEL_LARGE_v1: I know how you feel. I've been there before and it's just not the same. [Reward = -0.042]
-pretrained_models/BlenderBot:  I am sorry to hear that. I hope the next time you go you will have a better experience. [Reward = -0.265]
-pretrained_models/GPT3: That's too bad. At least you still had a good time. Did you find any other activities to do when it was raining? [Reward = 0.091]
-pretrained_models/GOLD: That's what matters most, that you had a good time and made memories! [Reward = 0.124]
-pretrained_models/GODEL_LARGE: I'm sorry to hear that. I'm sorry that you had a bad time. [Reward = -0.205]
 
+---- Sample ID 118 -----
 
----- Sample ID 3579 -----
+Speaker: I went to visit a friend one day and her boyfriend made a pass at me. He actually suddenly kissed me, as I was waiting for my friend to return. I couldn't believe his nerve!
 
-Speaker: Speaking of kids in school, I just found out my son got a B in his world history class at the end of the previous school year. I can't believe it.
-Listener: That's great!!  History is so important I think and so few kids really grasp it well.  Congrats to him for a job well done!
-Speaker: No no, see, it was the first grade below an A that he's ever made. I honestly thought I had the next Einstein on my hands. Now I guess I'll have to settle for...above average, I guess. :(
-Listener: Oh, I see what you are saying!  Did he get upset about it?  And you never know, he could turn it around next year and blow you away!
+dialogue_models/GODEL_LARGE_v0: That's so weird. I'm sure you were shocked. [Emotion: surprised; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: Oh my gosh, I would have been so embarrassed! How did your friend react? [Emotion: embarrassed; IP: 2; EX: 2; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That sounds really awkward. I'm sorry you had to go through that. [Emotion: lonely; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/BlenderBot: Oh my gosh! I would have been so embarrassed! Did you confront him about it? [Emotion: ashamed; IP: 2; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GPT3: That must have been really uncomfortable and unexpected for you. How did you deal with it? [Emotion: surprised; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm a girl and I've been in a lot of situations where I've been kissed. I've been in a lot of situations where I've been kissed. [Emotion: faithful; IP: 2; EX: 0; ER: 0; Reward: nan]
 
-dialogue_models/GODEL_LARGE_v0: I'm sure he will. I'm just so disappointed. I'm sure he'll be able to do better next year. [Reward = 0.051]
-RLHF_tuned_models/BlenderBot_v1:  I don't think he was upset, but I'm sure he was a little bummed about it. [Reward = 0.072]
-RLHF_tuned_models/GODEL_LARGE_v1: Yeah, I guess you're right. It's just hard to see him get so frustrated with his grades. [Reward = 0.207]
-pretrained_models/BlenderBot:  No, he didn't get upset at all. He was really proud of me. I was so proud of him. [Reward = 0.042]
-pretrained_models/GOLD: He seemed fine about it, which is weird because he's always been so proud to bring home straight As. I'm really hoping he does turn it around next year. I also hope he's not on drugs or something. I suppose we'll see. [Reward = 0.234]
-pretrained_models/GODEL_LARGE: He was upset, but I'm sure he'll get over it. I'm just so disappointed. [Reward = 0.120]
 
+---- Sample ID 3009 -----
 
----- Sample ID 2503 -----
+Speaker: My step dad showed me a cut he got while working on his boat and I could see his muscle fibers. I almost puked.
+Listener: Oh that sounds disgusting! 
+Speaker: Yeah it was gross. He probably should get stitches.
 
-Speaker: I know things will work out in God's perfect timing
-Listener: Yes, I agree, are you hoping for something in particular.
-Speaker: Yes I am. For everything we want for the baby to be gifted to us lol
+dialogue_models/GODEL_LARGE_v0: I hope he doesn't get a cut again. [Emotion: disappointed; IP: 0; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I hope he does, I would be so grossed out if I saw something like that. [Emotion: disgusted; IP: 2; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: I'm sure he will. He's a good guy. [Emotion: trusting; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: I hope he washed it off, that would have been so gross to see. [Emotion: disgusted; IP: 0; EX: 0; ER: 0; Reward: nan]
+pretrained_models/GPT3: Do you think he might need medical attention? [Emotion: caring; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm sure he did. [Emotion: proud; IP: 0; EX: 0; ER: 0; Reward: nan]
 
-dialogue_models/GODEL_LARGE_v0: I hope so too, I hope you have a great time with your baby. [Reward = -0.149]
-RLHF_tuned_models/BlenderBot_v1:  I hope everything goes well for you and the baby. I am sure you will be a great parent. [Reward = -0.118]
-RLHF_tuned_models/GODEL_LARGE_v1: That's a great attitude to have! I'm sure God will do everything He wants for you and your family. [Reward = 0.251]
-pretrained_models/BlenderBot:  That's a good way to look at it. I hope everything works out for you guys. [Reward = 0.005]
-pretrained_models/GOLD: That's a good hope. Good luck with that.  [Reward = 0.031]
-pretrained_models/GODEL_LARGE: I'm hoping for the baby to be a gift. [Reward = -0.191]
 
+---- Sample ID 1154 -----
 
----- Sample ID 1707 -----
+Speaker: The start of school for my 2 teenagers is less than a week away!
+Listener: Wow, school is right around the corner
+Speaker: It is! We actually got everything they need and more, except for a few notebooks. 
 
-Speaker: I was so furious when i found out a coworker badmouthed me to my boss
-Listener: I don't have a normal job anymore but that would frustrate me as well.
-Speaker: Yeah. i outperform this person, and he started throwing shade on me out of pure jealousy
+dialogue_models/GODEL_LARGE_v0: That's great! I hope they do well [Emotion: hopeful; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I'm sure it will be worth it in the end. What are you going to school for? [Emotion: confident; IP: 0; EX: 2; ER: 1; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's great! I'm sure they'll be happy to have them. [Emotion: joyful; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: That's great! I'm sure they're going to love it. What grade are they in? [Emotion: prepared; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/GPT3: That's great! It's always nice to have everything ready to go before the first day. Do you need any help picking out the notebooks? [Emotion: prepared; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm so excited for my kids. [Emotion: excited; IP: 2; EX: 0; ER: 0; Reward: nan]
 
-dialogue_models/GODEL_LARGE_v0: That's a shame. I hope you get a new job soon. [Reward = -0.010]
-RLHF_tuned_models/BlenderBot_v1:  I'm sorry to hear that. I hope you can find a new job soon. It's hard to find a good job these days. [Reward = 0.177]
-RLHF_tuned_models/GODEL_LARGE_v1: That's really tough. I'm sure you're feeling a lot of pressure to perform well. [Reward = 0.273]
-pretrained_models/BlenderBot:  That's terrible. I hope you can find a new job soon. What do you do for a living? [Reward = 0.134]
-pretrained_models/GPT3: That's really unfair. It's not right for someone to try and take credit for your hard work. Have you talked to your boss about it? [Reward = 0.331]
-pretrained_models/GOLD: What a disgusting person. I'm just being honest. [Reward = 0.016]
-pretrained_models/GODEL_LARGE: I'm sorry. [Reward = -0.147]
 
+---- Sample ID 3155 -----
 
----- Sample ID 3526 -----
+Speaker: Have you ever had a friend or loved one commit suicide.
+Listener: Yes, I have.  One that actually died and one that was miraculously saved.  It was a dark and tough time.  Did that happen to you recently?
+Speaker: Yes, my brother in law/childhood friend took his own life. Its been very hard to comes to terms with.
 
-Speaker: I got canned from my job and I'm feeling pretty good these days because I have more work than I can handle without needing to go to an office everyday
-Listener: Are you really able to work from home? Finding a gig is so difficult, I'm glad that it is working for you.
-Speaker: Yeah it's still a work in progress but I'm young and basically living on peanuts, good thing I'm not allergic
+dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. I hope you are able to come to terms with it. [Emotion: devastated; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I am so sorry to hear that.  I know how hard it is to lose a loved one. [Emotion: sad; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: I'm so sorry to hear that. It sounds like it was a really tough time for you. [Emotion: devastated; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/BlenderBot: I'm so sorry to hear that.  I can't imagine what you must be going through. [Emotion: devastated; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/GPT3: I'm so sorry to hear that. It must be a difficult and confusing time for you. Is there anything I can do to help you? [Emotion: sad; IP: 0; EX: 2; ER: 2; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm sorry to hear that. I'm so sorry for your loss. [Emotion: sad; IP: 0; EX: 0; ER: 2; Reward: nan]
 
-dialogue_models/GODEL_LARGE_v0: I'm sure you'll find a job soon. I'm sure you'll be able to find a job soon. [Reward = -0.042]
-RLHF_tuned_models/BlenderBot_v1:  I'm so sorry to hear that. I hope you can find a new job soon.  [Reward = -0.275]
-RLHF_tuned_models/GODEL_LARGE_v1: That's a good thing. It's always good to have a plan when you're young. [Reward = 0.236]
-pretrained_models/BlenderBot:  That is good, I am glad you are able to find a job that works for you! [Reward = -0.094]
-pretrained_models/GOLD: 5 [Reward = -0.485]
-pretrained_models/GODEL_LARGE: I'm sorry to hear that. I'm sure you'll find something soon. [Reward = -0.179]
 
+---- Sample ID 232 -----
 
----- Sample ID 5007 -----
+Speaker: 5
 
-Speaker: I have a really big meeting next week. I have rehearsed what I am to go over all this past week and plan to practice a little more this weekend. 
-Listener: Wow! What kind of meeting is it?
-Speaker: It's a meeting presenting a new product to the board. Big stuff and big money for the company.
+dialogue_models/GODEL_LARGE_v0: Oh no! What did you say? [Emotion: angry; IP: 0; EX: 2; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: Do you have any pets? I have a dog and a cat. I love them so much. [Emotion: caring; IP: 2; EX: 2; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: What happened? [Emotion: lonely; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: Do you have any pets? I have a dog and a cat. I love them so much. [Emotion: caring; IP: 2; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GPT3: I'm sorry, I'm not sure what you mean. Could you please explain it to me? [Emotion: ashamed; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm sorry. [Emotion: sad; IP: 0; EX: 0; ER: 2; Reward: nan]
 
-dialogue_models/GODEL_LARGE_v0: That's awesome! I hope you do well! [Reward = 0.007]
-RLHF_tuned_models/BlenderBot_v1:  I hope it goes well for you! I'm sure you'll do a great job at it! [Reward = 0.042]
-RLHF_tuned_models/GODEL_LARGE_v1: That sounds like a lot of work. Have you been practicing enough? [Reward = 0.315]
-pretrained_models/BlenderBot:  That sounds like a lot of fun. I hope it goes well for you. What is the meeting about? [Reward = -0.009]
-pretrained_models/GPT3: That sounds like a lot of pressure! How can I help you prepare? [Reward = 0.381]
-pretrained_models/GOLD: Dang! I hope you have successful meeting then! [Reward = -0.064]
-pretrained_models/GODEL_LARGE: Oh, I see. I'm going to have to go to the gym. [Reward = -0.241]
 
+---- Sample ID 2597 -----
 
----- Sample ID 3645 -----
+Speaker: I was furious when my friend made fun of me in front of random strangers.
+Listener: Why did your friend do that to you?
+Speaker: I am not sure. He told me he was sorry afterwards but I didn't listen to him
 
-Speaker: One time as a surprise for my birthday, my college friends "kidnapped me"
-Listener: Oh my goodness, that must have been terrifying until you figured out what was going on.
-Speaker: Nah - I knew that they were just having fun with me!  I was blindfolded and put in the trunk of a big car (I am tiny).
-Listener: Well at least you had a good time.  Did they do something nice for you after?
+dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. I hope you are able to get over it. [Emotion: devastated; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I'm sorry to hear that. I hope you can find a way to forgive him. [Emotion: guilty; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's not a good enough reason. You need to learn to be more careful in the future. [Emotion: guilty; IP: 0; EX: 0; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: That's not a very nice thing to do. I'm sorry you had to go through that. [Emotion: sad; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/GPT3: I'm sorry to hear that. That must have been really hurtful. Is there anything I can do to help? [Emotion: sad; IP: 0; EX: 2; ER: 2; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm sorry. [Emotion: sad; IP: 0; EX: 0; ER: 2; Reward: nan]
 
-dialogue_models/GODEL_LARGE_v0: I was able to get a new car and a new car seat. I was so happy! [Reward = -0.290]
-RLHF_tuned_models/BlenderBot_v1:  Yeah, they got me a new car.  It was really nice of them.   [Reward = -0.314]
-RLHF_tuned_models/GODEL_LARGE_v1: No, they just dumped me in the fountain. It was really weird. [Reward = 0.010]
-pretrained_models/BlenderBot:  No, they didn't.  It was just me and my dog, so I didn't know what to expect. [Reward = -0.170]
-pretrained_models/GOLD: Well they took me to a local fountain and dunked me in it!  It was warm out so it was funny and I liked that they cared about me. [Reward = -0.091]
-pretrained_models/GODEL_LARGE: I was able to get a new car and a new car seat. [Reward = -0.352]
 
+---- Sample ID 2892 -----
 
----- Sample ID 2268 -----
+Speaker: I've felt excited when I found out I had won a place on a prestigious creative writing course, taught by someone who I knew could help me in ways that I would I not be able to through self-study alone.
+Listener: You are so lucky to be talented enough to achieve such an honor. Was it as wonderful as you had imagined it would be?
 
-Speaker: My kids and I went to Six Flags and they wanted me to ride the roller coaster but I had so many reservations about getting on it.
+dialogue_models/GODEL_LARGE_v0: I'm not sure, but I'm sure it was. I'm so happy that I won. [Emotion: joyful; IP: 0; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: Yeah, it was a lot of hard work, but it was worth it in the end. [Emotion: confident; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: Yes, it was amazing. I'm so grateful that I was able to take this course and learn so much about writing. It's been a great experience and I'm looking forward to continuing to learn more about it. [Emotion: grateful; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: It really was. I was so proud of myself. It was a lot of hard work, but it was well worth it. [Emotion: proud; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: I've been thinking about this for a while. I've been thinking about it for a while. I've been thinking about it for a while. [Emotion: apprehensive; IP: 2; EX: 0; ER: 0; Reward: nan]
 
-dialogue_models/GODEL_LARGE_v0: I'm glad you got on it! I've never been on one before. [Reward = -0.264]
-RLHF_tuned_models/BlenderBot_v1:  I've never been on a rollercoaster, but I hear they're a lot of fun! [Reward = -0.114]
-RLHF_tuned_models/GODEL_LARGE_v1: Well, it sounds like you had a great time. It's always good to try new things and see what you like. [Reward = -0.142]
-pretrained_models/BlenderBot:  I love roller coasters, but I'm terrified of heights. Did you end up going on it? [Reward = -0.179]
-pretrained_models/GPT3: That sounds like a really tough situation. How did you handle it? [Reward = 0.005]
-pretrained_models/GOLD: Were you afraid of heights and high speeds? [Reward = -0.079]
-pretrained_models/GODEL_LARGE: I was a little nervous about going on the roller coaster. I finally got on and had so much fun! [Reward = -0.114]
 
+---- Sample ID 4713 -----
 
----- Sample ID 353 -----
+Speaker: When I went to the store the other day, I seen a guy all tweaked out on drugs.
 
-Speaker: Seeing people who have less than me just makes me so grateful for the blessings I have been given
+dialogue_models/GODEL_LARGE_v0: That's scary. Did you get a ticket? [Emotion: apprehensive; IP: 0; EX: 2; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I hope you called the police. Drugs are not good for anyone, even if they are legal. [Emotion: guilty; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: What did you see? [Emotion: terrified; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: That's not good.  Did you call the police?  I hope he didn't hurt anyone. [Emotion: furious; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/GPT3: Oh no, that must have been really scary. What did you do? [Emotion: terrified; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm sorry. [Emotion: sad; IP: 0; EX: 0; ER: 2; Reward: nan]
 
-dialogue_models/GODEL_LARGE_v0: That's true. I'm so grateful for the things I have. [Reward = 0.031]
-RLHF_tuned_models/BlenderBot_v1:  I know what you mean. It's a blessing and a curse at the same time. [Reward = 0.103]
-RLHF_tuned_models/GODEL_LARGE_v1: That's great! It's important to remember that we all have our own unique experiences and circumstances that make us unique. [Reward = 0.519]
-pretrained_models/BlenderBot:  I know what you mean. It's nice to know that there are still good people out there. [Reward = 0.198]
-pretrained_models/GPT3: That's wonderful to hear! It's so important to be mindful of how fortunate we are and to recognize that not everyone is as privileged. [Reward = 0.545]
-pretrained_models/GOLD: Oh yes, at least, you will be in a position to help them in return [Reward = 0.144]
-pretrained_models/GODEL_LARGE: I'm grateful for the blessings I have been given. [Reward = 0.066]
 
+---- Sample ID 383 -----
 
----- Sample ID 1035 -----
+Speaker: I feel happy about the new house I have and that I can work from home. Thanks be to God
 
-Speaker: My neighbors built a treehouse for their children in just one week! I couldn't believe how fast they completed the project!
+dialogue_models/GODEL_LARGE_v0: That's great! I'm glad you're happy. [Emotion: joyful; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I'm so happy for you! It must be so nice to be able to do that. [Emotion: grateful; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's great! What made you feel so content? [Emotion: content; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: That's great! I'm happy for you. What kind of work do you do from home? [Emotion: proud; IP: 0; EX: 2; ER: 2; Reward: nan]
+pretrained_models/GPT3: That's wonderful news! It sounds like you're very blessed to have this opportunity. How does it feel to have such a great setup? [Emotion: grateful; IP: 0; EX: 2; ER: 2; Reward: nan]
+pretrained_models/GODEL_LARGE: I am happy with my house, my income, and my income. Thanks be to God. [Emotion: content; IP: 0; EX: 0; ER: 0; Reward: nan]
 
-dialogue_models/GODEL_LARGE_v0: That's amazing! I'm sure they are proud of you! [Reward = -0.048]
-RLHF_tuned_models/BlenderBot_v1:  It must have taken a lot of hard work and dedication. I bet you are proud of them. [Reward = -0.022]
-RLHF_tuned_models/GODEL_LARGE_v1: That's amazing! I'm so proud of them. [Reward = -0.088]
-pretrained_models/BlenderBot:  Wow, that's impressive.  Did you help them with the construction or did they do it all on their own? [Reward = -0.170]
-pretrained_models/GPT3: Wow, that's amazing! It must have taken a lot of hard work and dedication to get it done that quickly. [Reward = 0.208]
-pretrained_models/GOLD: Oh man, I bet that is fun [Reward = -0.032]
-pretrained_models/GODEL_LARGE: My neighbors built a treehouse for their children in just one week! I couldn't believe how fast they completed the project! [Reward = -0.019]
 
+---- Sample ID 2878 -----
 
----- Sample ID 5221 -----
+Speaker: There was a huge spider on my wall, it ran away before I could kill it..
 
-Speaker: I'm 38 weeks pregnant, could have my baby any day now!
-Listener: Congrats! Thats so exciting do You fel ok?
-Speaker: Yes, a bit nervous because my first birth was hard, but I know I'm ready and have everything we need for the baby! 
+dialogue_models/GODEL_LARGE_v0: That's a good thing. I'm sure it was a good spider. [Emotion: terrified; IP: 0; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I would have screamed like a little girl if I saw a spider in my house! [Emotion: terrified; IP: 2; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's great! What did you do to kill it? [Emotion: surprised; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: Oh my goodness! I would have screamed like a little girl! Did you kill it? [Emotion: terrified; IP: 2; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GPT3: Oh no! That must have been really scary. Do you think it's still in your house? [Emotion: terrified; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I had a spider on my wall, it ran away before I could kill it. [Emotion: terrified; IP: 2; EX: 0; ER: 0; Reward: nan]
 
-dialogue_models/GODEL_LARGE_v0: Thats great! I hope you have a great birth! [Reward = -0.033]
-RLHF_tuned_models/BlenderBot_v1:  I am sure you will be a great parent. I know it will be hard but it is so worth it in the end. [Reward = 0.262]
-RLHF_tuned_models/GODEL_LARGE_v1: That's great! It's important to be prepared for anything. [Reward = 0.358]
-pretrained_models/BlenderBot:  Congratulations! I hope everything goes smoothly and that you have a healthy baby.  [Reward = -0.167]
-pretrained_models/GPT3: That's great! It's normal to be nervous, but I'm sure you're going to do great. Have you thought about who will be there to support you during the birth? [Reward = 0.410]
-pretrained_models/GOLD: YAY! good job! He/she is going to be beautiful [Reward = 0.107]
-pretrained_models/GODEL_LARGE: I'm so excited for you! [Reward = -0.033]
 
+---- Sample ID 128 -----
 
----- Sample ID 911 -----
+Speaker: I am definitely a proud parent of our 15 year old -- she was determined to work this summer, and even with us saying no one would hire her until 16 -- she found a job!
+Listener: Well, that's impressive! I can see why you are proud. Sounds like a hard working young lady!
 
-Speaker: When I was pregnant, I felt ill until it was over. The doctors were worried that something was wrong with the baby.
-Listener: Oh no! I'm not sure how all that works, but I thought that was fairly normal for a pregnat woman
-Speaker: Usually the sickness stops within the first few months, so the fact that I fell ill so much was worrisome. Despite it all, I had a healthy, bouncing baby boy. I never have felt more grateful in my life.
+dialogue_models/GODEL_LARGE_v0: She is, and she is a hard worker! I am so proud of her! [Emotion: proud; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I am very proud of her.  She has a bright future ahead of her if she keeps working hard. [Emotion: proud; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: Yeah, she is. She's been working hard and she's always been determined to succeed. [Emotion: proud; IP: 2; EX: 0; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: She is!  I'm so proud of her.  I hope she keeps it up! [Emotion: proud; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: She is! She is a hard worker! [Emotion: proud; IP: 0; EX: 0; ER: 0; Reward: nan]
 
-dialogue_models/GODEL_LARGE_v0: That's great! I hope you have a great life with him! [Reward = -0.049]
-RLHF_tuned_models/BlenderBot_v1:  I'm so glad to hear that! It's always a relief to have a healthy baby! [Reward = 0.099]
-RLHF_tuned_models/GODEL_LARGE_v1: That's amazing! I'm so happy for you. [Reward = 0.069]
-pretrained_models/BlenderBot:  I'm so glad to hear that! I hope you and your baby are doing well now! [Reward = -0.223]
-pretrained_models/GPT3: That's wonderful! I'm so glad that everything turned out okay. It must have been a huge relief for you. [Reward = 0.267]
-pretrained_models/GOLD: Well I'm glad for you! And for him! A new life is exciting [Reward = 0.047]
-pretrained_models/GODEL_LARGE: I'm so glad you had a healthy baby. [Reward = -0.131]
 
+---- Sample ID 2011 -----
 
----- Sample ID 4968 -----
+Speaker: Flying typically doesn't bother me too much, because I love travel. However I was a bit concerned on a flight once right after a travel advisory had been issued.
 
-Speaker: When I was in middle school, I had a friend come over to ride horses with me. After riding my mother pressured me to get on a horse bareback I wasn't comfortable riding. She made such a big scene that I got on to make her stop.
+dialogue_models/GODEL_LARGE_v0: That's unfortunate. I'm sure you'll be fine. [Emotion: anxious; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I can understand that. It can be a little nerve wracking, especially if it's a long flight. [Emotion: anxious; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's understandable. Traveling can be a lot of fun. But it's important to be careful when you're flying. [Emotion: afraid; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: Yeah, I can understand that. Flying can be a bit nerve wracking at times. [Emotion: apprehensive; IP: 2; EX: 0; ER: 1; Reward: nan]
+pretrained_models/GPT3: That sounds really stressful. What happened? [Emotion: anxious; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: I've been on a flight that was cancelled because of a travel advisory. I was worried about the flight attendants and the flight attendants. [Emotion: afraid; IP: 2; EX: 0; ER: 0; Reward: nan]
 
-dialogue_models/GODEL_LARGE_v0: That's so bad. I'm sorry that happened to you. [Reward = -0.129]
-RLHF_tuned_models/BlenderBot_v1:  I'm glad you were able to overcome your fears. Horses can be a lot of fun. [Reward = -0.125]
-RLHF_tuned_models/GODEL_LARGE_v1: It sounds like you were feeling ashamed because your mother made such a big scene. [Reward = 0.085]
-pretrained_models/BlenderBot:  Aww, that's so sweet of her! Did you end up riding with her again? [Reward = -0.163]
-pretrained_models/GPT3: That must have been really difficult for you. It sounds like your mother was really insistent that you get on the horse. How did you feel when you were on the horse? [Reward = 0.086]
-pretrained_models/GOLD: Oh no, did you get hurt? [Reward = -0.139]
-pretrained_models/GODEL_LARGE: I'm sorry. [Reward = -0.388]
 
+---- Sample ID 4875 -----
 
----- Sample ID 2064 -----
+Speaker: I got a job after a long period of unemployment.
+Listener: I know how hard that can be. Is it working out?
+Speaker: Yes. I was very happy to be gainfully employed.
 
-Speaker: I was given the opportunity to work at a new job that I was hoping to get! I never thought it would be possible!
-Listener: Congratulations! I'm sure you earned it!
-Speaker: Thank you! I feel very fortunate to have been given the opportunity.
+dialogue_models/GODEL_LARGE_v0: That's great. I hope you can keep it up. [Emotion: grateful; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I'm glad to hear that. It's always a relief to get a new job. [Emotion: proud; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's great! What made you decide to get a job? [Emotion: grateful; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: I'm glad to hear that. It's always nice to have a steady job. [Emotion: grateful; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/GPT3: That's great to hear! What kind of job did you get? [Emotion: proud; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm glad you got a job. [Emotion: grateful; IP: 0; EX: 0; ER: 1; Reward: nan]
 
-dialogue_models/GODEL_LARGE_v0: I'm sure you will be a great employee! [Reward = -0.223]
-RLHF_tuned_models/BlenderBot_v1:  I'm so happy for you! What kind of job is it if you don't mind me asking? [Reward = 0.053]
-RLHF_tuned_models/GODEL_LARGE_v1: That's great! What made you decide to apply for the job? [Reward = 0.198]
-pretrained_models/BlenderBot:  You are very welcome. I hope you enjoy your new job and that it goes well for you. [Reward = -0.158]
-pretrained_models/GPT3: That's wonderful! What do you think contributed to you getting this job? [Reward = 0.327]
-pretrained_models/GOLD: You're welcome. I wish you the best in the new position. [Reward = -0.302]
-pretrained_models/GODEL_LARGE: You are very welcome! [Reward = -0.210]
 
+---- Sample ID 1297 -----
 
----- Sample ID 1932 -----
+Speaker: Needing some extra money, I used the spare change in my car to buy a scratch off ticket.
 
-Speaker: I finished a class and most of my classmates got an A! It took a lot of work.
-
-dialogue_models/GODEL_LARGE_v0: That's awesome! I'm glad you did well. [Reward = 0.009]
-RLHF_tuned_models/BlenderBot_v1:  I bet it did. You must have worked really hard for it. What class was it? [Reward = 0.055]
-RLHF_tuned_models/GODEL_LARGE_v1: That's great! I'm sure you did a lot of work. [Reward = 0.090]
-pretrained_models/BlenderBot:  Congratulations! That must have been a great feeling. What class was it for, if you don't mind me asking? [Reward = 0.119]
-pretrained_models/GPT3: That's great! Congratulations on your hard work paying off! [Reward = 0.021]
-pretrained_models/GOLD: That's great. Takes a lot of dedication to be that prepared. [Reward = 0.167]
-pretrained_models/GODEL_LARGE: I finished a class and most of my classmates got an A! It took a lot of work. [Reward = -0.069]
-
-
----- Sample ID 634 -----
-
-Speaker: i am going to garden
-
-dialogue_models/GODEL_LARGE_v0: That's great! What kind of garden? [Reward = -0.382]
-RLHF_tuned_models/BlenderBot_v1:  I love gardening! It's so relaxing. What are you going to grow? [Reward = -0.300]
-RLHF_tuned_models/GODEL_LARGE_v1: That sounds like a great idea! What kind of garden are you going to plant? [Reward = -0.174]
-pretrained_models/BlenderBot:  I love gardening.  What are you going to grow?  I love flowers. [Reward = -0.447]
-pretrained_models/GPT3: That sounds like a great idea! What kind of plants are you going to be growing? [Reward = -0.183]
-pretrained_models/GOLD: Cool. Thats a fun hobby. [Reward = -0.347]
-pretrained_models/GODEL_LARGE: I'm going to garden [Reward = -0.299]
-
-
----- Sample ID 4945 -----
-
-Speaker: My husband is going through the process of quitting smoking on top of dealing with drama from his parents. He is having a hard time.
-Listener: im sorry, thats awful. its a shame his parents arent being more supportive
-Speaker: They aren't being supportive at all, but that's not surprising, that don't support him very well in anything. I just wish I could make it better for him, but I can't
-
-dialogue_models/GODEL_LARGE_v0: i know, its hard to quit smoking [Reward = 0.599]
-RLHF_tuned_models/BlenderBot_v1:  I wish you the best of luck. I know how hard it can be to quit smoking. [Reward = 0.082]
-RLHF_tuned_models/GODEL_LARGE_v1: It sounds like you're really struggling with this. It's normal to feel like you can't do anything to help someone who is going through a tough time. [Reward = 0.672]
-pretrained_models/BlenderBot:  Im sorry to hear that. I hope he can find a way to get through it.  [Reward = 0.105]
-pretrained_models/GPT3: I understand. It's hard when you can't do anything to help. Have you talked to him about it? Maybe talking it out will help him feel better. [Reward = 0.567]
-pretrained_models/GOLD: im sure he appreciates having you around though [Reward = 0.327]
-pretrained_models/GODEL_LARGE: I'm sorry you're going through this. I'm sure you'll find someone who can help you. [Reward = 0.309]
-
-
----- Sample ID 1575 -----
-
-Speaker: So my parents took me out to dinner for my birthday tonight.
-
-dialogue_models/GODEL_LARGE_v0: That's awesome! What did you have for dinner? [Reward = -0.414]
-RLHF_tuned_models/BlenderBot_v1:  I hope you had a great time! Did you have a good time? What did you eat? [Reward = -0.452]
-RLHF_tuned_models/GODEL_LARGE_v1: That's great! What did you have? [Reward = -0.474]
-pretrained_models/BlenderBot:  That's so nice of them! What did you have for dinner? I hope you had a good time! [Reward = -0.363]
-pretrained_models/GPT3: That sounds like a really nice way to celebrate! What did you have? [Reward = -0.208]
-pretrained_models/GOLD: Happy Birthday!!!!  Did you have a nice time? [Reward = -0.366]
-pretrained_models/GODEL_LARGE: I'm so happy for you! [Reward = -0.423]
-
-
----- Sample ID 1079 -----
-
-Speaker: it infuriates me that my wife expects me to read her mind where she wants to eat.
-
-dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. I'm sure she's not expecting you to read her mind. [Reward = 0.077]
-RLHF_tuned_models/BlenderBot_v1:  I'm sorry to hear that. I hope you can find a way to compromise with her. [Reward = 0.112]
-RLHF_tuned_models/GODEL_LARGE_v1: It sounds like you're feeling frustrated because you can't get a good answer out of your wife. [Reward = 0.240]
-pretrained_models/BlenderBot:  Why does she want you to do that? Is it because you don't want to listen to her? [Reward = 0.034]
-pretrained_models/GPT3: That sounds really frustrating. Is there a way you two could figure out a better way to communicate about this? [Reward = 0.549]
-pretrained_models/GOLD: Women these days. I don't think i'll ever understand them. [Reward = -0.028]
-pretrained_models/GODEL_LARGE: I'm sorry. [Reward = -0.232]
-
-
----- Sample ID 870 -----
-
-Speaker: My mother became ill a while back and had to be put into the hospital. I was so concerned, but she became better after a few days. Such a huge relief!
-Listener: I'm so sorry but great to hear she is better now!
-Speaker: Thanks, she is. She had a blood clot in her leg and we didn't know it, so it could have been much, much worse. I can't even express how glad I was when she was better!
-
-dialogue_models/GODEL_LARGE_v0: That's so scary! I hope she is doing better now. [Reward = -0.138]
-RLHF_tuned_models/BlenderBot_v1:  I am so glad to hear that she is doing better now. I know how hard it is to lose a loved one. [Reward = -0.102]
-RLHF_tuned_models/GODEL_LARGE_v1: That's really tough. I'm sure you're doing better now. [Reward = -0.020]
-pretrained_models/BlenderBot:  That's so scary! I'm glad she's doing better now. I hope she continues to get better. [Reward = -0.179]
-pretrained_models/GPT3: That must have been a scary time for you. I'm glad she's better now. [Reward = 0.034]
-pretrained_models/GOLD: Well I'm glad to hear it's resolved. [Reward = -0.293]
-pretrained_models/GODEL_LARGE: I'm so glad she is better now. [Reward = -0.410]
-
-
----- Sample ID 2776 -----
-
-Speaker: I'm leaving tomorrow to go on vacation! 
-Listener: Hey that's awesome!  Where ya goin?
-Speaker: We are going to Daytona and Orlando for 10 days. 
-
-dialogue_models/GODEL_LARGE_v0: That sounds like a great time! I've never been to Florida. [Reward = -0.056]
-RLHF_tuned_models/BlenderBot_v1:  I have never been to either of those places.  I hope you have a great time! [Reward = -0.133]
-RLHF_tuned_models/GODEL_LARGE_v1: That sounds like a lot of fun! I'm sure you'll have a great time. [Reward = -0.020]
-pretrained_models/BlenderBot:  That sounds like a lot of fun!  I hope you have a great time.  Where are you going? [Reward = -0.072]
-pretrained_models/GPT3: That sounds like such a fun trip! Have you been to either of those places before?  [Reward = 0.035]
-pretrained_models/GOLD: Holy cow that's awesome!  That's gonna be a fun 10 days! [Reward = 0.117]
-pretrained_models/GODEL_LARGE: I'm so excited! We are going to Daytona and Orlando for 10 days. [Reward = -0.125]
-
-
----- Sample ID 2339 -----
-
-Speaker: I am disgusted that my food didn't come out the way I wanted it
-
-dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. I'm sure you'll get over it. [Reward = -0.302]
-RLHF_tuned_models/BlenderBot_v1:  I'm sorry to hear that. Did you end up getting something else to eat at least? [Reward = -0.220]
-RLHF_tuned_models/GODEL_LARGE_v1: What happened? [Reward = -0.267]
-pretrained_models/BlenderBot:  I'm sorry to hear that. What did you end up doing to get it to come out? [Reward = -0.173]
-pretrained_models/GPT3: I'm sorry to hear that. Is there anything I can do to help? [Reward = 0.041]
-pretrained_models/GOLD: that is not good, what was wrong with your food? [Reward = -0.121]
-pretrained_models/GODEL_LARGE: I'm sorry. I'm sorry you're feeling this way. [Reward = -0.110]
-
-
----- Sample ID 2945 -----
-
-Speaker: We have a family reunion planned for next week. I am really looking forward to catching up with everyone, especially my brother and sister.
-Listener: Yes, that will be awesome! How long has it been since you've seen everyone?
-Speaker: It's been over a year and we don't get to talk very often because everyone is always so busy. I'm so excited.
-
-dialogue_models/GODEL_LARGE_v0: I'm sure you'll have a great time! [Reward = -0.154]
-RLHF_tuned_models/BlenderBot_v1:  I'm sure you'll have a great time! It's always nice to catch up with people you haven't seen in a while. [Reward = 0.029]
-RLHF_tuned_models/GODEL_LARGE_v1: That's great! I'm sure you'll have a lot of fun. [Reward = -0.071]
-pretrained_models/BlenderBot:  That sounds like a lot of fun! I hope you have a great time and make lots of new friends! [Reward = -0.002]
-pretrained_models/GPT3: That's great! I'm sure you'll all have a lot to catch up on. Have you made any plans for the reunion yet? [Reward = 0.125]
-pretrained_models/GOLD: That's fantastic that you get to see everyone again! I hope you have a great time catching up. [Reward = -0.046]
-pretrained_models/GODEL_LARGE: I'm so excited for you! [Reward = -0.203]
-
-
----- Sample ID 1419 -----
-
-Speaker: I can not wait until some of my family come in to town. They will be coming in to town in two weeks.
-Listener: When is the last time you seen them?
-Speaker: I saw them last summer which seems so long ago. I am very excited to see them because I am very close to them.
-
-dialogue_models/GODEL_LARGE_v0: I bet they are excited too. [Reward = -0.344]
-RLHF_tuned_models/BlenderBot_v1:  I am sure you will have a great time. It is always nice to get together with family. [Reward = -0.137]
-RLHF_tuned_models/GODEL_LARGE_v1: That's great! I'm sure they'll be happy to see you. [Reward = -0.247]
-pretrained_models/BlenderBot:  That's great! I hope you have a great time with them. Do they live far away? [Reward = -0.226]
-pretrained_models/GPT3: That sounds like it will be a great reunion. What are you looking forward to the most? [Reward = -0.050]
-pretrained_models/GOLD: That's awesome I hope yall have a good time! [Reward = -0.177]
-pretrained_models/GODEL_LARGE: I am excited too. I am very close to my family. [Reward = -0.200]
-
-
----- Sample ID 4692 -----
-
-Speaker: I think that I will do good on my test.
-Listener: Good. You sound confident. When is it?
-Speaker: It is tonight. I studied really hard.
-
-dialogue_models/GODEL_LARGE_v0: That's great. I hope you do well. [Reward = -0.093]
-RLHF_tuned_models/BlenderBot_v1:  I am sure you will do great. I know I did well on my exams too. [Reward = -0.067]
-RLHF_tuned_models/GODEL_LARGE_v1: That's great! I'm sure you'll do great. [Reward = 0.002]
-pretrained_models/BlenderBot:  That's good. I'm sure you'll do great. What class is it for?  [Reward = -0.017]
-pretrained_models/GPT3: That's great. What do you feel like you need to do to do your best? [Reward = 0.196]
-pretrained_models/GOLD: I'm sure you'll do great then! [Reward = -0.038]
-pretrained_models/GODEL_LARGE: Good. I think I will do well. [Reward = -0.201]
-
-
----- Sample ID 560 -----
-
-Speaker: I have a great picture from my wedding where my friends and I are in a circle having a shot, makes me want to go hang out with them again.
-
-dialogue_models/GODEL_LARGE_v0: That's a great picture. I'm sure you'll have a great time. [Reward = -0.192]
-RLHF_tuned_models/BlenderBot_v1:  I'm sure you'll have a good time. It's always nice to reconnect with old friends. [Reward = -0.147]
-RLHF_tuned_models/GODEL_LARGE_v1: That's a great picture! What made you want to go hang out with your friends again? [Reward = 0.121]
-pretrained_models/BlenderBot:  That sounds like a lot of fun. Are you going to invite them to your wedding? [Reward = -0.084]
-pretrained_models/GPT3: That sounds like a great picture! It's understandable that you miss your friends and want to hang out with them again. What are some ways you can stay connected with them? Maybe you can plan a virtual hangout or send them a message to catch up. [Reward = 0.237]
-pretrained_models/GOLD: I assume you don't get to see them often? [Reward = -0.236]
-pretrained_models/GODEL_LARGE: I'm glad you're feeling better now. [Reward = -0.259]
-
-
----- Sample ID 1671 -----
-
-Speaker: I am taking a long overdue and much needed vacation this week. I wish i didnt have to fly.
-Listener: I am afraid to fly too.
-Speaker: I usually do pretty good on short flights. Longer ones make me a little nervous.
-Listener: I know right, planes make me nervous.
-
-dialogue_models/GODEL_LARGE_v0: I'm not sure what you mean. I'm not a big fan of flying either. [Reward = 0.055]
-RLHF_tuned_models/BlenderBot_v1:  I'm sure you'll be fine. It's not as bad as I thought it would be. [Reward = 0.045]
-RLHF_tuned_models/GODEL_LARGE_v1: Yeah, I just wish I could take a break from them. [Reward = -0.213]
-pretrained_models/BlenderBot:  I don't like planes either, but I do like to travel by airplane. [Reward = -0.141]
-pretrained_models/GOLD: I hate turbulence too. [Reward = 0.060]
-pretrained_models/GODEL_LARGE: I am not sure what to say. [Reward = 0.090]
-
-
----- Sample ID 926 -----
-
-Speaker: I just love playing retro games. Takes me back
-
-dialogue_models/GODEL_LARGE_v0: I love playing old arcade games too. I used to play a lot of them when I was younger. [Reward = -0.127]
-RLHF_tuned_models/BlenderBot_v1:  I love retro gaming as well. What is your favorite retro game that you have played? [Reward = -0.038]
-RLHF_tuned_models/GODEL_LARGE_v1: Yeah, I know what you mean. I used to love playing those too. It's like we were in a different time period. [Reward = -0.306]
-pretrained_models/BlenderBot:  I love retro video games as well. What are some of your favorites to play? [Reward = -0.087]
-pretrained_models/GPT3: That sounds really fun! What kind of retro games do you like to play? [Reward = -0.111]
-pretrained_models/GOLD: Oh, me too! I love digging out my N64 and SNES from time to time. [Reward = -0.216]
-pretrained_models/GODEL_LARGE: I love playing old school arcade games. [Reward = -0.267]
+dialogue_models/GODEL_LARGE_v0: That's a good idea. Did you win? [Emotion: hopeful; IP: 0; EX: 2; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: It's always a good idea to use the extra money for something you don't have to worry about. [Emotion: grateful; IP: 0; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's really smart of you! What did you win? [Emotion: surprised; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: That's a good idea. You never know what could happen with those scratch-off tickets. [Emotion: disappointed; IP: 0; EX: 0; ER: 0; Reward: nan]
+pretrained_models/GPT3: Wow, that's an interesting way to come up with some extra cash. Did you win anything? [Emotion: surprised; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm a little embarrassed that I'm not the only one who did this. [Emotion: embarrassed; IP: 0; EX: 0; ER: 0; Reward: nan]
 
 
 ---- Sample ID 3831 -----
@@ -478,13 +384,352 @@ Speaker: I was very ready for my first car crash
 Listener: Why?
 Speaker: I had all the paperwork set and ready, I had a blanket cause it was in the winter.
 
-dialogue_models/GODEL_LARGE_v0: That's great. I hope you were able to get out of the wreck. [Reward = -0.226]
-RLHF_tuned_models/BlenderBot_v1:  I'm sorry to hear that. Did you have to pay a lot of money for it? [Reward = -0.148]
-RLHF_tuned_models/GODEL_LARGE_v1: That's great! I'm glad you were prepared. [Reward = -0.160]
-pretrained_models/BlenderBot:  Oh, I'm sorry to hear that. I hope you were able to get it sorted out. [Reward = -0.320]
-pretrained_models/GPT3: That sounds like you were very prepared. What made you think to be so prepared? [Reward = 0.274]
-pretrained_models/GOLD: What happened after your car crashed? [Reward = -0.023]
-pretrained_models/GODEL_LARGE: I was ready for my first car crash. [Reward = -0.234]
+dialogue_models/GODEL_LARGE_v0: That's great. I hope you were able to get out of the wreck. [Emotion: grateful; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I'm sorry to hear that. Did you have to pay a lot of money for it? [Emotion: impressed; IP: 0; EX: 2; ER: 2; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's great! I'm glad you were prepared. [Emotion: prepared; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/BlenderBot: Oh, I'm sorry to hear that. I hope you were able to get it sorted out. [Emotion: devastated; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/GPT3: That sounds like you were very prepared. What made you think to be so prepared? [Emotion: prepared; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I was ready for my first car crash. [Emotion: prepared; IP: 2; EX: 0; ER: 0; Reward: nan]
+
+
+---- Sample ID 4416 -----
+
+Speaker: I remember back when I got to pick up my dog at the airport when she was a puppy.
+Listener: Aww were you excited when you picked her up?
+Speaker: Oh man, I sure was. And she was so excited to get out of that box.
+
+dialogue_models/GODEL_LARGE_v0: That's awesome! I hope you have a great time with her. [Emotion: caring; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I bet she was! I bet you were so happy to get her home. I love puppies! [Emotion: joyful; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's great! I'm sure she was happy to see you. [Emotion: surprised; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/BlenderBot: I bet she was! What kind of dog do you have? I love puppies! [Emotion: caring; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GPT3: That sounds so sweet! What kind of puppy was she? [Emotion: caring; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: I remember when I got to pick up my dog at the airport when she was a puppy. [Emotion: nostalgic; IP: 2; EX: 0; ER: 0; Reward: nan]
+
+
+---- Sample ID 3432 -----
+
+Speaker: i used to be a member of a cool dance crew. we had so much fun together. we used to battle other teams and win local competitions
+Listener: That sounds really fun. Can you still remember some of the routines?
+Speaker: honestly, no, it's been 8 years haha loooong time ago! I wish i could hang out with all those people again
+
+dialogue_models/GODEL_LARGE_v0: I know right. I'm sure you'll find someone who is still in the dance crew. [Emotion: confident; IP: 0; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I'm sorry to hear that. I hope you can reconnect with some of those people. [Emotion: sentimental; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: Yeah, it's definitely a long time since you were a part of a dance crew. But it's always good to remember the good times. [Emotion: nostalgic; IP: 0; EX: 0; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: I'm sorry to hear that. I hope you are able to reconnect with some of those people. [Emotion: sentimental; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/GPT3: That's understandable. Do you still keep in touch with any of them?  [Emotion: sentimental; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: That's too bad. I'm sure you'd love to. [Emotion: hopeful; IP: 0; EX: 0; ER: 2; Reward: nan]
+
+
+---- Sample ID 3260 -----
+
+Speaker: One time, I smelled an odd burning smell coming from under the hood of my car.
+Listener: That's strange. What did you discover under there?
+Speaker: Well, when I went to lift the engine cover, I noticed a dead, rotting squirrel on top of the engine block! It was so repulsive.
+
+dialogue_models/GODEL_LARGE_v0: That's disgusting. I'm sure you're glad you didn't have to deal with it. [Emotion: disgusted; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I bet it was. Did you have to clean it up or did you just let it go? [Emotion: disgusted; IP: 0; EX: 2; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That sounds really disgusting. Did you try to clean it up? [Emotion: disgusted; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: Oh my goodness! I would have been so grossed out. Did you have to call an exterminator? [Emotion: disgusted; IP: 2; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GPT3: Oh my goodness! That must have been so unpleasant. Did you find out how the squirrel got there? [Emotion: disgusted; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: That's disgusting. [Emotion: disgusted; IP: 0; EX: 0; ER: 0; Reward: nan]
+
+
+---- Sample ID 1751 -----
+
+Speaker: Interestingly, I also had a job interview recently, although I've already heard back and I got it!
+Listener: Oh! I am so happy for you. Congratulations. What was the job?
+Speaker: A lab manager for a Physics department at a University.
+
+dialogue_models/GODEL_LARGE_v0: That is awesome! I am sure you will be a great manager. [Emotion: confident; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I am sure you will do great. It is always good to have a job that you are passionate about. [Emotion: confident; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That sounds like a great opportunity. I'm sure you'll do great. [Emotion: confident; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: That is great. I am sure you will do great. What kind of job is it? [Emotion: confident; IP: 0; EX: 2; ER: 2; Reward: nan]
+pretrained_models/GODEL_LARGE: Wow! That is great! I am so happy for you. [Emotion: grateful; IP: 0; EX: 0; ER: 2; Reward: nan]
+
+
+---- Sample ID 3065 -----
+
+Speaker: I was watching the Scottish Open golf tournament a few weeks ago. I know a guy who was playing in it. Guess what? He won! Fantastic four days of baited breath and cheering him on!
+Listener: That is great! Can you call him and see if we could all celebrate together?
+
+dialogue_models/GODEL_LARGE_v0: I will. I'm sure he'll be happy to hear that. [Emotion: hopeful; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I'm not sure if I can. I don't know how he's doing these days. [Emotion: sad; IP: 2; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: Yeah, that would be awesome! I'm sure he would love to hear from me. [Emotion: hopeful; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: I could, but I don't think he'd want to. He's a bit of an introvert. [Emotion: apprehensive; IP: 2; EX: 0; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I'd love to! [Emotion: hopeful; IP: 0; EX: 0; ER: 1; Reward: nan]
+
+
+---- Sample ID 393 -----
+
+Speaker: Hi, I joined a firm 6 months ago and then I got a promotion for Junior Manager
+Listener: Congratulations. That sounds like the fast track.
+Speaker: yes, They thought that I have some extraordinary talent and that is the reason I got that position
+Listener: Cool. Maybe next year you will be a partner!
+Speaker: Maybe yes, Haha, Now I am looking for a Manager post and then become a senior manager
+
+dialogue_models/GODEL_LARGE_v0: That's a great goal. I hope you get it. [Emotion: hopeful; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I wish you the best of luck. I am sure you will do great. [Emotion: confident; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's great! I'm sure you'll find the right job. [Emotion: confident; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: I wish you the best of luck in your future endeavors. I know you can do it. [Emotion: confident; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/GPT3: That's a great goal. What do you think you need to do to reach it? [Emotion: content; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: You are a good person. [Emotion: trusting; IP: 0; EX: 0; ER: 1; Reward: nan]
+
+
+---- Sample ID 2122 -----
+
+Speaker: my son is teething and he is so cranky! I gave him tylenol and got some teething toys. I don
+
+dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. I hope he gets better soon. [Emotion: sad; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I don't blame you, I would have done the same thing. I hope he feels better soon! [Emotion: sad; IP: 2; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's great! I'm glad you're taking care of him. What kind of toys did you get? [Emotion: caring; IP: 0; EX: 2; ER: 2; Reward: nan]
+pretrained_models/BlenderBot: I'm sorry to hear that. I hope he feels better soon. Is there anything you can do to help him? [Emotion: caring; IP: 0; EX: 2; ER: 2; Reward: nan]
+pretrained_models/GPT3: I'm sorry to hear that your son is going through this. It can be really tough. Have you tried any natural remedies? There are some homeopathic solutions which can be helpful, such as rubbing a clove of garlic on the gums or giving him chamomile tea. You could also try cold compresses or frozen washcloths. [Emotion: caring; IP: 0; EX: 2; ER: 2; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm sorry to hear that. [Emotion: grateful; IP: 0; EX: 0; ER: 2; Reward: nan]
+
+
+---- Sample ID 3574 -----
+
+Speaker: My girlfriend has been cheating on me with another woman!
+Listener: That is terrible and a little odd!
+
+dialogue_models/GODEL_LARGE_v0: I know! I'm so upset! [Emotion: angry; IP: 2; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I know, but I can't help but feel like I'm going to break up with her. [Emotion: anxious; IP: 2; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: I know. I'm so upset. I don't know what to do. [Emotion: devastated; IP: 2; EX: 0; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: I know, right? I don't know what I would do if that happened to me. [Emotion: afraid; IP: 2; EX: 0; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm so sorry! [Emotion: devastated; IP: 0; EX: 0; ER: 2; Reward: nan]
+
+
+---- Sample ID 1683 -----
+
+Speaker: One day my 10 year old daughter came home crying after she got off the bus. A teenage boy purposely tripped her as she was getting off and she got hurt. Needless to say, I was very, very upset!
+
+dialogue_models/GODEL_LARGE_v0: Oh no! That's terrible. I'm sorry to hear that. [Emotion: disappointed; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: Oh no! I hope she didn't get hurt too badly. Kids can be so unpredictable. [Emotion: terrified; IP: 0; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That sounds really tough. I'm sorry that happened to your daughter. [Emotion: sad; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/BlenderBot: Oh my gosh, that is so sad. I would be so upset too. Did he get in trouble? [Emotion: disappointed; IP: 2; EX: 2; ER: 2; Reward: nan]
+pretrained_models/GPT3: Oh no, that sounds awful. How did you handle the situation?  [Emotion: angry; IP: 0; EX: 2; ER: 2; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm sorry. [Emotion: sad; IP: 0; EX: 0; ER: 2; Reward: nan]
+
+
+---- Sample ID 2364 -----
+
+Speaker: My husband and I are going on our very first cruise in December.
+Listener: Oh boy! Where are you headed?
+Speaker: To the Caribbean Islands. We are going with another couple that we have been friends with for a very long time.
+Listener: Congratulations! I hope everything goes well! 
+
+dialogue_models/GODEL_LARGE_v0: Thank you! We are going to have a great time. [Emotion: hopeful; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: It should be a lot of fun. I hope you have a great time on your trip! [Emotion: excited; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: Thanks. We are really excited about it. We are going to be spending a lot of time together and just enjoying the scenery. [Emotion: excited; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: Thank you! I am really looking forward to it. I have never been on one before. [Emotion: anticipating; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: Thank you! We are so excited! [Emotion: hopeful; IP: 0; EX: 0; ER: 1; Reward: nan]
+
+
+---- Sample ID 4152 -----
+
+Speaker: One of my friends recently bought a house. I really wish I could afford a house.
+Listener: Wow that is great for your friend! and don't stress it, we are still young and have plenty of time to save up for a house!
+Speaker: I'm starting to feel like I will never be able to afford a house. They're just so expensive. And the market has been going up here about 5% a year for the past 10 years.
+
+dialogue_models/GODEL_LARGE_v0: I know what you mean, I am in the same boat. I am still young and have plenty of time to save up. [Emotion: excited; IP: 2; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I am sure you will get there one day! Just keep working hard and you'll get there! [Emotion: confident; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That is true, but you have to remember that you can always sell your house and buy a new one. You can't afford to wait until you're older and have more money. [Emotion: jealous; IP: 0; EX: 0; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: Oh wow that is a lot of money, I hope you guys can get one soon! [Emotion: surprised; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm sorry to hear that. I'm in the same boat. [Emotion: hopeful; IP: 2; EX: 0; ER: 2; Reward: nan]
+
+
+---- Sample ID 2616 -----
+
+Speaker: I am so annoyed that people are so mean to other people
+
+dialogue_models/GODEL_LARGE_v0: I know right? I hate when people are mean to other people. [Emotion: angry; IP: 0; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I'm sorry to hear that. What did they do to make you feel that way, if you don't mind me asking? [Emotion: sentimental; IP: 0; EX: 2; ER: 2; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: What do you mean? [Emotion: jealous; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: I'm sorry to hear that. People can be mean to each other for no reason at all. [Emotion: trusting; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/GPT3: That's really unfortunate. It must be hard to see people treating each other that way. Is there anything you can do to help? [Emotion: sad; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: I am so annoyed that people are so mean to other people. [Emotion: annoyed; IP: 2; EX: 0; ER: 0; Reward: nan]
+
+
+---- Sample ID 5059 -----
+
+Speaker: I used to work in a place where all my colleagues had different believes to myself. I wanted to stay true to what I believed in, so had to walk away from conversations on many occasions.
+Listener: In what do you believe?
+Speaker: Just that all people should be given an equal chance in life and that no one type of person is better than another, just because of their religion or skin color, or where they come from.
+Listener: That is great. In what do your colleagues believe?
+
+dialogue_models/GODEL_LARGE_v0: They all believe in different things. I'm not sure what they believe, but I think it's important to be honest with them. [Emotion: trusting; IP: 0; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I believe that everyone has a right to believe in what they want to do, but I don't know if it's just me. [Emotion: apprehensive; IP: 0; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: They all believed in different things, but I always tried to stay true to my beliefs. I wanted to be able to share my beliefs with others and not have to worry about them. [Emotion: faithful; IP: 2; EX: 0; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: I believe that everyone has a right to be who they want to be and that everyone should be able to be happy with who they are. [Emotion: faithful; IP: 0; EX: 0; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I believe that all people should be given an equal chance in life and that no one type of person is better than another, just because of their religion or skin color, or where they come from. [Emotion: faithful; IP: 0; EX: 0; ER: 0; Reward: nan]
+
+
+---- Sample ID 1599 -----
+
+Speaker: So I recently made buffalo wing sauce from a new recipe I found and it turned out great!
+Listener: Oh wow, I love that kind of sauce
+Speaker: Me too! It only took 10 minutes to make and now I feel way more sure of myself when making it next time.
+
+dialogue_models/GODEL_LARGE_v0: I'm glad you made it! [Emotion: grateful; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I'm sure it will turn out great. It's always good to try new recipes. [Emotion: confident; IP: 0; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's great! I'm glad you're feeling confident. [Emotion: confident; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/BlenderBot: That's great, I'm glad you were able to find a recipe that worked for you. [Emotion: hopeful; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/GPT3: That's awesome! It's so great when you find something that turns out well and you know you can do it again. [Emotion: content; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm glad you made it! [Emotion: grateful; IP: 0; EX: 0; ER: 2; Reward: nan]
+
+
+---- Sample ID 1299 -----
+
+Speaker: I once ate a piece of cake, it was old.  After the first bite I noticed spots of mold on it.
+
+dialogue_models/GODEL_LARGE_v0: That's disgusting. Did you eat it? [Emotion: disgusted; IP: 0; EX: 2; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: Oh no! Did you throw it away or eat it? I would have thrown it out. [Emotion: disgusted; IP: 0; EX: 2; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: What did you do? [Emotion: lonely; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: Oh no! Did you throw it away? I would have thrown it away. I don't know what I would do if that happened to me. [Emotion: furious; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GPT3: Oh no! That must have been really unpleasant. Did you get sick from it? [Emotion: disgusted; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I once ate a piece of cake found in the fridge. After the first bite I looked down and saw spots of mold on it. [Emotion: disgusted; IP: 2; EX: 0; ER: 0; Reward: nan]
+
+
+---- Sample ID 3110 -----
+
+Speaker: my dog is over at the vet for 4 days and makes the house feel so alone'
+
+dialogue_models/GODEL_LARGE_v0: That is a long time. I hope your dog is okay. [Emotion: sad; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I'm sorry to hear that. I know how you feel. I've been there before. [Emotion: faithful; IP: 2; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: I'm sorry to hear that. It sounds like you're really looking forward to your dog coming back. [Emotion: hopeful; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/BlenderBot: Oh no, I'm sorry to hear that. What is wrong with him/her? [Emotion: disgusted; IP: 0; EX: 2; ER: 2; Reward: nan]
+pretrained_models/GPT3: I'm so sorry to hear that. It must be really hard to have your beloved pet away for so long. Is there anything I can do to help? [Emotion: sad; IP: 0; EX: 2; ER: 2; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm sorry to hear that. [Emotion: grateful; IP: 0; EX: 0; ER: 2; Reward: nan]
+
+
+---- Sample ID 3883 -----
+
+Speaker: Do you watch any YouTube at all?
+Listener: I watch everyday. love youtube!
+Speaker: What type of content do you like watching?
+
+dialogue_models/GODEL_LARGE_v0: I like to watch music videos. [Emotion: nostalgic; IP: 0; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: It depends on my mood, but I usually watch comedy or educational videos. What about you? [Emotion: content; IP: 0; EX: 2; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: I like watching all kinds of videos. I especially like watching videos about animals. [Emotion: sentimental; IP: 2; EX: 0; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: I like to watch all kinds of videos, but I especially like the educational ones. [Emotion: nostalgic; IP: 2; EX: 0; ER: 0; Reward: nan]
+pretrained_models/GPT3: I like to watch vlogs, tutorials, and comedy videos. [Emotion: nostalgic; IP: 0; EX: 0; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I like to watch music videos. [Emotion: nostalgic; IP: 0; EX: 0; ER: 0; Reward: nan]
+
+
+---- Sample ID 4496 -----
+
+Speaker: I had a job interview last week
+Listener: How did it go?
+
+dialogue_models/GODEL_LARGE_v0: It went well. I got the job. [Emotion: confident; IP: 0; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I think it went well. I hope I get the job. I've been looking for a job for a while. [Emotion: hopeful; IP: 0; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: It went well. I got the job and I'm really excited about it. [Emotion: confident; IP: 0; EX: 0; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: It went well. I think I did well on it. I hope I get the job. [Emotion: hopeful; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: I got the job [Emotion: prepared; IP: 0; EX: 0; ER: 0; Reward: nan]
+
+
+---- Sample ID 1803 -----
+
+Speaker: I had to go out of town and leave my dogs with a friend, I was worried about them.
+Listener: Did everything go okay?
+Speaker: Yeah.  They annoyed my friend some, but overall it was fine.
+
+dialogue_models/GODEL_LARGE_v0: That's good. I hope you have a good time with them. [Emotion: lonely; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I'm glad it worked out for you. I'm sure it was nerve wracking. [Emotion: apprehensive; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's good. It's important to trust your friends when you're away from home. [Emotion: trusting; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: That's good to hear. What kind of dogs do you have if you don't mind me asking? [Emotion: caring; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/GPT3: That's good to hear. I'm sure they missed you while you were away. [Emotion: lonely; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm glad you were able to trust your friend. [Emotion: trusting; IP: 0; EX: 0; ER: 1; Reward: nan]
+
+
+---- Sample ID 1094 -----
+
+Speaker: Hi, I'm separated, I'm hurt and my heart is broken
+Listener: When did you get separated? By the way, that is terrible to hear.
+Speaker: one month I am desolate ... I hope to see the light at the end of the tunnel
+Listener: Why are you so down, my depressed friend?
+
+dialogue_models/GODEL_LARGE_v0: I'm not sure, I'm just a little tired from work [Emotion: lonely; IP: 2; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I am not sure. I think I am depressed because I have no one to talk to. [Emotion: lonely; IP: 2; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: I don't know, I just feel like I'm stuck in this rut and I can't get out of it. [Emotion: apprehensive; IP: 2; EX: 0; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: I don't know, I just feel like I am not good enough for him. I am so lonely. [Emotion: lonely; IP: 2; EX: 0; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I am so sad... I am so sad... I am so sad... [Emotion: devastated; IP: 2; EX: 0; ER: 1; Reward: nan]
+
+
+---- Sample ID 3718 -----
+
+Speaker: I have quite a long drive ahead of me next month. It's about 1/12 hours, but I've don it before so I'll be fine.
+Listener: I don't know how you do it. I can't stand long drives.
+
+dialogue_models/GODEL_LARGE_v0: I've done it before, but I know I'll be fine. [Emotion: confident; IP: 2; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I hate long drives too, but it's worth it to see my family and friends. [Emotion: joyful; IP: 2; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: It's not that hard. I've done them before and I know I'll be fine. [Emotion: confident; IP: 2; EX: 0; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: It's not so bad once you get used to it. What do you like to do in your spare time? [Emotion: content; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I've done it before, but I've done it before. [Emotion: apprehensive; IP: 2; EX: 0; ER: 0; Reward: nan]
+
+
+---- Sample ID 4846 -----
+
+Speaker: My cat was kept overnight at the vets recently. I was so worried!
+
+dialogue_models/GODEL_LARGE_v0: Oh no! Is she okay? [Emotion: devastated; IP: 0; EX: 2; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I'm so sorry to hear that. Did you find out what was wrong with your cat? [Emotion: caring; IP: 0; EX: 2; ER: 2; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: It's understandable that you would feel anxious. What happened? [Emotion: anxious; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: Oh no! I hope your cat is okay. Did you find out what was wrong with it? [Emotion: afraid; IP: 0; EX: 2; ER: 2; Reward: nan]
+pretrained_models/GPT3: Oh, no! That must have been so hard for you. How is your cat doing now? [Emotion: sad; IP: 0; EX: 2; ER: 2; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm sorry to hear that. [Emotion: grateful; IP: 0; EX: 0; ER: 2; Reward: nan]
+
+
+---- Sample ID 1279 -----
+
+Speaker: i felt so guilty after lying to my girlfriend
+Listener: What did you lie about, and why?
+Speaker: I kissed a mutual friend of ours. I lied when she checked up on me. It was a one time thing, i did not wanted to hurt her.
+
+dialogue_models/GODEL_LARGE_v0: That's a good thing, I'm sure she'll forgive you. [Emotion: trusting; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I don't blame you, I would have done the same thing if I was in your shoes. [Emotion: jealous; IP: 2; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's not a good enough reason to lie to your girlfriend. You should have been more honest with her. [Emotion: guilty; IP: 0; EX: 0; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: Oh, I see. Well, I'm sure she forgave you. It's not like you did it on purpose. [Emotion: disappointed; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/GPT3: I can understand why you would feel guilty. It sounds like you were trying to protect her from getting hurt. Have you told her the truth yet? [Emotion: guilty; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm sorry. I'm sorry you felt guilty. [Emotion: guilty; IP: 0; EX: 0; ER: 2; Reward: nan]
+
+
+---- Sample ID 84 -----
+
+Speaker: Once my husband asked me not to tell my mom that he was busy that day when she needed his help but I told her anyway.  I really felt bad b/c he got pretty upset with me.
+
+dialogue_models/GODEL_LARGE_v0: Oh no! That's so rude of him. I'm sorry you had to go through that. [Emotion: sad; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I can understand why he would be upset with you. I would have felt the same way. [Emotion: trusting; IP: 2; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: It sounds like you were feeling pretty embarrassed about telling your mom. What did you do? [Emotion: ashamed; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: Why did he get upset with you? Did he ask you why you didn't tell him? [Emotion: guilty; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GPT3: That must have been really difficult for you. How did you feel when you told your mom? [Emotion: ashamed; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm sorry you had to go through that. [Emotion: sad; IP: 0; EX: 0; ER: 2; Reward: nan]
+
+
+---- Sample ID 2583 -----
+
+Speaker: I was surprised when my parents threw me a party
+Listener: I bet that was a nice feeling
+Speaker: It really was. I am pretty thankful for them
+
+dialogue_models/GODEL_LARGE_v0: I bet you are [Emotion: confident; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: It's always nice to have a good relationship with your parents. I'm glad you had a good time. [Emotion: grateful; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's great! I'm glad you had a good time. [Emotion: joyful; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/BlenderBot: It's always nice to have a good relationship with your parents. What did they do for you? [Emotion: grateful; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/GPT3: That is great! It's good to be thankful for the people in your life. [Emotion: grateful; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: I was surprised too [Emotion: surprised; IP: 2; EX: 0; ER: 0; Reward: nan]
+
+
+---- Sample ID 1906 -----
+
+Speaker: I couldn't go to movies to watch The greatest showman when it came out so my husband bought this movie when it came out. he is sweet
+
+dialogue_models/GODEL_LARGE_v0: That's so sweet of him. I'm glad you got to see it. [Emotion: devastated; IP: 0; EX: 0; ER: 2; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I love that movie! It's one of my favorite movies of all time. Did you enjoy it? [Emotion: nostalgic; IP: 0; EX: 2; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's really sweet of him. I'm sure he's happy that you were able to watch the movie. [Emotion: trusting; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: That is so sweet of him.  What movie was it?  Was it a good movie? [Emotion: surprised; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/GPT3: That's really sweet of your husband! It's great that you get to watch it now. [Emotion: nostalgic; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm surprised too. [Emotion: surprised; IP: 0; EX: 0; ER: 0; Reward: nan]
 
 
 ---- Sample ID 4120 -----
@@ -493,218 +738,88 @@ Speaker: It's tough to talk to my parents, but I try to talk about things we don
 Listener: That is unfortunate, what do you usually avoid talking about?
 Speaker: Anything political or religious really, or relationships
 
-dialogue_models/GODEL_LARGE_v0: I agree, I think it is important to talk about things that you both agree on. [Reward = 0.239]
-RLHF_tuned_models/BlenderBot_v1:  I don't really have a problem talking about anything, I just try to be honest with them. [Reward = -0.079]
-RLHF_tuned_models/GODEL_LARGE_v1: I can understand how you feel. It's hard when you're not sure what to say or how to react. [Reward = 0.259]
-pretrained_models/BlenderBot:  I am sorry to hear that. I hope you can talk to them about it and they will understand. [Reward = -0.009]
-pretrained_models/GPT3: I can understand why those topics would be difficult to discuss. Is there anything you do talk about that you enjoy? [Reward = 0.409]
-pretrained_models/GOLD: Well I hope one day your parents are more accepting! [Reward = -0.072]
-pretrained_models/GODEL_LARGE: I'm sorry to hear that. [Reward = -0.121]
+dialogue_models/GODEL_LARGE_v0: I agree, I think it is important to talk about things that you both agree on. [Emotion: faithful; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I don't really have a problem talking about anything, I just try to be honest with them. [Emotion: trusting; IP: 0; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: I can understand how you feel. It's hard when you're not sure what to say or how to react. [Emotion: devastated; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: I am sorry to hear that. I hope you can talk to them about it and they will understand. [Emotion: guilty; IP: 0; EX: 0; ER: 2; Reward: nan]
+pretrained_models/GPT3: I can understand why those topics would be difficult to discuss. Is there anything you do talk about that you enjoy? [Emotion: apprehensive; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm sorry to hear that. [Emotion: grateful; IP: 0; EX: 0; ER: 2; Reward: nan]
 
 
----- Sample ID 167 -----
+---- Sample ID 3424 -----
 
-Speaker: My friend is a surgeon and we were discussing salary. He easily makes 200,000 a year and he is only 32. It's crazy and I was jealous of him.
-Listener: You shouldn't, because that is  a very stressful job
-Speaker: Yeah, that's a good point. I also realized he has a high malpractice insurance, and is on call a lot.
-Listener: And don't forget how many years they have to study in order to get a license for surgery
+Speaker: I came home from work today and my wife had a new puppy waiting for me.
+Listener: oh that sounds like fun
+Speaker: Yeah, he is such a cutie. I have been playing with my new pup the rest of the day. 
+Listener: sounds like a wonderful day!
 
-dialogue_models/GODEL_LARGE_v0: Yeah, I know. I'm not sure if I could do it. [Reward = 0.136]
-RLHF_tuned_models/BlenderBot_v1:  I'm sure it's a lot of work, but it's worth it in the end. [Reward = 0.237]
-RLHF_tuned_models/GODEL_LARGE_v1: Yeah, that's true. I was just thinking that he must be really lucky to have such a good job. [Reward = 0.148]
-pretrained_models/BlenderBot:  That's true, but I'm sure it's worth it in the end. Do you have any hobbies? [Reward = 0.134]
-pretrained_models/GOLD: True. He went to college for 12 years! The student loans are probably high too. [Reward = 0.388]
-pretrained_models/GODEL_LARGE: I'm not jealous, I'm just saying that I'm not sure if I should be. [Reward = 0.049]
-
-
----- Sample ID 467 -----
-
-Speaker: My dog chewed a hole in my carpet 2 weeks ago.. I was very disgusted to say the least!
-Listener: Haha I'm sorry! My dog is chill now but he ate a hole in the wall when he was a puppy lol
-Speaker: Oh dang, I guess I can't complain too much then, that's brutal!
-
-dialogue_models/GODEL_LARGE_v0: I know, I'm glad he's a little more mature now lol [Reward = -0.020]
-RLHF_tuned_models/BlenderBot_v1:  I know, I was so mad at him for it. He's a good dog though, so I forgave him. [Reward = -0.007]
-RLHF_tuned_models/GODEL_LARGE_v1: Yeah, it's not like he's going to do it again.. [Reward = 0.008]
-pretrained_models/BlenderBot:  I know, right? I was so mad at him. I don't know what I would do if that happened to me. [Reward = -0.068]
-pretrained_models/GPT3: Haha yeah, it was definitely a learning experience for us both. How have you been dealing with the carpet issue? [Reward = 0.247]
-pretrained_models/GOLD: Yeah lol what breed is yours? Mine is a golden so he loves eating stuff. Now it's thankfully just actual food. [Reward = -0.039]
-pretrained_models/GODEL_LARGE: Haha I know! I'm glad he's not as bad as he was when he was a puppy lol [Reward = 0.020]
+dialogue_models/GODEL_LARGE_v0: It was. I am so happy for him. [Emotion: proud; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: What kind of puppy did you get? I love puppies, they are so cute. [Emotion: joyful; IP: 0; EX: 2; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: It was. I'm so glad I got to spend time with him. He is such a sweet dog. [Emotion: grateful; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: It really is. I can't wait to take him out for a walk. What kind of puppy did you get? [Emotion: excited; IP: 2; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I came home from work today and my wife had a new puppy waiting for me. [Emotion: surprised; IP: 2; EX: 0; ER: 0; Reward: nan]
 
 
----- Sample ID 5174 -----
+---- Sample ID 2336 -----
 
-Speaker: I grew up pretty skinny and now that I've grown some muscle I feel a lot more comfortable in my skin
+Speaker: i was really jelous when i say my  neighboor had a new 2018 Bmw convertible
+Listener: That car is quite expensive, I wish I could afford one too.
+Speaker: yeah it is i wish i could have a car like that
 
-dialogue_models/GODEL_LARGE_v0: That's great! I'm sure you'll feel better in your skin too. [Reward = -0.215]
-RLHF_tuned_models/BlenderBot_v1:  I'm glad to hear that! It's always nice to feel more comfortable with your body. [Reward = -0.085]
-RLHF_tuned_models/GODEL_LARGE_v1: That's great! What made you decide to start lifting? [Reward = -0.033]
-pretrained_models/BlenderBot:  That's great! It's always nice to feel more comfortable with your body. What kind of muscle did you grow up with? [Reward = 0.058]
-pretrained_models/GPT3: That's great to hear! It sounds like you've put in a lot of hard work and dedication to get to where you are now. I'm really proud of you. [Reward = 0.125]
-pretrained_models/GOLD: Grats.  How long have you been working out for? [Reward = -0.144]
-pretrained_models/GODEL_LARGE: I feel good about the progress I've made with lifting. [Reward = -0.216]
-
-
----- Sample ID 3254 -----
-
-Speaker: I was doing the dishes and a huge roach crawled out from underneath the dishwasher.
-Listener: Eww, it may be time to call someone to take care of them.
-Speaker: I almost fell over trying to crush it, i forgot I wasn't wearing shoes and stepped on in with my bare feet.
-
-dialogue_models/GODEL_LARGE_v0: I'm sorry to hear that. I'm sure you'll be fine. [Reward = -0.090]
-RLHF_tuned_models/BlenderBot_v1:  Oh no! I hate when that happens. Did you have to call an exterminator? [Reward = 0.151]
-RLHF_tuned_models/GODEL_LARGE_v1: That sounds like a really scary experience. Do you think you'll be able to get rid of it? [Reward = 0.080]
-pretrained_models/BlenderBot:  Oh my goodness, I would have been so grossed out if that happened to me. [Reward = 0.206]
-pretrained_models/GOLD: Oh, that had to be super gross!  [Reward = 0.187]
-pretrained_models/GODEL_LARGE: I'm sorry. [Reward = -0.173]
+dialogue_models/GODEL_LARGE_v0: I'm sure you can find one. I'm sure you'll find one soon. [Emotion: hopeful; IP: 0; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I'm sure you'll get one one day, just keep working hard and you'll be able to get one. [Emotion: confident; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: Well, you're lucky that you have a friend who has one. [Emotion: trusting; IP: 0; EX: 0; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: I would love to have a BMW too, they are really nice cars. [Emotion: jealous; IP: 2; EX: 0; ER: 0; Reward: nan]
+pretrained_models/GPT3: That would be nice. Have you looked into any other cars that might be more affordable? [Emotion: jealous; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/GODEL_LARGE: I'm not sure I could afford one either. [Emotion: jealous; IP: 2; EX: 0; ER: 0; Reward: nan]
 
 
----- Sample ID 2210 -----
+---- Sample ID 4290 -----
 
-Speaker: I still live and work in the place where I grew up, but all of my friends have moved away.
+Speaker: I think my cat likes my new girlfriend more than he likes me now.
 
-dialogue_models/GODEL_LARGE_v0: That is sad. I am sorry to hear that. [Reward = -0.323]
-RLHF_tuned_models/BlenderBot_v1:  I'm sorry to hear that. Do you have any plans to move back to where you grew up? [Reward = -0.270]
-RLHF_tuned_models/GODEL_LARGE_v1: That sounds very lonely. Have you tried reaching out to any of your friends? [Reward = -0.037]
-pretrained_models/BlenderBot:  I'm sorry to hear that. Do you have any hobbies to keep you occupied? [Reward = -0.205]
-pretrained_models/GPT3: That must be difficult for you. It sounds like you're missing them a lot. Have you been able to stay in touch with them? [Reward = 0.120]
-pretrained_models/GOLD: Aw, that has to be tough not to see your friends. Do they visit often? [Reward = -0.024]
-pretrained_models/GODEL_LARGE: I'm in the same boat. I'm not sure what to do. [Reward = -0.268]
-
-
----- Sample ID 1338 -----
-
-Speaker: I feel happy when I am outside in nature
-Listener: That's wonderful!  I do too.  I don't take it for granted because I've been battling Lupus for 13 years and in bed a lot.  Its an amazing world we have! What is on of your favorite things to do outside?
-
-dialogue_models/GODEL_LARGE_v0: I love to go hiking and go to the park. [Reward = -0.503]
-RLHF_tuned_models/BlenderBot_v1:  I love going to the beach.  It's so peaceful.  What about you? [Reward = -0.412]
-RLHF_tuned_models/GODEL_LARGE_v1: I love hiking and being outdoors. It's so peaceful and calming. Plus, it's a great way to clear my head and relax. [Reward = -0.099]
-pretrained_models/BlenderBot:  I love going to the beach.  It's so relaxing.  What about you? [Reward = -0.435]
-pretrained_models/GOLD: I love to garden. Organic gardening, I plant peppers, cucumbers, tomatoes and a bunch of other goodies.  [Reward = -0.390]
-pretrained_models/GODEL_LARGE: I love to go hiking and go to the park [Reward = -0.472]
+dialogue_models/GODEL_LARGE_v0: That's a good thing. I'm sure he's happy with you. [Emotion: trusting; IP: 0; EX: 0; ER: 1; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I'm sorry to hear that. Why do you think she doesn't like you more than you? [Emotion: jealous; IP: 0; EX: 2; ER: 2; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's understandable. It's hard to see your cat like someone you're not. [Emotion: caring; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: Aww, I'm sorry to hear that. Have you tried talking to him about it? [Emotion: jealous; IP: 0; EX: 2; ER: 2; Reward: nan]
+pretrained_models/GPT3: That must be tough to deal with. Do you think it's because she's been around more often? [Emotion: sad; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I think it's because he's sleeping with her on her side of the bed. [Emotion: annoyed; IP: 2; EX: 0; ER: 0; Reward: nan]
 
 
----- Sample ID 1562 -----
+---- Sample ID 2127 -----
 
-Speaker: My wife surprised me on my birthday with an amazing homemade dinner.
-Listener: That sounds like you have a great wife.  What did she make you?
+Speaker: I have been seeing pictures of friends of mine traveling around Italy.
+Listener: How does that make you feel ?
+Speaker: I wish I were with them.  I love Italy
+Listener: I've never left the US. I've never been north of Kentucky.
 
-dialogue_models/GODEL_LARGE_v0: She made me a chicken pot pie. It was so good. [Reward = -0.172]
-RLHF_tuned_models/BlenderBot_v1:  She made me a steak and mashed potatoes with green beans and mushrooms. [Reward = -0.122]
-RLHF_tuned_models/GODEL_LARGE_v1: She made me a chicken pot pie. It was so delicious. [Reward = -0.170]
-pretrained_models/BlenderBot:  She made spaghetti and meatballs.  I was so happy.  [Reward = -0.274]
-pretrained_models/GOLD: She made me ribs and a cheesecake for dessert.  [Reward = -0.131]
-pretrained_models/GODEL_LARGE: She made me a delicious steak and mashed potatoes. [Reward = -0.171]
-
-
----- Sample ID 1093 -----
-
-Speaker: Hi, I'm separated, I'm hurt and my heart is broken
-Listener: When did you get separated? By the way, that is terrible to hear.
-
-dialogue_models/GODEL_LARGE_v0: I got separated from my husband in December. I'm so sad. [Reward = 0.058]
-RLHF_tuned_models/BlenderBot_v1:  I got divorced a few years ago. It was hard, but it was for the best. [Reward = 0.168]
-RLHF_tuned_models/GODEL_LARGE_v1: I don't know, it just happened. We were both working and I was just too busy to keep up with everything. [Reward = 0.104]
-pretrained_models/BlenderBot:  We were separated for a year and a half. It was hard, but it was for the best. [Reward = 0.225]
-pretrained_models/GOLD: one month I am desolate ... I hope to see the light at the end of the tunnel [Reward = -0.306]
-pretrained_models/GODEL_LARGE: I got separated when I was 18 [Reward = 0.112]
+dialogue_models/GODEL_LARGE_v0: I have been to Italy. I have never been to the south. [Emotion: excited; IP: 2; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I have never been out of the country either.  It is on my bucket list. [Emotion: content; IP: 2; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's too bad. I'm sure they're enjoying their time in Italy. [Emotion: caring; IP: 0; EX: 0; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: I would love to go to Italy one day.  Have you ever been to Europe? [Emotion: excited; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I've never been to Italy. I've never been to Italy. [Emotion: surprised; IP: 2; EX: 0; ER: 0; Reward: nan]
 
 
----- Sample ID 4434 -----
+---- Sample ID 837 -----
 
-Speaker: After months of job searching, I finally got a good offer
-Listener: What kind of job did you get?
-Speaker: I got a job in statistics
+Speaker: I once went a restaurant, and I saw rats running around in the back kitchen! 
 
-dialogue_models/GODEL_LARGE_v0: That's great! I hope you enjoy it. [Reward = -0.299]
-RLHF_tuned_models/BlenderBot_v1:  I am so happy for you. I hope you enjoy your new job and it pays well. [Reward = -0.268]
-RLHF_tuned_models/GODEL_LARGE_v1: That's great! What made you decide to go for it? [Reward = 0.028]
-pretrained_models/BlenderBot:  Congratulations!  That's a great job to have.  Do you like it? [Reward = -0.222]
-pretrained_models/GPT3: That's great! What made you decide to pursue a job in statistics? [Reward = 0.065]
-pretrained_models/GOLD: What do you do as a statistic [Reward = -0.246]
-pretrained_models/GODEL_LARGE: What do you do for a living? [Reward = -0.109]
+dialogue_models/GODEL_LARGE_v0: Oh no! Did you get bitten? [Emotion: terrified; IP: 0; EX: 2; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I would have screamed like a little girl! Rats scare the crap out of me! [Emotion: terrified; IP: 2; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: That's really scary! What did you do? [Emotion: terrified; IP: 0; EX: 2; ER: 1; Reward: nan]
+pretrained_models/BlenderBot: Oh my goodness! I would have been so grossed out! Were you able to get rid of them? [Emotion: disgusted; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GPT3: Wow, that must have been really shocking to see. Did you tell the manager about it? [Emotion: embarrassed; IP: 0; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I once went to a restaurant and I saw rats running around in the back kitchen! [Emotion: disgusted; IP: 2; EX: 0; ER: 0; Reward: nan]
 
 
----- Sample ID 855 -----
+---- Sample ID 201 -----
 
-Speaker: As I look at my 21 year old son, I often reflect on when he was smaller. Time really flies!
+Speaker: Do you have any pets?
 
-dialogue_models/GODEL_LARGE_v0: That's true. I'm sure he's grown up a lot. [Reward = 0.013]
-RLHF_tuned_models/BlenderBot_v1:  I know, it's crazy how fast time goes by.  I can't believe it's been almost a year since he was born. [Reward = 0.160]
-RLHF_tuned_models/GODEL_LARGE_v1: Yes, it does. It's amazing how much time has passed since you were a child. [Reward = 0.275]
-pretrained_models/BlenderBot:  It really does. I can't believe how fast time goes by. I wish I could go back to being a kid again. [Reward = -0.035]
-pretrained_models/GPT3: Yes, it sure does. It's amazing how quickly children grow up. It's so important to cherish every moment with them while they're still young. [Reward = 0.419]
-pretrained_models/GOLD: Time sure does fly and change is inevitable [Reward = 0.178]
-pretrained_models/GODEL_LARGE: My son is 21 and I feel nostalgic when I look at him. Time really flies! [Reward = 0.158]
-
-
----- Sample ID 3533 -----
-
-Speaker: No matter how many times I told her that I didn't do it, my roommate insisted that I ate her ice cream last night! Unbelievable!
-Listener: Well, did you eat her ice cream?
-Speaker: I certainly would have liked to, but I'm lactose intolerant! If I had eaten it, I would have been so miserable that there's no way she would've mistaken it.
-Listener: I wonder who actually ate it then.
-Speaker: She probably did, during one of those nights when she stumbles into the apartment at 3am, drunk, with some random guy she brought home from the club.
-Listener: So are you saying it could be the guy?
-
-dialogue_models/GODEL_LARGE_v0: No, I'm saying it could be the guy. [Reward = -0.199]
-RLHF_tuned_models/BlenderBot_v1:  I don't think so, but it made me feel a little uneasy at the time. [Reward = 0.189]
-RLHF_tuned_models/GODEL_LARGE_v1: Yeah, I'm sure it is. But I'm not sure if I can trust her. [Reward = -0.010]
-pretrained_models/BlenderBot:  I don't think so. He seemed like a nice guy, so I didn't want to make a big deal out of it.  [Reward = -0.004]
-pretrained_models/GOLD: Either he ate it, or she did and she just doesn't remember doing it. All I know is that I didn't do it, and I'm about to hulk out! [Reward = -0.080]
-pretrained_models/GODEL_LARGE: No, I'm saying it could be the guy. [Reward = -0.199]
-
-
----- Sample ID 3121 -----
-
-Speaker: A few years ago, before we got married, my wife planned a party for me for my birthday completely without me knowing.
-Listener: That sounds like a pleasant surprise! 
-Speaker: It really was!  I walked into my apartment to like 15 more people than I expected.
-
-dialogue_models/GODEL_LARGE_v0: That's a lot of people! [Reward = -0.073]
-RLHF_tuned_models/BlenderBot_v1:  Oh wow, that's a lot of people! Did you have a good time at least? [Reward = -0.039]
-RLHF_tuned_models/GODEL_LARGE_v1: That's amazing! What did you do? [Reward = -0.143]
-pretrained_models/BlenderBot:  Wow, that's a lot of people. Did you have a good time at the party? [Reward = -0.095]
-pretrained_models/GOLD: Thats so sweet of her and what a great memory to have!  [Reward = 0.089]
-pretrained_models/GODEL_LARGE: That's a lot of people! [Reward = -0.073]
-
-
----- Sample ID 2751 -----
-
-Speaker: I had just moved in to my new apartment, and every night this skinny little tabby came begging for food at my door.
-
-dialogue_models/GODEL_LARGE_v0: Oh no! I'm sorry to hear that. I'm sure you've had to deal with that. [Reward = -0.016]
-RLHF_tuned_models/BlenderBot_v1:  I love kittens! They're so cute and cuddly. Did you feed him? [Reward = -0.178]
-RLHF_tuned_models/GODEL_LARGE_v1: That sounds like a really tough situation. What did you do? [Reward = 0.072]
-pretrained_models/BlenderBot:  Aww, that's so sweet.  Did you give him some of your leftover food? [Reward = -0.007]
-pretrained_models/GPT3: That's so sweet! How long did it take for you to start feeding it? [Reward = -0.094]
-pretrained_models/GOLD: Aww - did you feed the cat? [Reward = -0.129]
-pretrained_models/GODEL_LARGE: I'm so sorry. [Reward = -0.355]
-
-
----- Sample ID 236 -----
-
-Speaker: Do you know the feeling of drinking a mug of hot cocoa with marshmallows on a cold winter's night?
-Listener: I have not tried yet, but i feel like it would be enjoying and full of delight
-
-dialogue_models/GODEL_LARGE_v0: I've never tried it, but I've heard it's good. [Reward = -0.119]
-RLHF_tuned_models/BlenderBot_v1:  Yeah, it's a great way to warm up to the cold. I recommend it.  [Reward = -0.040]
-RLHF_tuned_models/GODEL_LARGE_v1: Yeah, I can see how that would be. It's definitely a great way to relax and unwind. [Reward = 0.052]
-pretrained_models/BlenderBot:  It really is.  You should try it sometime.  Do you like hot chocolate? [Reward = -0.169]
-pretrained_models/GOLD: Next time you get a cold front in your area you should try it. It's extremely relaxing and sleep-inducing haha [Reward = 0.152]
-pretrained_models/GODEL_LARGE: I've never tried it, but I've heard it's good. [Reward = -0.119]
-
-
----- Sample ID 2859 -----
-
-Speaker: I watched The Lion King today with my daughter, reminded me of my childhood.
-
-dialogue_models/GODEL_LARGE_v0: That's a great movie. I love it. [Reward = -0.415]
-RLHF_tuned_models/BlenderBot_v1:  I love the lion king, it is one of my favorite animated films of all time. [Reward = -0.376]
-RLHF_tuned_models/GODEL_LARGE_v1: That's great! What did you think of it? [Reward = -0.366]
-pretrained_models/BlenderBot:  I love the lion king, it is one of my favorite animated films.  What did you think of it? [Reward = -0.383]
-pretrained_models/GPT3: That sounds like a really special experience! What did you enjoy the most about it? [Reward = -0.238]
-pretrained_models/GOLD: thats a good movie, cant wait for the live action version coming out [Reward = -0.306]
-pretrained_models/GODEL_LARGE: I watched The Lion King today with my daughter, reminded me of my childhood watching it with my mom. [Reward = -0.296]
+dialogue_models/GODEL_LARGE_v0: I have a cat. He is a night owl. [Emotion: caring; IP: 2; EX: 0; ER: 0; Reward: nan]
+RLHF_tuned_models/BlenderBot_v1: I do! I have a dog and a cat. I love them so much. Do you? [Emotion: caring; IP: 2; EX: 2; ER: 0; Reward: nan]
+RLHF_tuned_models/GODEL_LARGE_v1: Yes, I have a cat. He's a great cat. He's always so playful and he loves to play fetch. [Emotion: joyful; IP: 2; EX: 0; ER: 0; Reward: nan]
+pretrained_models/BlenderBot: I do! I have a dog and a cat. I love them so much. How about you? [Emotion: caring; IP: 2; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GPT3: Yes, I have two cats. How about you? [Emotion: caring; IP: 2; EX: 2; ER: 0; Reward: nan]
+pretrained_models/GODEL_LARGE: I have a cat. He is a night owl. [Emotion: caring; IP: 2; EX: 0; ER: 0; Reward: nan]
 

@@ -10,7 +10,7 @@ import pytorch_lightning as pl
 
 # User-defined Modules
 from base_classes import TokenizerBase
-from data_loader import pad_seq_and_convert_to_tensor
+from data_loader import pad_to_tensor
 from data_classes import RewardModelRawData, RewardModelBatch
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -116,9 +116,7 @@ class RewardDataModule(pl.LightningDataModule):
 def collate_fn(data: RewardModelRawData, tokenizer: TokenizerBase):
     contexts = torch.LongTensor([data.context for _ in range(len(data.targets))])
     context_mask = torch.ones_like(contexts)
-    max_len_target_seq = max([len(seq) for seq in data.targets])
-    targets = pad_seq_and_convert_to_tensor(data.targets, max_len_target_seq, tokenizer.PAD_IDX)
-    target_mask = (targets != tokenizer.PAD_IDX)
+    targets, target_mask = pad_to_tensor(data.targets, tokenizer.PAD_IDX)
     return RewardModelBatch(
         contexts=contexts,
         context_mask=context_mask,

@@ -13,7 +13,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 from data_loader import DataModule
 from rlhf_supervisor import RLHFSupervisor
 from data_classes import GenerationConfig, PPOConfig
-from setup import get_model_supervisor_and_config
+from setup import get_model_supervisor
 from utils.train import get_model_checkpoints
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -32,6 +32,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max_epochs", type=int, default=10)
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--initial_lr", type=float, default=0.00001)
+    parser.add_argument("--data_erasure_level", type=float, default=0.3)
     parser.add_argument("--few_shot_training", action="store_true")
     parser.add_argument("--beam_width", type=int, default=None)
     parser.add_argument('--sample', action='store_true', default=None)
@@ -78,13 +79,13 @@ def main():
     )
 
     # Set up dialogue and reward model as well as RLHF pipeline
-    dialogue_model = get_model_supervisor_and_config(
+    dialogue_model = get_model_supervisor(
         model=cli_args.model,
         pretrained_model_dir=cli_args.pretrained_model_dir,
         kwargs={"generation_config": generation_config}
     )
 
-    reward_model = get_model_supervisor_and_config(
+    reward_model = get_model_supervisor(
         pretrained_model_dir=cli_args.reward_model_dir,
         reward_model=True
     )
@@ -112,6 +113,7 @@ def main():
         tokenizer=dialogue_model.tokenizer,
         num_workers=max(1, os.cpu_count() // 4),
         model_has_encoder=dialogue_model.model.has_encoder,
+        data_erasure_level=cli_args.data_erasure_level,
         few_shot_training=cli_args.few_shot_training
     )
 

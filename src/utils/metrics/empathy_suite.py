@@ -37,11 +37,10 @@ def _predict_empintents(
 
     print("Predicting EmpIntents...")
     for item in tqdm(test_data):
-        context = tokenizer.sep_token.join(item['context'])
         output = item['output']
         target = item['target']
         
-        input_data = [context, output, target]
+        input_data = [output, target]
         input_ids, attention_mask = _convert_data_to_tensors(
             input_data, 
             model_args, 
@@ -63,10 +62,9 @@ def _predict_empintents(
             preds = logits.detach().cpu().numpy()
             preds = np.argmax(preds, axis=1)
         
-        assert len(preds) == 3
-        item['empintent_context'] = empintent_labels[int(preds[0])]
-        item['empintent_output'] = empintent_labels[int(preds[1])]
-        item['empintent_target'] = empintent_labels[int(preds[2])]
+        assert len(preds) == 2
+        item['empintent_output'] = empintent_labels[int(preds[0])]
+        item['empintent_target'] = empintent_labels[int(preds[1])]
 
 
 def _predict_emotions(
@@ -123,12 +121,12 @@ def _get_epitome_score(
 
     print("Predicting IP, EX, and ER scores...")
     for item in tqdm(test_data):
-        context = epitome_empathy_scorer.tokenizer.sep_token.join(item['context'])
+        prev_utt = item["context"][-1]
         output = item['output']
         target = item['target']
         
-        output_epitome_score = epitome_empathy_scorer([context], [output])
-        target_epitome_score = epitome_empathy_scorer([context], [target])
+        output_epitome_score = epitome_empathy_scorer([prev_utt], [output])
+        target_epitome_score = epitome_empathy_scorer([prev_utt], [target])
         
         item['epitome_IP_output'] = output_epitome_score['IP'][0][0]
         item['epitome_EX_output'] = output_epitome_score['EX'][0][0]

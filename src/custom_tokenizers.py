@@ -108,6 +108,7 @@ class DialoGPTTokenizer(HuggingFaceTokenizerBase):
         if version not in ["small", "medium", "large"]:
             raise ValueError("Model version must be 'small', 'medium' or 'large'!")
         super().__init__(AutoTokenizer.from_pretrained(f"microsoft/DialoGPT-{version}"))
+        self.tokenizer.truncation_side = "left"
 
     def encode_text(
         self,
@@ -115,14 +116,16 @@ class DialoGPTTokenizer(HuggingFaceTokenizerBase):
         *_
     ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
     
-        if type(text) == str:
-            text = [text]
-        input_ = f"{f' {self.tokenizer.eos_token} '.join(text)} {self.tokenizer.eos_token}"
-
-        token_ids = self.tokenizer(
-            input_, 
-            add_special_tokens=False
-        )["input_ids"]
+        if type(text) == list:
+            input_ = f"{f' {self.tokenizer.eos_token} '.join(text)} {self.tokenizer.eos_token}"
+            token_ids = self.tokenizer(
+                input_,
+                truncation=True,
+                max_length=self.tokenizer.model_max_length
+            )["input_ids"]
+        else:
+            token_ids = self.tokenizer(text)["input_ids"] + [self.tokenizer.eos_token_id]
+            token_ids = token_ids[:self.tokenizer.model_max_length]
 
         return token_ids, None
 

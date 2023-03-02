@@ -7,7 +7,7 @@ from typing import Optional
 
 # User-defined Modules
 from data_loader import collate_batch
-from setup import get_model_supervisor_and_config
+from setup import get_model_supervisor
 from data_classes import ModelRawData, GenerationConfig
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -67,7 +67,7 @@ def main():
     )
 
     # Set up dialogue model and configuration
-    model_supervisor = get_model_supervisor_and_config(
+    model_supervisor = get_model_supervisor(
         model=cli_args.model,
         pretrained_model_dir=cli_args.pretrained_model_dir,
         kwargs={"generation_config": generation_config}
@@ -79,7 +79,7 @@ def main():
     instruction = initialise_interface()
 
     while True:
-        speaker_utterance = input(f"Speaker: ").strip()
+        speaker_utterance = input(f"Human: ").strip()
         if speaker_utterance == "<quit>":
             os.system("clear")
             break
@@ -107,7 +107,7 @@ def main():
 
         response = model_supervisor.generate(batch.contexts, batch.context_mask)
         decoded_reponse = tokenizer.decode(response)[0]
-        print(f"Dialogue Model: {decoded_reponse}")
+        print(f"{type(model_supervisor.model).__name__}: {decoded_reponse}")
 
         context.append(decoded_reponse)
         print("")

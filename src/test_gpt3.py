@@ -9,22 +9,20 @@ import argparse
 from tqdm import tqdm
 from openai.error import RateLimitError
 
-import torch
-
 # User-defined Modules
 from utils.metrics.full_suite import compute_test_metrics
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
-openai.organization = "org-EfQ17TvbVssFVjhyWwHXaVwk"
-openai.api_key = "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"
+openai.organization = "org-d2uKBRnpSfSqcHfeWCRLDIMR"
+openai.api_key = "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"
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()
 
     parser.add_argument("--dataset_dir", type=str, default=None, required=True)
     parser.add_argument("--output_dir", type=str, default="/home/tb662/rds/hpc-work/automating-empathy-project/pretrained_models/GPT3")
-    parser.add_argument("--force_new", action='store_true', help="Flag to ignore and overwrite pre-saved test data")
+    parser.add_argument("--reuse_cache", action='store_true')
     parser.add_argument("--emo_classifier_dir", type=str, default=None)
     parser.add_argument("--intent_classifier_dir", type=str, default=None)
     parser.add_argument("--epitome_dir", type=str, default=None)
@@ -32,7 +30,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max_tokens", type=int, default=256)
     parser.add_argument("--temperature", type=float, default=0.5)
     parser.add_argument("--top_p", type=float, default=1.0)
-    parser.add_argument("--pred_n_grams", type=int, default=4)
+    parser.add_argument("--metric_n_grams", type=int, default=4)
     parser.add_argument("--max_giveup_time", type=int, default=600)
 
     cli_args = parser.parse_args()
@@ -47,17 +45,16 @@ def main():
     
     # Create output directory if does not exist
     output_dir = os.path.abspath(cli_args.output_dir)
-    if not os.path.isdir(output_dir):
+    test_fpath = os.path.join(output_dir, "test_data.json")
+    if cli_args.reuse_cache:
+        test_data = json.load(open(test_fpath))
+        print(f"{len(test_data)} cached samples detected at '{test_fpath}'")
+        print("WARNING: Generation will continue for the remaining test samples. " + 
+              "Make sure cached data matches the specified dataset!")
+    else:
+        test_data = []
         os.makedirs(output_dir)
         print(f"Created test output directory at '{output_dir}'")
-    
-    # Check if any test data is saved at the output directory
-    test_data = []
-    test_fpath = os.path.join(output_dir, "test_data.json")
-    if (not cli_args.force_new) and (os.path.isfile(test_fpath)):
-        test_data = json.load(open(test_fpath))
-        print(f"{len(test_data)} tested samples detected at '{test_fpath}'")
-        print("Generation will continue for the remaining test samples.")
 
     # Load remaining contexts and targets from test dataset
     data_path = os.path.abspath(cli_args.dataset_dir)
@@ -104,26 +101,22 @@ def main():
             test_data.append(test_entry)
             with open(test_fpath, "w") as f:
                 json.dump(test_data, f)
-
-        with open(test_fpath, "w") as f:
-            test_data = sorted(test_data, key=lambda x:x["id"])
-            json.dump(test_data, f)
-            print(f"All test data saved at '{test_fpath}'")
     else:
-        print("No samples left to generate!")
+        print("No samples left to test!")
 
     test_metrics, classwise_metrics = compute_test_metrics(
-        test_data,
-        torch.device("cpu"),
-        cli_args.emo_classifier_dir,
-        cli_args.intent_classifier_dir,
-        cli_args.epitome_dir,
-        cli_args.reward_model_dir,
-        None,
-        None,
-        None,
-        cli_args.pred_n_grams,
+        test_data=test_data,
+        emo_classifier_dir=cli_args.emo_classifier_dir,
+        intent_classifier_dir=cli_args.intent_classifier_dir,
+        epitome_dir=cli_args.epitome_dir,
+        reward_model_dir=cli_args.reward_model_dir,
+        metric_n_grams=cli_args.metric_n_grams,
     )
+
+    with open(test_fpath, "w") as f:
+        test_data = sorted(test_data, key=lambda x:x["id"])
+        json.dump(test_data, f)
+        print(f"All test data saved at '{test_fpath}'")
 
     fname = f"{output_dir}/test_metrics.json"
     with open(fname, "w") as f:
@@ -133,7 +126,7 @@ def main():
     with open(fname, "w") as f:
         json.dump(classwise_metrics, f)
 
-    print(f"All main and classwise test metrics saved at '{output_dir}'")
+    print(f"All test metrics saved at directory '{output_dir}'")
 
 if __name__ == "__main__":
     main()

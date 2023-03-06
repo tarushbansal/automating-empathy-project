@@ -38,6 +38,8 @@ def compute_test_metrics(
 
     if test_data is None:
         raise ValueError("No test data supplied to compute metrics!")
+    if device is None:
+        device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
     print("Computing test metrics...")
 

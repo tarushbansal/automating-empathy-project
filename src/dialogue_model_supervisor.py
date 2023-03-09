@@ -27,6 +27,7 @@ class DialogueModelSupervisor(pl.LightningModule):
         config: ModelConfig.__dict__,
         batch_size:  Optional[int] = None,
         initial_lr: Optional[float] = None,
+        data_erasure_level:  Optional[float] = None,
         metric_n_grams: Optional[int] = None,
         test_output_dir: Optional[str] = None,
         emo_classifier_dir: Optional[str] = None,
@@ -55,6 +56,7 @@ class DialogueModelSupervisor(pl.LightningModule):
 
         self.batch_size = batch_size
         self.initial_lr = initial_lr
+        self.data_erasure_level = data_erasure_level
         self.test_output_dir = test_output_dir
         self.emo_classifier_dir = emo_classifier_dir
         self.intent_classifier_dir = intent_classifier_dir
@@ -68,7 +70,7 @@ class DialogueModelSupervisor(pl.LightningModule):
             "sync_dist": True
         }
         
-        self.save_hyperparameters("config", "batch_size", "initial_lr")
+        self.save_hyperparameters("config", "batch_size", "initial_lr", "data_erasure_level")
 
     def forward(
         self, 

@@ -331,6 +331,8 @@ def compute_empathy_metrics(
             emo_targets, 
             EMOTIONS
         )
+    else:
+        print("USER WARNING: No emotion classifier directory supplied!")
     
     # Load classifier and predict target and output intents
     if intent_classifier_dir is not None:
@@ -353,6 +355,8 @@ def compute_empathy_metrics(
             empintent_targets, 
             EMPINTENTS
         )
+    else:
+        print("USER WARNING: No intent classifier directory supplied!")
 
     # Load empathy scorer and compute scores
     if epitome_dir is not None:
@@ -372,6 +376,8 @@ def compute_empathy_metrics(
         main_metrics['diff_IP'] = sum(diff_IP_scores) / len(diff_IP_scores)
         main_metrics['diff_EX'] = sum(diff_EX_scores) / len(diff_EX_scores)
         main_metrics['diff_ER'] = sum(diff_ER_scores) / len(diff_ER_scores)
+    else:
+        print("USER WARNING: No epitome models directory supplied!")
 
     return main_metrics, classwise_metrics
 

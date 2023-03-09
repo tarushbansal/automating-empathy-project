@@ -69,10 +69,6 @@ def main(
                 data.append(metric_data[model].get(metric, None))
             writer.writerow(data)
 
-    for id in list(text_data.keys()):
-        if len(text_data[id].keys()) <= 2:
-            del text_data[id]
-
     for id in random.sample(list(text_data.keys()), cli_args.num_samples):
         print(f"\n---- Sample ID {id} -----\n")
         context = text_data[id].pop("context")

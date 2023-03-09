@@ -27,7 +27,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--epitome_dir", type=str, default=None)
     parser.add_argument("--reward_model_dir", type=str, default=None)
     parser.add_argument("--batch_size", type=int, default=32)
-    parser.add_argument("--data_erasure_level", type=float, default=0.3)
+    parser.add_argument("--data_erasure_level", type=float, default=1.0)
     parser.add_argument("--metric_n_grams", type=int, default=4)
     parser.add_argument("--beam_width", type=int, default=None)
     parser.add_argument('--sample', action='store_true', default=None)

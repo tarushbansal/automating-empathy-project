@@ -32,7 +32,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max_epochs", type=int, default=10)
     parser.add_argument("--batch_size", type=int, default=8)
     parser.add_argument("--initial_lr", type=float, default=0.00001)
-    parser.add_argument("--data_erasure_level", type=float, default=0.3)
+    parser.add_argument("--data_erasure_level", type=float, default=1.0)
     parser.add_argument("--few_shot_training", action="store_true")
     parser.add_argument("--beam_width", type=int, default=None)
     parser.add_argument('--sample', action='store_true', default=None)
@@ -103,7 +103,8 @@ def main():
             entropy_coeff=cli_args.entropy_coeff
         ),
         initial_lr=cli_args.initial_lr,
-        batch_size=cli_args.batch_size * num_devices
+        batch_size=cli_args.batch_size * num_devices,
+        data_erasure_level=cli_args.data_erasure_level
     )
 
     # Set up data module

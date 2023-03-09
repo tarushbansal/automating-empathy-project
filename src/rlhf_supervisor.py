@@ -13,7 +13,7 @@ import pytorch_lightning as pl
 from transformers.optimization import get_linear_schedule_with_warmup
 
 # User-defined Modules
-from data_loader import pad_seq_and_convert_to_tensor
+from data_loader import pad_to_tensor
 from dialogue_model_supervisor import DialogueModelSupervisor
 from reward_model_supervisor import RewardModelSupervisor
 from data_classes import ModelBatch, RewardModelBatch, PPOConfig
@@ -28,7 +28,8 @@ class RLHFSupervisor(pl.LightningModule):
         reward_model: RewardModelSupervisor,
         ppo_config: Optional[PPOConfig] = None,   
         initial_lr: Optional[float] = None,
-        batch_size: Optional[int] = None
+        batch_size: Optional[int] = None,
+        data_erasure_level:  Optional[float] = None,
     ) -> None:
         super().__init__()
         self.ref_model = dialogue_model
@@ -37,6 +38,7 @@ class RLHFSupervisor(pl.LightningModule):
         self.ppo_config = ppo_config
         self.initial_lr = initial_lr
         self.batch_size = batch_size
+        self.data_erasure_level = data_erasure_level
         self.dropout = nn.Dropout()
         self.value_head = nn.Linear(dialogue_model.model.hidden_size, 1)
         self.default_log_config = {
@@ -54,6 +56,7 @@ class RLHFSupervisor(pl.LightningModule):
             "config": dialogue_model.hparams["config"],
             "initial_lr": self.initial_lr,
             "batch_size": self.batch_size,
+            "data_erasure_level": self.data_erasure_level,
             "generation_config": dialogue_model.generation_config.__dict__,
             "ppo_config": ppo_config.__dict__
         })
@@ -120,39 +123,33 @@ class RLHFSupervisor(pl.LightningModule):
 
         with torch.no_grad():
             # ROLLOUT PHASE
-            enc_predictions = self.tuned_model.generate(
+            enc_outputs = self.tuned_model.generate(
                 batch.contexts, 
                 batch.context_mask, 
                 default_config = True if stage == "val" else False
             )
-            predictions = self.tuned_model.tokenizer.decode(enc_predictions)
+            outputs = self.tuned_model.tokenizer.decode(enc_outputs)
 
             # EVALUATION PHASE
             contexts = [self.reward_model.tokenizer.encode_text(context)[0] 
                         for context in batch.raw_contexts]
-            max_len_context_seq = max([len(seq) for seq in contexts])
-            contexts = pad_seq_and_convert_to_tensor(
+            contexts, context_mask = pad_to_tensor(
                 contexts,
-                max_len_context_seq,
                 pad_token=self.reward_model.tokenizer.PAD_IDX
             )
-            contexts = contexts.to(device)
-            targets = [self.reward_model.tokenizer.encode_text(prediction)[0]
-                       for prediction in predictions]
-            max_len_target_seq = max([len(seq) for seq in targets])
-            targets = pad_seq_and_convert_to_tensor(
+            targets = [self.reward_model.tokenizer.encode_text(output)[0]
+                       for output in outputs]
+            targets, target_mask = pad_to_tensor(
                 targets,
-                max_len_target_seq,
                 pad_token=self.reward_model.tokenizer.PAD_IDX
             )
-            targets = targets.to(device)
             self.reward_model.eval()
             scores = self.reward_model.forward(
                 RewardModelBatch(
-                    contexts=contexts,
-                    context_mask=(contexts != self.reward_model.tokenizer.PAD_IDX),
-                    targets=targets,
-                    target_mask=(targets != self.reward_model.tokenizer.PAD_IDX),
+                    contexts=contexts.to(device),
+                    context_mask=context_mask.to(device),
+                    targets=targets.to(device),
+                    target_mask=target_mask.to(device),
                     ratings=None
                 )
             )
@@ -161,8 +158,8 @@ class RLHFSupervisor(pl.LightningModule):
         # OPTIMIZATION PHASE   
 
         # Compute new and reference log probability and advantage for each generated token
-        batch.targets = enc_predictions
-        batch.target_mask = (enc_predictions != self.tuned_model.tokenizer.PAD_IDX)
+        batch.targets = enc_outputs
+        batch.target_mask = (enc_outputs != self.tuned_model.tokenizer.PAD_IDX)
         output, _ = self.tuned_model.forward(batch)
         target_logits = (
             output.logits[:, :-1, :] 

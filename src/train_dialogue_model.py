@@ -26,7 +26,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--num_nodes", type=int, default=1)
     parser.add_argument("--max_epochs", type=int, default=10)
     parser.add_argument("--batch_size", type=int, default=8)
-    parser.add_argument("--data_erasure_level", type=float, default=0.3)
+    parser.add_argument("--data_erasure_level", type=float, default=0.5)
     parser.add_argument("--initial_lr", type=float, default=0.00001)
     parser.add_argument("--pretrained_model_dir", type=str, default=None)
     parser.add_argument("--few_shot_training", action="store_true")
@@ -56,7 +56,8 @@ def main():
         pretrained_model_dir=cli_args.pretrained_model_dir,
         kwargs={
             "batch_size": cli_args.batch_size * num_devices,
-            "initial_lr": cli_args.initial_lr
+            "initial_lr": cli_args.initial_lr,
+            "data_erasure_level": cli_args.data_erasure_level
         }
     )
 

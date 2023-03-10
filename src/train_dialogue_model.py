@@ -26,7 +26,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--num_nodes", type=int, default=1)
     parser.add_argument("--max_epochs", type=int, default=10)
     parser.add_argument("--batch_size", type=int, default=8)
-    parser.add_argument("--data_erasure_level", type=float, default=0.5)
+    parser.add_argument("--data_erasure_level", type=float, default=0.3)
     parser.add_argument("--initial_lr", type=float, default=0.00001)
     parser.add_argument("--pretrained_model_dir", type=str, default=None)
     parser.add_argument("--few_shot_training", action="store_true")

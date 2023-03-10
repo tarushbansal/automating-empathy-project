@@ -1,7 +1,0 @@
-{
-    "GOLD": "/home/tb662/rds/hpc-work/automating-empathy-project/pretrained_models/GOLD",
-    "GPT3": "/home/tb662/rds/hpc-work/automating-empathy-project/pretrained_models/GPT3",
-    "BlenderBot": "/home/tb662/rds/hpc-work/automating-empathy-project/pretrained_models/BlenderBot",
-    "GODEL_RLHF": "/home/tb662/rds/hpc-work/RLHF_tuned_models/GODEL_LARGE/tensorboard_logs/version_1",
-    "GODEL_EMPDIAL": "/home/tb662/rds/hpc-work/dialogue_models/GODEL_LARGE/tensorboard_logs/version_0"
-}

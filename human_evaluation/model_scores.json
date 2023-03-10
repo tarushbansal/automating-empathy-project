@@ -1,1 +1,0 @@
-{"GOLD": {"Empathy": 2.933333333333333, "Specificity": 3.533333333333333}, "GPT3": {"Empathy": 3.5, "Specificity": 3.2666666666666666}, "BlenderBot": {"Empathy": 2.066666666666667, "Specificity": 2.3666666666666667}, "GODEL_RLHF": {"Empathy": 2.0, "Specificity": 2.566666666666667}, "GODEL_EMPDIAL": {"Empathy": 1.5333333333333334, "Specificity": 1.9666666666666666}}

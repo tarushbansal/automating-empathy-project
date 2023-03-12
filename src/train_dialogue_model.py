@@ -82,7 +82,7 @@ def main():
     # Set up trainer
     trainer = pl.Trainer(
         accelerator="auto",
-        devices="auto",
+        devices=torch.cuda.device_count(),
         num_nodes=cli_args.num_nodes,
         strategy="ddp_find_unused_parameters_false",
         max_epochs=cli_args.max_epochs,

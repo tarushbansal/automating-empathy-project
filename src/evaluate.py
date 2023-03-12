@@ -5,6 +5,7 @@ import os
 import json
 import random
 import argparse
+import numpy as np
 from typing import List, Dict, Union
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -161,8 +162,11 @@ def main() -> None:
     scores = {model: {crit: [] for crit in criteria} for model in model_names}
     for model in scores:
         for crit in criteria:
-            ratings = [item["models"][model][crit] for item in eval_data]
-            scores[model][crit] = sum(ratings) / len(ratings)
+            ratings = np.array([item["models"][model][crit] for item in eval_data])
+            scores[model][crit] = {
+                "mean": np.mean(ratings),
+                "var": np.var(ratings)
+            }
 
     with open(f"{output_dir}/model_scores.json", "w") as f:
         json.dump(scores, f)
@@ -173,10 +177,11 @@ def main() -> None:
         print(f"----- {crit} Scores -----")
         for model, score in sorted(
             [(model, scores[model][crit]) for model in scores], 
-            key=lambda x: x[1], 
+            key=lambda x: x[1]["mean"], 
             reverse=True
         ):
-            print(f"{model}: {score:.3f}")
+            mean = score["mean"]
+            print(f"{model}: {mean:.3f}")
         print("")
 
 

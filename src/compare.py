@@ -15,7 +15,7 @@ def parse_args() -> argparse.Namespace:
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--num_samples", type=int, default=5)
+    parser.add_argument("--num_samples", type=int, default=50)
     cli_args = parser.parse_args()
 
     return cli_args

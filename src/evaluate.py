@@ -6,6 +6,7 @@ import json
 import random
 import argparse
 import numpy as np
+import pandas as pd
 from typing import List, Dict, Union
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -68,7 +69,13 @@ def load_data(
             id = item["id"]
             if id not in data:
                 data[id] = {"context": item["context"], "models": {}}
-            data[id]["models"][model_name] = {"output": item["output"]}
+            data[id]["models"][model_name] = {
+                "output": item["output"],
+                "diff_ER": (item["epitome_ER_output"] - item["epitome_ER_target"]) ** 2,
+                "diff_EX": (item["epitome_EX_output"] - item["epitome_EX_target"]) ** 2,
+                "diff_IP": (item["epitome_IP_output"] - item["epitome_IP_target"]) ** 2,
+                "reward": item["reward_output"]
+            }
     
     return data
 
@@ -170,6 +177,22 @@ def main() -> None:
 
     with open(f"{output_dir}/model_scores.json", "w") as f:
         json.dump(scores, f)
+    
+    diff_ER, diff_EX, diff_IP, reward, empathy, specificity = ([] for _ in range(6))
+    for item in eval_data:
+        for model in item["models"]:
+            diff_ER.append(item["models"][model]["diff_ER"] if model != "GOLD" else None)
+            diff_EX.append(item["models"][model]["diff_EX"] if model != "GOLD" else None)
+            diff_IP.append(item["models"][model]["diff_IP"] if model != "GOLD" else None)
+            reward.append(item["models"][model]["reward"])
+            empathy.append(item["models"][model]["Empathy"])
+            specificity.append(item["models"][model]["Specificity"])
+    df = pd.DataFrame(
+        np.array([diff_ER, diff_EX, diff_IP, reward, empathy, specificity]).T, 
+        columns=["diff_ER", "diff_EX", "diff_IP", "reward", "empathy", "specificity"]
+    )
+    corr_matrix = df.corr(numeric_only=False)
+    corr_matrix.to_csv(f"{output_dir}/correlation_matrix.csv")
 
     print(f"All human evaluation results saved at directory '{output_dir}'\n")
 
@@ -183,6 +206,9 @@ def main() -> None:
             mean = score["mean"]
             print(f"{model}: {mean:.3f}")
         print("")
+    
+    print("Pearson's Correlation Matrix:\n")
+    print(corr_matrix)
 
 
 if __name__ == "__main__":

@@ -1,1 +1,2717 @@
-[{"id": 3771, "context": ["I was in a hospital and a guy game in with some really bad burns."], "models": {"GOLD": {"output": "oh my gosh. what happened to him?", "Empathy": 3, "Specificity": 3}, "GPT3": {"output": "Oh no, that must have been really tough to see. How did you handle it?", "Empathy": 4, "Specificity": 4}, "BlenderBot": {"output": "Oh no! I hope you are okay. Did you have to go to the ER?", "Empathy": 1, "Specificity": 1}, "GODEL_SODA_RLHF": {"output": "Oh, that's terrible! What happened?", "Empathy": 2, "Specificity": 2}, "GODEL_EMPDIAL_RLHF": {"output": "That's awful. Did you get any help?", "Empathy": 1, "Specificity": 2}}}, {"id": 165, "context": ["When I bought my first house I put down 20% of the loan, which made me broke quick. My monthly paycheck helped me with bills but my parents bought me groceries for a month until I got on my feet. SO grateful for them", "I would be too! You did what you had to do!", "Yes, I am always better off with them as my parents, they want to see us succeed", "Do you find the home buying experience worth it?", "Yes, it was well worth it! I love being independant. teaches you a lot.", "How long do you plan on staying in that house?", "Maybe 5 more years then I am ready for something bigger. Probably when I get married"], "models": {"GOLD": {"output": "Well that's awesome! I'm happy for you!", "Empathy": 3, "Specificity": 0}, "GPT3": {"output": "That makes sense. It's great that you have a plan for the future.", "Empathy": 5, "Specificity": 4}, "BlenderBot": {"output": "That's a long time to wait. Do you have any plans for when you get married?", "Empathy": 1, "Specificity": 3}, "GODEL_SODA_RLHF": {"output": "That sounds like a great plan! I'm sure you will be happy with whatever you decide to do.", "Empathy": 4, "Specificity": 2}, "GODEL_EMPDIAL_RLHF": {"output": "That's a great plan! I hope you have a great marriage!", "Empathy": 2, "Specificity": 3}}}, {"id": 1207, "context": ["I finally got a new bike! I've been wanting one for so long!"], "models": {"GOLD": {"output": "There are so many bike trails available now. You are going to have a lot of fun.", "Empathy": 4, "Specificity": 3}, "GPT3": {"output": "That's great! What kind of bike did you get?", "Empathy": 3, "Specificity": 3}, "BlenderBot": {"output": "That's awesome! What kind of bike did you get? Did you get a good deal?", "Empathy": 4, "Specificity": 3}, "GODEL_SODA_RLHF": {"output": "That's great! What kind of bike did you get?", "Empathy": 3, "Specificity": 3}, "GODEL_EMPDIAL_RLHF": {"output": "That's awesome! I've been wanting a bike for a long time too.", "Empathy": 1, "Specificity": 3}}}, {"id": 3376, "context": ["I had the most wonderful week recently. My neighbors weren't here and I could do whatever I wanted without them stomping on my head!"], "models": {"GOLD": {"output": "That sounds like a relief.", "Empathy": 3, "Specificity": 3}, "GPT3": {"output": "That sounds great! It must have been so nice to have some peace and quiet. What did you do with all that extra time?", "Empathy": 4, "Specificity": 4}, "BlenderBot": {"output": "That's awesome! I'm glad you had such a great week. What did you do?", "Empathy": 3, "Specificity": 4}, "GODEL_SODA_RLHF": {"output": "That sounds like a great week! What did you do?", "Empathy": 1, "Specificity": 2}, "GODEL_EMPDIAL_RLHF": {"output": "That's a great feeling! I hope you have a great weekend!", "Empathy": 1, "Specificity": 1}}}, {"id": 3421, "context": ["I had a dream the other night about my friends from high school. It brought back all kinds of memories from my teen years and thinking back made me smile.", "Did you tell anyone about the dream?", "I told my husband. The dream made me miss my best friend from high school.", "You should call your best friend on the telephone!"], "models": {"GOLD": {"output": "I actually sent her a message through facebook.", "Empathy": 3, "Specificity": 4}, "GPT3": {"output": "Yes, that's a great idea. I'm going to do that today. Thanks for the suggestion!", "Empathy": 3, "Specificity": 2}, "BlenderBot": {"output": "That's a good idea. I'll have to do that. Thank you for the suggestion.", "Empathy": 3, "Specificity": 2}, "GODEL_SODA_RLHF": {"output": "I don't know if I can do that. It's just so hard to talk to her.", "Empathy": 0, "Specificity": 3}, "GODEL_EMPDIAL_RLHF": {"output": "I will. I haven't been able to call him in a while.", "Empathy": 4, "Specificity": 4}}}, {"id": 2404, "context": ["We had to clean out our storage building because of roof damage. I found an old box of pictures!", "What of?", "My family and all kinds of old memories, birthdays, festivals, swimming, and other stuff"], "models": {"GOLD": {"output": "Oh, that is awesome, I love those trips down the old memory lane", "Empathy": 4, "Specificity": 4}, "GPT3": {"output": "That sounds like it was a really special find! What was it like going through them?", "Empathy": 5, "Specificity": 4}, "BlenderBot": {"output": "That's great! I bet it brought back a lot of good memories for you.", "Empathy": 4, "Specificity": 4}, "GODEL_SODA_RLHF": {"output": "That's amazing! I'm so glad you found them.", "Empathy": 2, "Specificity": 0}, "GODEL_EMPDIAL_RLHF": {"output": "That's a lot of memories!", "Empathy": 1, "Specificity": 3}}}, {"id": 4573, "context": ["But yeah - school started for the kids today and it was weird how quiet it was once the bus pulled away."], "models": {"GOLD": {"output": "Oh, but I bet you appreciated it! Summer can get long. ", "Empathy": 5, "Specificity": 4}, "GPT3": {"output": "That must have been really strange for you. How are you feeling about it?", "Empathy": 4, "Specificity": 3}, "BlenderBot": {"output": "Yeah, it's weird to think about how long it's been since I was a kid.", "Empathy": 0, "Specificity": 3}, "GODEL_SODA_RLHF": {"output": "Yeah, I know what you mean. It's like everyone is just settling down and enjoying the day.", "Empathy": 1, "Specificity": 3}, "GODEL_EMPDIAL_RLHF": {"output": "That's a good thing. It's always a little quiet when school starts.", "Empathy": 1, "Specificity": 4}}}, {"id": 2245, "context": ["So my car wouldn't start today after work. I kind of hate my car!", "That's terrible to hear. Is it old?", "Oh yes, very old. It's a 2002 and while I've had it for 6 years now, I'm finally starting to grow tired of it."], "models": {"GOLD": {"output": "Are you thinking of getting a new car?", "Empathy": 4, "Specificity": 3}, "GPT3": {"output": "I understand. What kind of car is it?", "Empathy": 0, "Specificity": 3}, "BlenderBot": {"output": "I'm sorry to hear that. I hope you can find a way to get it fixed.", "Empathy": 3, "Specificity": 2}, "GODEL_SODA_RLHF": {"output": "Well, maybe you should get a new one. It's not like you're going to be able to fix it overnight.", "Empathy": 3, "Specificity": 4}, "GODEL_EMPDIAL_RLHF": {"output": "That's a shame. It's a good thing you have a car.", "Empathy": 1, "Specificity": 3}}}, {"id": 4084, "context": ["I had to schedule an appointment with the dentist after not visiting one in five years.", "That is crazy. Did you not have insurance for all these years you missed the dentist appointments?", "I do not have insurance. I went anyway because I had a problem with one tooth."], "models": {"GOLD": {"output": "I hope the problem was not deep in the enamel of the tooth since that requires a lot of work.", "Empathy": 4, "Specificity": 5}, "GPT3": {"output": "That's really brave of you to go without insurance. Did they give you a good estimate of how much it will cost?", "Empathy": 5, "Specificity": 5}, "BlenderBot": {"output": "I am sorry to hear that. I hope you are able to get it taken care of soon.", "Empathy": 3, "Specificity": 2}, "GODEL_SODA_RLHF": {"output": "That is really tough. I'm sure you'll be able to get it fixed soon.", "Empathy": 2, "Specificity": 1}, "GODEL_EMPDIAL_RLHF": {"output": "That is a good thing to do. It is always good to have a dentist appointment.", "Empathy": 2, "Specificity": 3}}}, {"id": 4367, "context": ["My ex and I broke up because he decided that he would no longer be willing to leave his job from overwork, like 70 plus hours a week.", "I am sorry. Breakups are the worst. Did he just not want to give up overtime or he worked 70hours always?", "He claims that he kept getting raises and felt obligated to work even harder. So he just kept working more and more and I rarely got to spend time with him and he was always tired."], "models": {"GOLD": {"output": "That's rough but you deserve someone who is willing or wants to make the time for you. Never settle for less than what you are willing to settle for.", "Empathy": 5, "Specificity": 5}, "GPT3": {"output": "That must have been really hard for you. It sounds like it was a difficult situation for both of you. Is there anything you can do to make it easier on yourself?", "Empathy": 3, "Specificity": 2}, "BlenderBot": {"output": "That is terrible. I hope you are able to move on and find someone that will make you happy.", "Empathy": 3, "Specificity": 3}, "GODEL_SODA_RLHF": {"output": "That sounds like a really tough situation. I'm sure you're feeling really frustrated right now.", "Empathy": 2, "Specificity": 1}, "GODEL_EMPDIAL_RLHF": {"output": "That is a very sad thing to hear. I am sure you are a great person.", "Empathy": 1, "Specificity": 1}}}, {"id": 3810, "context": ["I just bought a brand new necklace and shirt."], "models": {"GOLD": {"output": "What kind of necklace did you purchase? It's good to treat yourself some times.", "Empathy": 5, "Specificity": 4}, "GPT3": {"output": "That sounds great! What did you get?", "Empathy": 1, "Specificity": 1}, "BlenderBot": {"output": "That's awesome! What kind of necklaces did you get? I love new jewelry!", "Empathy": 4, "Specificity": 4}, "GODEL_SODA_RLHF": {"output": "That's great! What kind of necklace and shirt did you get?", "Empathy": 3, "Specificity": 4}, "GODEL_EMPDIAL_RLHF": {"output": "That's a great purchase! What color is the necklace?", "Empathy": 2, "Specificity": 4}}}, {"id": 4956, "context": ["I came home the other day and my roommate had a friend over. I've only seen him with a friend over once in my 3.5 years of living here."], "models": {"GOLD": {"output": "Wow. That must be a very special friend. I net you were surprised.", "Empathy": 2, "Specificity": 3}, "GPT3": {"output": "That must have been a surprise. Did you two talk or did you just leave them to their own devices?", "Empathy": 4, "Specificity": 3}, "BlenderBot": {"output": "Wow, that's a long time. How did you feel when you first saw him/her?", "Empathy": 1, "Specificity": 1}, "GODEL_SODA_RLHF": {"output": "That's weird. I've only seen him with a friend once too. What happened?", "Empathy": 0, "Specificity": 4}, "GODEL_EMPDIAL_RLHF": {"output": "That's a good thing. It's nice to have friends over.", "Empathy": 3, "Specificity": 3}}}, {"id": 4687, "context": ["I found out that my daughter is moving out. My youngest one told me so."], "models": {"GOLD": {"output": "How do you feel about that ?", "Empathy": 4, "Specificity": 1}, "GPT3": {"output": "Oh, no! That must be difficult for you. Is there anything I can do to help?", "Empathy": 3, "Specificity": 1}, "BlenderBot": {"output": "Oh no, I'm sorry to hear that. Is she going to be moving far away?", "Empathy": 4, "Specificity": 3}, "GODEL_SODA_RLHF": {"output": "Oh, wow. I'm so sorry to hear that. What happened?", "Empathy": 3, "Specificity": 0}, "GODEL_EMPDIAL_RLHF": {"output": "That is so sad. I hope you have a good time with her.", "Empathy": 1, "Specificity": 0}}}, {"id": 5129, "context": ["I love my girlfriend. She would never cheat on me", "That is really nice that you guys have that trust.", "I hope to make her my wife some day!"], "models": {"GOLD": {"output": "That is an awesome goal! Good luck!", "Empathy": 2, "Specificity": 2}, "GPT3": {"output": "That's wonderful! Have you talked to her about it?", "Empathy": 4, "Specificity": 3}, "BlenderBot": {"output": "I wish you the best of luck with that. It sounds like you have a great relationship.", "Empathy": 4, "Specificity": 4}, "GODEL_SODA_RLHF": {"output": "That's a great goal! I'm sure she would be happy to be your wife.", "Empathy": 3, "Specificity": 4}, "GODEL_EMPDIAL_RLHF": {"output": "That is a great goal. I am sure you will be happy.", "Empathy": 3, "Specificity": 3}}}, {"id": 2386, "context": ["You never know what someone else is going through, and looks can be deceiving. Like this old man that seemed like any other drunk.", "Yeah you can judge someone like that", "It was hard to tell honestly, but it turned out the guy was lost and diabetic. He had lost track of his friends and had no way to get home, so I hailed him a cab and paid the driver $20."], "models": {"GOLD": {"output": "Thats a nice gesture from you", "Empathy": 4, "Specificity": 3}, "GPT3": {"output": "That was really kind of you. It's so easy to jump to conclusions about someone but it's also important to remember that everyone has a story.", "Empathy": 5, "Specificity": 5}, "BlenderBot": {"output": "That was very nice of you. I'm glad you were able to help him out.", "Empathy": 4, "Specificity": 3}, "GODEL_SODA_RLHF": {"output": "That's really brave of you. I'm sure he was grateful for your help.", "Empathy": 3, "Specificity": 2}, "GODEL_EMPDIAL_RLHF": {"output": "That is a good thing to do", "Empathy": 2, "Specificity": 1}}}, {"id": 3109, "context": ["I read in the news about a family who lost all six of their animals in a house fire :(", "thats so sad oh no! thats terrible. :( ", "I know, it made me upset! My two dogs are my babies couldn't imagine loosing them."], "models": {"GOLD": {"output": "They are honestly just like children so its really sad. ", "Empathy": 3, "Specificity": 2}, "GPT3": {"output": "I completely understand. Losing a pet is like losing a family member. It's heartbreaking. Is there anything we can do to help the family?", "Empathy": 5, "Specificity": 4}, "BlenderBot": {"output": "I am so sorry to hear that. It must have been devastating for you and your family.", "Empathy": 0, "Specificity": 2}, "GODEL_SODA_RLHF": {"output": "Yeah, it's really hard to lose a pet. But you're lucky that you have them to help you through it.", "Empathy": 0, "Specificity": 3}, "GODEL_EMPDIAL_RLHF": {"output": "thats so sad! i know how you feel. i have a dog and a cat.", "Empathy": 1, "Specificity": 3}}}, {"id": 3702, "context": ["Our local organic store now stocks Indian food made by a local Indian lady - heaven, heaven, heaven!", "That is very cool!  I love when food is authentic.  Do you shop there often?"], "models": {"GOLD": {"output": "About once a week. Her husband works in the store, so he brings her food in regularly. It's such a pleasure to find such a thing - I missed my Indian food!", "Empathy": 4, "Specificity": 5}, "GPT3": {"output": "Yes, I do! They have such a great selection of fresh fruits and vegetables, as well as all sorts of Indian spices and ingredients. I'm always finding something new to try!", "Empathy": 4, "Specificity": 5}, "BlenderBot": {"output": "Yes, I love going to the local farmer's market and picking out fresh vegetables and fruits.", "Empathy": 1, "Specificity": 1}, "GODEL_SODA_RLHF": {"output": "Yeah, I do. It's a great place to find fresh, healthy food. And the prices are reasonable too.", "Empathy": 3, "Specificity": 3}, "GODEL_EMPDIAL_RLHF": {"output": "I do, it's a great place to buy organic food. It's a little expensive though, so it's a nice change of pace.", "Empathy": 4, "Specificity": 4}}}, {"id": 2466, "context": ["On our second date, my girlfriend and I stopped in a dive bar on our way back from the beach.", "what is a dive bar", "Like a hole in the wall. Cheap drinks, sometimes a little dirty, but altogether relaxed - the opposite of snoody. They had a pool table and I showed her some tricks."], "models": {"GOLD": {"output": "oh ok. We call them hole in the walls lol", "Empathy": 0, "Specificity": 4}, "GPT3": {"output": "That sounds like fun! What kind of tricks?", "Empathy": 4, "Specificity": 4}, "BlenderBot": {"output": "That sounds like a lot of fun. What kind of tricks did you show her?", "Empathy": 3, "Specificity": 4}, "GODEL_SODA_RLHF": {"output": "That sounds like fun! I've never been to a dive bar before. What did you do?", "Empathy": 1, "Specificity": 3}, "GODEL_EMPDIAL_RLHF": {"output": "that sounds like a great time", "Empathy": 2, "Specificity": 1}}}, {"id": 1189, "context": ["I got angry when she refused. But I should've been more understanding"], "models": {"GOLD": {"output": "Yes, you only hurt yourself when you get angry.", "Empathy": 3, "Specificity": 4}, "GPT3": {"output": "It sounds like you are feeling frustrated and disappointed. Is there anything I can do to help?", "Empathy": 4, "Specificity": 2}, "BlenderBot": {"output": "I'm sorry to hear that. Did she give you a reason why she didn't want to?", "Empathy": 2, "Specificity": 3}, "GODEL_SODA_RLHF": {"output": "What did you do?", "Empathy": 3, "Specificity": 1}, "GODEL_EMPDIAL_RLHF": {"output": "That's a good thing to do. It's hard to be understanding when you're being a bit of a jerk.", "Empathy": 1, "Specificity": 2}}}, {"id": 5056, "context": ["When my children were born, it was a rejoicing time for me. I can't think of a time I felt more happiness."], "models": {"GOLD": {"output": "Children are a beautiful thing for us parents. What a great memory you have of that. ", "Empathy": 4, "Specificity": 3}, "GPT3": {"output": "That's wonderful! It must have been an amazing feeling! How old are your children now?", "Empathy": 4, "Specificity": 3}, "BlenderBot": {"output": "That's so sweet. I bet you were so happy. How many kids do you have?", "Empathy": 3, "Specificity": 2}, "GODEL_SODA_RLHF": {"output": "That's great, Ayanna. I'm so glad you had such a happy time. What made you decide to have children?", "Empathy": 2, "Specificity": 3}, "GODEL_EMPDIAL_RLHF": {"output": "That's great! It's so nice to have a family that you can be proud of.", "Empathy": 3, "Specificity": 3}}}, {"id": 2261, "context": ["i hate when ash from my cigarette drops in my work pants", "oof that sucks really bad", "yeah, i haave to wait till i get home to get the stain off, it is really embarrasing"], "models": {"GOLD": {"output": "yea i can imagine it is", "Empathy": 3, "Specificity": 1}, "GPT3": {"output": "That does sound really embarrassing. Have you tried using a stain remover on it? That might help get it out faster.", "Empathy": 4, "Specificity": 4}, "BlenderBot": {"output": "I know how you feel, I've had that happen to me a few times.", "Empathy": 1, "Specificity": 0}, "GODEL_SODA_RLHF": {"output": "Yeah, it's not fun.", "Empathy": 3, "Specificity": 1}, "GODEL_EMPDIAL_RLHF": {"output": "oof that is a good thing", "Empathy": 0, "Specificity": 0}}}, {"id": 1017, "context": ["i feels happy", "That is awesome!  Is there a particular reason you are so happy?", "because i built a new house"], "models": {"GOLD": {"output": "That is something to be happy about!  Congratulations!", "Empathy": 3, "Specificity": 3}, "GPT3": {"output": "That's great! How long did it take you to build the house?", "Empathy": 4, "Specificity": 4}, "BlenderBot": {"output": "Oh wow, congratulations!  That must have taken a lot of hard work.", "Empathy": 4, "Specificity": 3}, "GODEL_SODA_RLHF": {"output": "That's amazing! What kind of house did you build?", "Empathy": 4, "Specificity": 4}, "GODEL_EMPDIAL_RLHF": {"output": "That is awesome! I am sure you will be happy for a long time to come!", "Empathy": 2, "Specificity": 2}}}, {"id": 2602, "context": ["I was terrified when I watched that horror film in the theaters"], "models": {"GOLD": {"output": "I understand. Horror movies freak me out, too. Did you watch the whole thing?", "Empathy": 4, "Specificity": 4}, "GPT3": {"output": "That sounds really frightening. What was it about the movie that scared you?", "Empathy": 3, "Specificity": 4}, "BlenderBot": {"output": "What movie was it? I've never seen a horror movie in a theater before.", "Empathy": 2, "Specificity": 3}, "GODEL_SODA_RLHF": {"output": "What was it about?", "Empathy": 2, "Specificity": 1}, "GODEL_EMPDIAL_RLHF": {"output": "That's a good movie. I'm sure you were scared.", "Empathy": 0, "Specificity": 2}}}, {"id": 352, "context": ["When I was younger, my dog died. He was getting up there in age, but he was still on the young side. Later, we heard the pet food we had been feeding him had been recalled because of similiar fatalities.", "Sorry to hear that. Did someone do anything against the company selling the food?", "No, they just had a recall. Apparently they didn't clean out their machines properly when making the food, so it got contaminated. "], "models": {"GOLD": {"output": "Someone should have sued them.", "Empathy": 4, "Specificity": 4}, "GPT3": {"output": "That's terrible. Do you think it would have been different if they had done something differently?", "Empathy": 3, "Specificity": 3}, "BlenderBot": {"output": "That's too bad. I'm glad you were able to find a solution to the problem.", "Empathy": 0, "Specificity": 1}, "GODEL_SODA_RLHF": {"output": "That's really sad. I'm sure your dog would have been very happy if he had been able to get some fresh food.", "Empathy": 0, "Specificity": 3}, "GODEL_EMPDIAL_RLHF": {"output": "That's a shame. I'm sure you're a good person for bringing it up.", "Empathy": 1, "Specificity": 1}}}, {"id": 4479, "context": ["My husband and I are going on our very first cruise in December. i can't wait!!!", "I love vacations I hope you and him have a good time.", "I hope so too. I have wanted to go on a cruise for so long. I'm happy were are able to go this year.", "What cruise line are you using did they give you a good discount."], "models": {"GOLD": {"output": "We are going with a few friends, so they booked it and we got a discount because they are returning customers.", "Empathy": 3, "Specificity": 3}, "GPT3": {"output": "Yes, we got a really good deal from Royal Caribbean. We're so excited!", "Empathy": 4, "Specificity": 4}, "BlenderBot": {"output": "It is a Royal Caribbean Cruise. We are going to the Bahamas.", "Empathy": 3, "Specificity": 4}, "GODEL_SODA_RLHF": {"output": "They are using the Carnival Cruise Line. They have a great deal on their cruises. I'm really excited to go on this cruise.", "Empathy": 2, "Specificity": 4}, "GODEL_EMPDIAL_RLHF": {"output": "I am using Carnival. I have been wanting to go for a long time. I am so excited to go.", "Empathy": 3, "Specificity": 4}}}, {"id": 4391, "context": ["I stayed at a friends house for the weekend a while back, and when I got home my bedroom was destroyed"], "models": {"GOLD": {"output": "Oh no!! That is terrible, do you know what happened? ", "Empathy": 4, "Specificity": 3}, "GPT3": {"output": "That's awful! What happened?", "Empathy": 4, "Specificity": 3}, "BlenderBot": {"output": "Oh no, that's terrible. Did you call the police? I hope you didn't lose too much.", "Empathy": 0, "Specificity": 1}, "GODEL_SODA_RLHF": {"output": "Oh my gosh, that sounds awful! What happened?", "Empathy": 4, "Specificity": 3}, "GODEL_EMPDIAL_RLHF": {"output": "That is so sad. I'm sorry to hear that. Did you have a good time?", "Empathy": 0, "Specificity": 0}}}, {"id": 3390, "context": ["i hate when my neighboors dog poops on my yard and she does nothing, i dont care if he poops if she picks it up"], "models": {"GOLD": {"output": "Maybe put the poop back on your neighbors yard?", "Empathy": 4, "Specificity": 4}, "GPT3": {"output": "That must be really annoying. Have you talked to your neighbor about it?", "Empathy": 4, "Specificity": 3}, "BlenderBot": {"output": "I hate when that happens too. It's like they don't care about anyone but themselves.", "Empathy": 3, "Specificity": 2}, "GODEL_SODA_RLHF": {"output": "That's really annoying. I'm sure you're not happy about it.", "Empathy": 3, "Specificity": 1}, "GODEL_EMPDIAL_RLHF": {"output": "That's a good thing to do. It's a good way to get rid of a dog.", "Empathy": 0, "Specificity": 0}}}, {"id": 1086, "context": ["Not long ago I realized we are more financially stable than I think we have ever been.", "That's awesome. What are you going to do about it?", "Keep moving forwards with our plans and feel great!"], "models": {"GOLD": {"output": "I'm envious. Do you have any idea of what those plans are?", "Empathy": 3, "Specificity": 4}, "GPT3": {"output": "That's great! What kind of plans do you have in mind?", "Empathy": 4, "Specificity": 3}, "BlenderBot": {"output": "I'm glad to hear that. I wish you the best of luck in your future endeavors.", "Empathy": 3, "Specificity": 2}, "GODEL_SODA_RLHF": {"output": "I'm sure you will. You've worked hard and you deserve it.", "Empathy": 2, "Specificity": 2}, "GODEL_EMPDIAL_RLHF": {"output": "That's great. I'm sure you will.", "Empathy": 1, "Specificity": 0}}}, {"id": 2858, "context": ["I know it's silly, but my friend got something I wanted in a game the other day, bit sad.", "We're all human so having a feeling like that is understandable.", "I guess, little things at times right?"], "models": {"GOLD": {"output": "Yea, I'm always surprised at how much I sweat the little things.", "Empathy": 5, "Specificity": 5}, "GPT3": {"output": "Absolutely. It's the little things that can make us feel the most joy or the most sadness.", "Empathy": 5, "Specificity": 5}, "BlenderBot": {"output": "Yeah, it's hard to be upset about something like that, but I'm sure you'll get over it.", "Empathy": 2, "Specificity": 2}, "GODEL_SODA_RLHF": {"output": "Yeah, we all have our moments.", "Empathy": 4, "Specificity": 3}, "GODEL_EMPDIAL_RLHF": {"output": "Yes, it's a little bit of a sucks to be a little bit sad.", "Empathy": 0, "Specificity": 0}}}, {"id": 1335, "context": ["my friend bought a big house and i'm happy for her but at the same time i'm a little bit jealous", "Big houses are a pain in the neck to keep clean.", "true, but there is so much space for her kid to run and play at and I live in a tiny apartment with my son"], "models": {"GOLD": {"output": "It does have its benefits.", "Empathy": 2, "Specificity": 2}, "GPT3": {"output": "That sounds like it could be really difficult. Is there anything you can do to make your living situation more comfortable for you and your son?", "Empathy": 2, "Specificity": 4}, "BlenderBot": {"output": "That's understandable. I'm sure she appreciates you being there for her when she needs it.", "Empathy": 0, "Specificity": 1}, "GODEL_SODA_RLHF": {"output": "That's true. But it's still nice to have a place to call home.", "Empathy": 4, "Specificity": 4}, "GODEL_EMPDIAL_RLHF": {"output": "That's a good thing. It's a good thing to have a place to live.", "Empathy": 1, "Specificity": 1}}}, {"id": 1210, "context": ["Pretty soon I'll be taking over my parents mortgage.  Homeownership is on the horizon.", "That's a big step. I hope it works out for you.", "A huge step. But I'm done with renting and I have a lot of renovating plans in the works."], "models": {"GOLD": {"output": "I like renovation projects. And yes, renting is a waste of money", "Empathy": 2, "Specificity": 4}, "GPT3": {"output": "That sounds exciting! I'm sure it will be a great experience. Good luck with it!", "Empathy": 3, "Specificity": 2}, "BlenderBot": {"output": "I'm sure it will be worth it in the end. Do you have any hobbies?", "Empathy": 1, "Specificity": 0}, "GODEL_SODA_RLHF": {"output": "That sounds like a great plan. I'm sure you'll be able to make it work.", "Empathy": 3, "Specificity": 1}, "GODEL_EMPDIAL_RLHF": {"output": "That's a great goal. It's always good to have goals.", "Empathy": 1, "Specificity": 2}}}, {"id": 3087, "context": ["I had a bad experience out to eat the other day.  I don't do it too often, so it was a bummer.", "That doesn't sound good. What happened that was so bad?", "The food was pretty bad and the service didn't help clear things up.  There were a lot of mistakes on top of everything.  Just general bad eating out things."], "models": {"GOLD": {"output": "That sounds like an awful experience. I probably wouldn't go back there anytime soon.", "Empathy": 1, "Specificity": 3}, "GPT3": {"output": "That sounds really frustrating. I'm sorry you had to go through that. Is there anything you can do to make sure it doesn't happen again?", "Empathy": 1, "Specificity": 1}, "BlenderBot": {"output": "Oh no, I'm sorry to hear that. I hope it didn't ruin your meal.", "Empathy": 2, "Specificity": 3}, "GODEL_SODA_RLHF": {"output": "That sounds like a pretty bad experience. I'm sorry to hear that.", "Empathy": 3, "Specificity": 2}, "GODEL_EMPDIAL_RLHF": {"output": "That's a shame. I'm sure you'll find a better place next time.", "Empathy": 3, "Specificity": 3}}}, {"id": 3324, "context": ["My husband went to a job fair and got a lot of job offers!", "Great, what is his field ?", "He is currently Active Duty Army, but is wanting to go into transportation/logistics. "], "models": {"GOLD": {"output": "I see. I hope for all the best for you and him.", "Empathy": 2, "Specificity": 1}, "GPT3": {"output": "That's great! What kind of job offers did he get?", "Empathy": 4, "Specificity": 3}, "BlenderBot": {"output": "That's great. I hope he gets the job. What kind of work does he do?", "Empathy": 1, "Specificity": 2}, "GODEL_SODA_RLHF": {"output": "That's great! What are some of the jobs he's been applying for?", "Empathy": 3, "Specificity": 3}, "GODEL_EMPDIAL_RLHF": {"output": "That's a great career choice, I'm sure he will be able to find a job soon.", "Empathy": 4, "Specificity": 4}}}, {"id": 4075, "context": ["I was a little nervous to eat some cloves of garlic for the first time"], "models": {"GOLD": {"output": "What made you nervous about it?", "Empathy": 3, "Specificity": 2}, "GPT3": {"output": "That's understandable! How did it go? Did you enjoy it?", "Empathy": 4, "Specificity": 3}, "BlenderBot": {"output": "Garlic is one of my favorite things to put on anything.  What did you have?", "Empathy": 1, "Specificity": 4}, "GODEL_SODA_RLHF": {"output": "Why were you nervous?", "Empathy": 3, "Specificity": 2}, "GODEL_EMPDIAL_RLHF": {"output": "That's a good thing to do. It's a good way to get used to it.", "Empathy": 0, "Specificity": 0}}}, {"id": 3022, "context": ["i'm so proud of my son! He learned a couple of words this week. He now knows how to ay please", "That's wonderful, they say children have a certain gift for picking up languages.", "he actually speaks 2 languages. I teach him english and russian"], "models": {"GOLD": {"output": "Wow! That's impressive and a lasting skill for your child to develop.", "Empathy": 5, "Specificity": 4}, "GPT3": {"output": "That's amazing! What a talented little guy. How old is he?", "Empathy": 5, "Specificity": 3}, "BlenderBot": {"output": "Wow, that's really impressive. I wish I could speak more than one language. What languages does he speak?", "Empathy": 1, "Specificity": 2}, "GODEL_SODA_RLHF": {"output": "That's amazing! I'm sure he's very proud of you.", "Empathy": 1, "Specificity": 0}, "GODEL_EMPDIAL_RLHF": {"output": "That's great, I'm sure he will be able to speak both languages.", "Empathy": 3, "Specificity": 3}}}, {"id": 3203, "context": ["Playing hookey can be really fun. But sometimes it backfires..."], "models": {"GOLD": {"output": "Ohh what happened?", "Empathy": 4, "Specificity": 2}, "GPT3": {"output": "What happened?", "Empathy": 4, "Specificity": 2}, "BlenderBot": {"output": "I know what you mean. It can be a lot of fun, but sometimes it can be dangerous.", "Empathy": 3, "Specificity": 4}, "GODEL_SODA_RLHF": {"output": "I know what you mean. It's like you're trying to play a game of catch and you just get caught.", "Empathy": 1, "Specificity": 0}, "GODEL_EMPDIAL_RLHF": {"output": "That's a good way to get a good laugh.", "Empathy": 0, "Specificity": 0}}}, {"id": 1279, "context": ["i felt so guilty after lying to my girlfriend", "What did you lie about, and why?", "I kissed a mutual friend of ours. I lied when she checked up on me. It was a one time thing, i did not wanted to hurt her."], "models": {"GOLD": {"output": "Best advice.  Never confess it.", "Empathy": 3, "Specificity": 4}, "GPT3": {"output": "I can understand why you would feel guilty. It sounds like you were trying to protect her from getting hurt. Have you told her the truth yet?", "Empathy": 5, "Specificity": 4}, "BlenderBot": {"output": "Oh, I see. Well, I'm sure she forgave you. It's not like you did it on purpose.", "Empathy": 3, "Specificity": 4}, "GODEL_SODA_RLHF": {"output": "That's understandable. It's not like you were cheating on her or anything.", "Empathy": 3, "Specificity": 4}, "GODEL_EMPDIAL_RLHF": {"output": "That's a good thing, you should feel better about it.", "Empathy": 0, "Specificity": 0}}}, {"id": 188, "context": ["The hardest time in my life was when my best friend died on Christmas of 2007."], "models": {"GOLD": {"output": "Wow. I'm so sorry to hear that. That would be incredibly hard. What happened?", "Empathy": 4, "Specificity": 2}, "GPT3": {"output": "I'm so sorry to hear that. It must have been incredibly difficult. What was it like for you?", "Empathy": 4, "Specificity": 2}, "BlenderBot": {"output": "I'm so sorry to hear that. How long ago was that, if you don't mind me asking?", "Empathy": 1, "Specificity": 2}, "GODEL_SODA_RLHF": {"output": "Oh, I'm so sorry. That must have been really tough for you.", "Empathy": 3, "Specificity": 1}, "GODEL_EMPDIAL_RLHF": {"output": "That is so sad. I am sorry to hear that. I hope you have a good time.", "Empathy": 0, "Specificity": 0}}}, {"id": 3716, "context": ["I was on the patio and a giant roach crawled out from underneath."], "models": {"GOLD": {"output": "Those are my nightmares. They are so big where I live in the South.", "Empathy": 4, "Specificity": 4}, "GPT3": {"output": "Oh no! That must have been so scary. Did you manage to get rid of it?", "Empathy": 4, "Specificity": 3}, "BlenderBot": {"output": "Oh my goodness! I would have screamed like a little girl! Did you kill it?", "Empathy": 4, "Specificity": 3}, "GODEL_SODA_RLHF": {"output": "Oh my gosh, that's so scary! What did you do?", "Empathy": 3, "Specificity": 3}, "GODEL_EMPDIAL_RLHF": {"output": "That's a scary thing to have happen to you.", "Empathy": 2, "Specificity": 2}}}, {"id": 3670, "context": ["I am confident that I will win the gaming tournament in Chicago"], "models": {"GOLD": {"output": "What kind of gaming is it?", "Empathy": 3, "Specificity": 4}, "GPT3": {"output": "That's great! What kind of tournament is it? Have you been practicing a lot?", "Empathy": 4, "Specificity": 5}, "BlenderBot": {"output": "That's awesome!  What game are you competing in?  I hope you do well!", "Empathy": 4, "Specificity": 4}, "GODEL_SODA_RLHF": {"output": "That's great! I'm sure you'll do great.", "Empathy": 1, "Specificity": 1}, "GODEL_EMPDIAL_RLHF": {"output": "That's a great feeling! I hope you do well!", "Empathy": 3, "Specificity": 2}}}, {"id": 4643, "context": ["I went to do karaoke with a guy i'm dating and I discovered he's a really talented singer", "Does he like to sing?", "He's kind of shy about it. He had to get really drunk to perform karaoke"], "models": {"GOLD": {"output": "I bet he sings in the shower everyday.", "Empathy": 4, "Specificity": 3}, "GPT3": {"output": "That's understandable. It can be really intimidating to perform in front of a crowd. Is he interested in pursuing music in any way?", "Empathy": 3, "Specificity": 4}, "BlenderBot": {"output": "That's too bad. I'm sure it was a lot of fun though. Did you have a good time?", "Empathy": 1, "Specificity": 1}, "GODEL_SODA_RLHF": {"output": "That's weird. I'm sure he's really good at it.", "Empathy": 3, "Specificity": 2}, "GODEL_EMPDIAL_RLHF": {"output": "That's a good thing. It's a great way to meet people.", "Empathy": 2, "Specificity": 1}}}, {"id": 5010, "context": ["I know I broke up with my ex, but I can't help but feel irritated when he talks about going on dates."], "models": {"GOLD": {"output": "That must be weird to talk to your ex still.", "Empathy": 2, "Specificity": 4}, "GPT3": {"output": "It sounds like you're still struggling to come to terms with the breakup. It's natural to feel a bit of jealousy or envy when your ex starts seeing someone else, so don't be too hard on yourself. It might help to focus on the positive aspects of being single and the things you can do to move on from the relationship.", "Empathy": 4, "Specificity": 5}, "BlenderBot": {"output": "I know how you feel. It's hard to let go of someone you used to care about.", "Empathy": 4, "Specificity": 3}, "GODEL_SODA_RLHF": {"output": "Why do you feel that way?", "Empathy": 3, "Specificity": 1}, "GODEL_EMPDIAL_RLHF": {"output": "That's a good thing. It's a good thing to break up.", "Empathy": 0, "Specificity": 2}}}, {"id": 5110, "context": ["I was the only one wearing pajamas at this party, not my greatest moment"], "models": {"GOLD": {"output": "Oh boy. Did you not get the memo that you were supposed to be wearing a dress?", "Empathy": 4, "Specificity": 4}, "GPT3": {"output": "That sounds really embarrassing. Did you feel out of place?", "Empathy": 5, "Specificity": 2}, "BlenderBot": {"output": "I'm sorry to hear that. I hope you were able to find someplace else to wear them.", "Empathy": 0, "Specificity": 2}, "GODEL_SODA_RLHF": {"output": "What happened?", "Empathy": 0, "Specificity": 0}, "GODEL_EMPDIAL_RLHF": {"output": "That's a shame. I'm sure you had a great time.", "Empathy": 2, "Specificity": 1}}}, {"id": 3395, "context": ["This morning, my dog knocked down a while box of cereal and it spilled everywhere.", "Oh wow, that sounds like it was a big mess.", "Yes, and to make it worse, when I tried to clean it, she tried to eat, so she almost knocked me over too. I was not happy.", "I hope she didn't eat too much of it, it might make her sick."], "models": {"GOLD": {"output": "No, she only ate a little bit. I cleaned it up pretty quickly.", "Empathy": 3, "Specificity": 3}, "GPT3": {"output": "No, luckily I was able to stop her before she ate too much.", "Empathy": 4, "Specificity": 3}, "BlenderBot": {"output": "Oh no, I hope so too! I am so mad at her right now, I don't know what to do.", "Empathy": 2, "Specificity": 2}, "GODEL_SODA_RLHF": {"output": "Yeah, I'm worried about that too. I'm just glad she's not a big deal.", "Empathy": 2, "Specificity": 1}, "GODEL_EMPDIAL_RLHF": {"output": "I hope so, but I am not sure how much she ate.", "Empathy": 3, "Specificity": 3}}}, {"id": 2130, "context": ["My friend bought me lunch today", "That was nice. What did you have?", "I had a nice burger and fries", "That sounds good. I bet it was fun to hangout and eat with your friend."], "models": {"GOLD": {"output": "Yes I was appreciative that she wanted to buy me lunch", "Empathy": 3, "Specificity": 4}, "GPT3": {"output": "It was great. We had a lot of catching up to do.", "Empathy": 4, "Specificity": 3}, "BlenderBot": {"output": "It really was. I was so happy to see him. I hope you have a great day!", "Empathy": 1, "Specificity": 1}, "GODEL_SODA_RLHF": {"output": "Yeah, it was. I'm glad we went out.", "Empathy": 4, "Specificity": 3}, "GODEL_EMPDIAL_RLHF": {"output": "It was. I was so happy to have a friend", "Empathy": 2, "Specificity": 2}}}, {"id": 2687, "context": ["I have a wonderful sister-in-law.  who is always there for me when I need her"], "models": {"GOLD": {"output": "That must be comforting!  It is good to have people in your life that are supportive.", "Empathy": 5, "Specificity": 4}, "GPT3": {"output": "That's so great to hear! It sounds like you have a really special relationship. What do you appreciate most about her?", "Empathy": 4, "Specificity": 3}, "BlenderBot": {"output": "That's so nice of her. I wish I had someone like that in my life.", "Empathy": 1, "Specificity": 2}, "GODEL_SODA_RLHF": {"output": "That's great! I'm glad you have someone to rely on.", "Empathy": 3, "Specificity": 4}, "GODEL_EMPDIAL_RLHF": {"output": "That's great. I'm glad you have a sister-in-law.", "Empathy": 2, "Specificity": 3}}}, {"id": 2316, "context": ["My dad was cleaning out his attic when he found a box of my old stuff from childhood ", "Oh, that's cool. Did you find any good memories in there?", "I did! He found my favorite childhood book of mine and I just sat there thinking about all the memories "], "models": {"GOLD": {"output": "Nice! It sounds like a really good bonding experience.", "Empathy": 1, "Specificity": 2}, "GPT3": {"output": "That's so nice. What kind of book was it?", "Empathy": 4, "Specificity": 2}, "BlenderBot": {"output": "That's a great memory to have. I bet it brought back a lot of good memories.", "Empathy": 2, "Specificity": 4}, "GODEL_SODA_RLHF": {"output": "That sounds like a really great experience. I'm sure you'll be able to use all of your old memories to make new ones.", "Empathy": 5, "Specificity": 4}, "GODEL_EMPDIAL_RLHF": {"output": "That's so cool. I'm sure you have a lot of good memories.", "Empathy": 3, "Specificity": 3}}}, {"id": 141, "context": ["This mother's day was amazing! I got so much more than expected and it was all so heartfelt", "That is great!!  Sometimes we mom's get a bit forgotten, so to have an entire day where we are just loved is such a great feeling.", "Yes, definitely! I actually cried a few times because of how much thought went into each gift and what was written in the cards "], "models": {"GOLD": {"output": "Those words are the things we cherish more than any other thing, I love it when my girls do that!", "Empathy": 4, "Specificity": 4}, "GPT3": {"output": "That is so beautiful! It's always nice to feel so appreciated and loved. It's moments like this that make motherhood so special.", "Empathy": 5, "Specificity": 4}, "BlenderBot": {"output": "That's so sweet.  I bet she was so happy to see you.  What did you get her?", "Empathy": 0, "Specificity": 0}, "GODEL_SODA_RLHF": {"output": "That's so sweet of you to say! It's always nice to see someone appreciate your hard work.", "Empathy": 2, "Specificity": 3}, "GODEL_EMPDIAL_RLHF": {"output": "That is so sweet! It is so nice to be appreciated.", "Empathy": 3, "Specificity": 3}}}, {"id": 623, "context": ["I was bathing my dog in the backyard this weekend, and she got loose. She then went and rolled in the dirt getting extra filthy.", "That must of been terrible.", "It WAS. Since she was wet, the dirt got stuck inside her fur. She was even harder to clean the second time around."], "models": {"GOLD": {"output": "Did anyone help you?", "Empathy": 4, "Specificity": 2}, "GPT3": {"output": "I'm sorry to hear that. Is there anything I can do to help?", "Empathy": 1, "Specificity": 0}, "BlenderBot": {"output": "Oh no, I'm sorry to hear that. Did you have to clean it up yourself?", "Empathy": 3, "Specificity": 3}, "GODEL_SODA_RLHF": {"output": "That sounds like a lot of work. Did you have any idea how to clean her up?", "Empathy": 3, "Specificity": 3}, "GODEL_EMPDIAL_RLHF": {"output": "That must of been a pain in the ass.", "Empathy": 4, "Specificity": 2}}}, {"id": 1689, "context": ["I hate watching movies that are full of gore! I just saw one today and so gross!"], "models": {"GOLD": {"output": "I don't like them either. It makes me sick.", "Empathy": 3, "Specificity": 3}, "GPT3": {"output": "That sounds really unpleasant. Is there something else you'd rather watch?", "Empathy": 4, "Specificity": 4}, "BlenderBot": {"output": "I know what you mean.  I don't like gore either.  What movie did you see?", "Empathy": 3, "Specificity": 4}, "GODEL_SODA_RLHF": {"output": "Yeah, I know what you mean. I've seen a few horror movies and they're all pretty gross.", "Empathy": 2, "Specificity": 3}, "GODEL_EMPDIAL_RLHF": {"output": "That's a shame. I'm sure you'll find a way to enjoy it.", "Empathy": 0, "Specificity": 2}}}]
+[
+    {
+        "id": 3771,
+        "context": [
+            "I was in a hospital and a guy game in with some really bad burns."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "oh my gosh. what happened to him?",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.07204855978488922
+            },
+            "GPT3": {
+                "output": "Oh no, that must have been really tough to see. How did you handle it?",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.19701436161994934
+            },
+            "BlenderBot": {
+                "output": "Oh no! I hope you are okay. Did you have to go to the ER?",
+                "Empathy": 1,
+                "Specificity": 1,
+                "diff_ER": 4,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.11295507848262787
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "Oh, that's terrible! What happened?",
+                "Empathy": 2,
+                "Specificity": 2,
+                "diff_ER": 4,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.00797264277935028
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's awful. Did you get any help?",
+                "Empathy": 1,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.09970588982105255
+            }
+        }
+    },
+    {
+        "id": 165,
+        "context": [
+            "When I bought my first house I put down 20% of the loan, which made me broke quick. My monthly paycheck helped me with bills but my parents bought me groceries for a month until I got on my feet. SO grateful for them",
+            "I would be too! You did what you had to do!",
+            "Yes, I am always better off with them as my parents, they want to see us succeed",
+            "Do you find the home buying experience worth it?",
+            "Yes, it was well worth it! I love being independant. teaches you a lot.",
+            "How long do you plan on staying in that house?",
+            "Maybe 5 more years then I am ready for something bigger. Probably when I get married"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Well that's awesome! I'm happy for you!",
+                "Empathy": 3,
+                "Specificity": 0,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.06821000576019287
+            },
+            "GPT3": {
+                "output": "That makes sense. It's great that you have a plan for the future.",
+                "Empathy": 5,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.1919824182987213
+            },
+            "BlenderBot": {
+                "output": "That's a long time to wait. Do you have any plans for when you get married?",
+                "Empathy": 1,
+                "Specificity": 3,
+                "diff_ER": 4,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.2220945656299591
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That sounds like a great plan! I'm sure you will be happy with whatever you decide to do.",
+                "Empathy": 4,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.09546254575252533
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a great plan! I hope you have a great marriage!",
+                "Empathy": 2,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.07503306865692139
+            }
+        }
+    },
+    {
+        "id": 1207,
+        "context": [
+            "I finally got a new bike! I've been wanting one for so long!"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "There are so many bike trails available now. You are going to have a lot of fun.",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.1412709802389145
+            },
+            "GPT3": {
+                "output": "That's great! What kind of bike did you get?",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.24749572575092316
+            },
+            "BlenderBot": {
+                "output": "That's awesome! What kind of bike did you get? Did you get a good deal?",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.14867907762527466
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's great! What kind of bike did you get?",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.24749572575092316
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's awesome! I've been wanting a bike for a long time too.",
+                "Empathy": 1,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": -0.1802758127450943
+            }
+        }
+    },
+    {
+        "id": 3376,
+        "context": [
+            "I had the most wonderful week recently. My neighbors weren't here and I could do whatever I wanted without them stomping on my head!"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "That sounds like a relief.",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.10564428567886353
+            },
+            "GPT3": {
+                "output": "That sounds great! It must have been so nice to have some peace and quiet. What did you do with all that extra time?",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.19413721561431885
+            },
+            "BlenderBot": {
+                "output": "That's awesome! I'm glad you had such a great week. What did you do?",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 4,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.03765743970870972
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That sounds like a great week! What did you do?",
+                "Empathy": 1,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.0759650468826294
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a great feeling! I hope you have a great weekend!",
+                "Empathy": 1,
+                "Specificity": 1,
+                "diff_ER": 4,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.01565711200237274
+            }
+        }
+    },
+    {
+        "id": 3421,
+        "context": [
+            "I had a dream the other night about my friends from high school. It brought back all kinds of memories from my teen years and thinking back made me smile.",
+            "Did you tell anyone about the dream?",
+            "I told my husband. The dream made me miss my best friend from high school.",
+            "You should call your best friend on the telephone!"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "I actually sent her a message through facebook.",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.2178872972726822
+            },
+            "GPT3": {
+                "output": "Yes, that's a great idea. I'm going to do that today. Thanks for the suggestion!",
+                "Empathy": 3,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.10249681770801544
+            },
+            "BlenderBot": {
+                "output": "That's a good idea. I'll have to do that. Thank you for the suggestion.",
+                "Empathy": 3,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.03407000005245209
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "I don't know if I can do that. It's just so hard to talk to her.",
+                "Empathy": 0,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": -0.17844079434871674
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "I will. I haven't been able to call him in a while.",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.052935946732759476
+            }
+        }
+    },
+    {
+        "id": 2404,
+        "context": [
+            "We had to clean out our storage building because of roof damage. I found an old box of pictures!",
+            "What of?",
+            "My family and all kinds of old memories, birthdays, festivals, swimming, and other stuff"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Oh, that is awesome, I love those trips down the old memory lane",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.08983176946640015
+            },
+            "GPT3": {
+                "output": "That sounds like it was a really special find! What was it like going through them?",
+                "Empathy": 5,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.04059530794620514
+            },
+            "BlenderBot": {
+                "output": "That's great! I bet it brought back a lot of good memories for you.",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.2176782190799713
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's amazing! I'm so glad you found them.",
+                "Empathy": 2,
+                "Specificity": 0,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.26054632663726807
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a lot of memories!",
+                "Empathy": 1,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.23262062668800354
+            }
+        }
+    },
+    {
+        "id": 4573,
+        "context": [
+            "But yeah - school started for the kids today and it was weird how quiet it was once the bus pulled away."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Oh, but I bet you appreciated it! Summer can get long. ",
+                "Empathy": 5,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.07263295352458954
+            },
+            "GPT3": {
+                "output": "That must have been really strange for you. How are you feeling about it?",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.10199253261089325
+            },
+            "BlenderBot": {
+                "output": "Yeah, it's weird to think about how long it's been since I was a kid.",
+                "Empathy": 0,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": -0.011099293828010559
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "Yeah, I know what you mean. It's like everyone is just settling down and enjoying the day.",
+                "Empathy": 1,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": -0.12373386323451996
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a good thing. It's always a little quiet when school starts.",
+                "Empathy": 1,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.0005656778812408447
+            }
+        }
+    },
+    {
+        "id": 2245,
+        "context": [
+            "So my car wouldn't start today after work. I kind of hate my car!",
+            "That's terrible to hear. Is it old?",
+            "Oh yes, very old. It's a 2002 and while I've had it for 6 years now, I'm finally starting to grow tired of it."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Are you thinking of getting a new car?",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.15659640729427338
+            },
+            "GPT3": {
+                "output": "I understand. What kind of car is it?",
+                "Empathy": 0,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.06636683642864227
+            },
+            "BlenderBot": {
+                "output": "I'm sorry to hear that. I hope you can find a way to get it fixed.",
+                "Empathy": 3,
+                "Specificity": 2,
+                "diff_ER": 4,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.029070153832435608
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "Well, maybe you should get a new one. It's not like you're going to be able to fix it overnight.",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.012720033526420593
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a shame. It's a good thing you have a car.",
+                "Empathy": 1,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.18700963258743286
+            }
+        }
+    },
+    {
+        "id": 4084,
+        "context": [
+            "I had to schedule an appointment with the dentist after not visiting one in five years.",
+            "That is crazy. Did you not have insurance for all these years you missed the dentist appointments?",
+            "I do not have insurance. I went anyway because I had a problem with one tooth."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "I hope the problem was not deep in the enamel of the tooth since that requires a lot of work.",
+                "Empathy": 4,
+                "Specificity": 5,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.20856577157974243
+            },
+            "GPT3": {
+                "output": "That's really brave of you to go without insurance. Did they give you a good estimate of how much it will cost?",
+                "Empathy": 5,
+                "Specificity": 5,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.27557629346847534
+            },
+            "BlenderBot": {
+                "output": "I am sorry to hear that. I hope you are able to get it taken care of soon.",
+                "Empathy": 3,
+                "Specificity": 2,
+                "diff_ER": 4,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.05768350884318352
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That is really tough. I'm sure you'll be able to get it fixed soon.",
+                "Empathy": 2,
+                "Specificity": 1,
+                "diff_ER": 4,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.11313451826572418
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That is a good thing to do. It is always good to have a dentist appointment.",
+                "Empathy": 2,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.3694540560245514
+            }
+        }
+    },
+    {
+        "id": 4367,
+        "context": [
+            "My ex and I broke up because he decided that he would no longer be willing to leave his job from overwork, like 70 plus hours a week.",
+            "I am sorry. Breakups are the worst. Did he just not want to give up overtime or he worked 70hours always?",
+            "He claims that he kept getting raises and felt obligated to work even harder. So he just kept working more and more and I rarely got to spend time with him and he was always tired."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "That's rough but you deserve someone who is willing or wants to make the time for you. Never settle for less than what you are willing to settle for.",
+                "Empathy": 5,
+                "Specificity": 5,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.2664467692375183
+            },
+            "GPT3": {
+                "output": "That must have been really hard for you. It sounds like it was a difficult situation for both of you. Is there anything you can do to make it easier on yourself?",
+                "Empathy": 3,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.5604426860809326
+            },
+            "BlenderBot": {
+                "output": "That is terrible. I hope you are able to move on and find someone that will make you happy.",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.09097220003604889
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That sounds like a really tough situation. I'm sure you're feeling really frustrated right now.",
+                "Empathy": 2,
+                "Specificity": 1,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.22940003871917725
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That is a very sad thing to hear. I am sure you are a great person.",
+                "Empathy": 1,
+                "Specificity": 1,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.17106083035469055
+            }
+        }
+    },
+    {
+        "id": 3810,
+        "context": [
+            "I just bought a brand new necklace and shirt."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "What kind of necklace did you purchase? It's good to treat yourself some times.",
+                "Empathy": 5,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.08583983778953552
+            },
+            "GPT3": {
+                "output": "That sounds great! What did you get?",
+                "Empathy": 1,
+                "Specificity": 1,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.31218817830085754
+            },
+            "BlenderBot": {
+                "output": "That's awesome! What kind of necklaces did you get? I love new jewelry!",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.13738742470741272
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's great! What kind of necklace and shirt did you get?",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.2573309540748596
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a great purchase! What color is the necklace?",
+                "Empathy": 2,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.2347586452960968
+            }
+        }
+    },
+    {
+        "id": 4956,
+        "context": [
+            "I came home the other day and my roommate had a friend over. I've only seen him with a friend over once in my 3.5 years of living here."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Wow. That must be a very special friend. I net you were surprised.",
+                "Empathy": 2,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.023650795221328735
+            },
+            "GPT3": {
+                "output": "That must have been a surprise. Did you two talk or did you just leave them to their own devices?",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.04232953488826752
+            },
+            "BlenderBot": {
+                "output": "Wow, that's a long time. How did you feel when you first saw him/her?",
+                "Empathy": 1,
+                "Specificity": 1,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.09814567863941193
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's weird. I've only seen him with a friend once too. What happened?",
+                "Empathy": 0,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.10568448901176453
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a good thing. It's nice to have friends over.",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.10387368500232697
+            }
+        }
+    },
+    {
+        "id": 4687,
+        "context": [
+            "I found out that my daughter is moving out. My youngest one told me so."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "How do you feel about that ?",
+                "Empathy": 4,
+                "Specificity": 1,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.05909305438399315
+            },
+            "GPT3": {
+                "output": "Oh, no! That must be difficult for you. Is there anything I can do to help?",
+                "Empathy": 3,
+                "Specificity": 1,
+                "diff_ER": 4,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.37826308608055115
+            },
+            "BlenderBot": {
+                "output": "Oh no, I'm sorry to hear that. Is she going to be moving far away?",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 4,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.07113140821456909
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "Oh, wow. I'm so sorry to hear that. What happened?",
+                "Empathy": 3,
+                "Specificity": 0,
+                "diff_ER": 4,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.0425291508436203
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That is so sad. I hope you have a good time with her.",
+                "Empathy": 1,
+                "Specificity": 0,
+                "diff_ER": 4,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.09181906282901764
+            }
+        }
+    },
+    {
+        "id": 5129,
+        "context": [
+            "I love my girlfriend. She would never cheat on me",
+            "That is really nice that you guys have that trust.",
+            "I hope to make her my wife some day!"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "That is an awesome goal! Good luck!",
+                "Empathy": 2,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.16110491752624512
+            },
+            "GPT3": {
+                "output": "That's wonderful! Have you talked to her about it?",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.3032304346561432
+            },
+            "BlenderBot": {
+                "output": "I wish you the best of luck with that. It sounds like you have a great relationship.",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.11315962672233582
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's a great goal! I'm sure she would be happy to be your wife.",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.04694889113306999
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That is a great goal. I am sure you will be happy.",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.01650717854499817
+            }
+        }
+    },
+    {
+        "id": 2386,
+        "context": [
+            "You never know what someone else is going through, and looks can be deceiving. Like this old man that seemed like any other drunk.",
+            "Yeah you can judge someone like that",
+            "It was hard to tell honestly, but it turned out the guy was lost and diabetic. He had lost track of his friends and had no way to get home, so I hailed him a cab and paid the driver $20."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Thats a nice gesture from you",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.13243506848812103
+            },
+            "GPT3": {
+                "output": "That was really kind of you. It's so easy to jump to conclusions about someone but it's also important to remember that everyone has a story.",
+                "Empathy": 5,
+                "Specificity": 5,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.5777401924133301
+            },
+            "BlenderBot": {
+                "output": "That was very nice of you. I'm glad you were able to help him out.",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.21965661644935608
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's really brave of you. I'm sure he was grateful for your help.",
+                "Empathy": 3,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.2104066014289856
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That is a good thing to do",
+                "Empathy": 2,
+                "Specificity": 1,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.17904144525527954
+            }
+        }
+    },
+    {
+        "id": 3109,
+        "context": [
+            "I read in the news about a family who lost all six of their animals in a house fire :(",
+            "thats so sad oh no! thats terrible. :( ",
+            "I know, it made me upset! My two dogs are my babies couldn't imagine loosing them."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "They are honestly just like children so its really sad. ",
+                "Empathy": 3,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.06805442273616791
+            },
+            "GPT3": {
+                "output": "I completely understand. Losing a pet is like losing a family member. It's heartbreaking. Is there anything we can do to help the family?",
+                "Empathy": 5,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.2905951142311096
+            },
+            "BlenderBot": {
+                "output": "I am so sorry to hear that. It must have been devastating for you and your family.",
+                "Empathy": 0,
+                "Specificity": 2,
+                "diff_ER": 4,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.06276515126228333
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "Yeah, it's really hard to lose a pet. But you're lucky that you have them to help you through it.",
+                "Empathy": 0,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.1847764253616333
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "thats so sad! i know how you feel. i have a dog and a cat.",
+                "Empathy": 1,
+                "Specificity": 3,
+                "diff_ER": 4,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": -0.014416933059692383
+            }
+        }
+    },
+    {
+        "id": 3702,
+        "context": [
+            "Our local organic store now stocks Indian food made by a local Indian lady - heaven, heaven, heaven!",
+            "That is very cool!  I love when food is authentic.  Do you shop there often?"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "About once a week. Her husband works in the store, so he brings her food in regularly. It's such a pleasure to find such a thing - I missed my Indian food!",
+                "Empathy": 4,
+                "Specificity": 5,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.029095396399497986
+            },
+            "GPT3": {
+                "output": "Yes, I do! They have such a great selection of fresh fruits and vegetables, as well as all sorts of Indian spices and ingredients. I'm always finding something new to try!",
+                "Empathy": 4,
+                "Specificity": 5,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.11607767641544342
+            },
+            "BlenderBot": {
+                "output": "Yes, I love going to the local farmer's market and picking out fresh vegetables and fruits.",
+                "Empathy": 1,
+                "Specificity": 1,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.3133355975151062
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "Yeah, I do. It's a great place to find fresh, healthy food. And the prices are reasonable too.",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": -0.17433767020702362
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "I do, it's a great place to buy organic food. It's a little expensive though, so it's a nice change of pace.",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": -0.001603454351425171
+            }
+        }
+    },
+    {
+        "id": 2466,
+        "context": [
+            "On our second date, my girlfriend and I stopped in a dive bar on our way back from the beach.",
+            "what is a dive bar",
+            "Like a hole in the wall. Cheap drinks, sometimes a little dirty, but altogether relaxed - the opposite of snoody. They had a pool table and I showed her some tricks."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "oh ok. We call them hole in the walls lol",
+                "Empathy": 0,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.24576124548912048
+            },
+            "GPT3": {
+                "output": "That sounds like fun! What kind of tricks?",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.07906751334667206
+            },
+            "BlenderBot": {
+                "output": "That sounds like a lot of fun. What kind of tricks did you show her?",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.04603329300880432
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That sounds like fun! I've never been to a dive bar before. What did you do?",
+                "Empathy": 1,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.15264546871185303
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "that sounds like a great time",
+                "Empathy": 2,
+                "Specificity": 1,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.05585126951336861
+            }
+        }
+    },
+    {
+        "id": 1189,
+        "context": [
+            "I got angry when she refused. But I should've been more understanding"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Yes, you only hurt yourself when you get angry.",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.17715036869049072
+            },
+            "GPT3": {
+                "output": "It sounds like you are feeling frustrated and disappointed. Is there anything I can do to help?",
+                "Empathy": 4,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.43979212641716003
+            },
+            "BlenderBot": {
+                "output": "I'm sorry to hear that. Did she give you a reason why she didn't want to?",
+                "Empathy": 2,
+                "Specificity": 3,
+                "diff_ER": 4,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.049563437700271606
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "What did you do?",
+                "Empathy": 3,
+                "Specificity": 1,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.11676493287086487
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a good thing to do. It's hard to be understanding when you're being a bit of a jerk.",
+                "Empathy": 1,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.4104657471179962
+            }
+        }
+    },
+    {
+        "id": 5056,
+        "context": [
+            "When my children were born, it was a rejoicing time for me. I can't think of a time I felt more happiness."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Children are a beautiful thing for us parents. What a great memory you have of that. ",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.11797787249088287
+            },
+            "GPT3": {
+                "output": "That's wonderful! It must have been an amazing feeling! How old are your children now?",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.18775048851966858
+            },
+            "BlenderBot": {
+                "output": "That's so sweet. I bet you were so happy. How many kids do you have?",
+                "Empathy": 3,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.00014826655387878418
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's great, Ayanna. I'm so glad you had such a happy time. What made you decide to have children?",
+                "Empathy": 2,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.056166961789131165
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's great! It's so nice to have a family that you can be proud of.",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.25855177640914917
+            }
+        }
+    },
+    {
+        "id": 2261,
+        "context": [
+            "i hate when ash from my cigarette drops in my work pants",
+            "oof that sucks really bad",
+            "yeah, i haave to wait till i get home to get the stain off, it is really embarrasing"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "yea i can imagine it is",
+                "Empathy": 3,
+                "Specificity": 1,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.10291606187820435
+            },
+            "GPT3": {
+                "output": "That does sound really embarrassing. Have you tried using a stain remover on it? That might help get it out faster.",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.26670658588409424
+            },
+            "BlenderBot": {
+                "output": "I know how you feel, I've had that happen to me a few times.",
+                "Empathy": 1,
+                "Specificity": 0,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": 0.20817768573760986
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "Yeah, it's not fun.",
+                "Empathy": 3,
+                "Specificity": 1,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.0966825932264328
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "oof that is a good thing",
+                "Empathy": 0,
+                "Specificity": 0,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.11506131291389465
+            }
+        }
+    },
+    {
+        "id": 1017,
+        "context": [
+            "i feels happy",
+            "That is awesome!  Is there a particular reason you are so happy?",
+            "because i built a new house"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "That is something to be happy about!  Congratulations!",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.0465322844684124
+            },
+            "GPT3": {
+                "output": "That's great! How long did it take you to build the house?",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.10652880370616913
+            },
+            "BlenderBot": {
+                "output": "Oh wow, congratulations!  That must have taken a lot of hard work.",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.028628379106521606
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's amazing! What kind of house did you build?",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.08246499300003052
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That is awesome! I am sure you will be happy for a long time to come!",
+                "Empathy": 2,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.05721735954284668
+            }
+        }
+    },
+    {
+        "id": 2602,
+        "context": [
+            "I was terrified when I watched that horror film in the theaters"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "I understand. Horror movies freak me out, too. Did you watch the whole thing?",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.011402025818824768
+            },
+            "GPT3": {
+                "output": "That sounds really frightening. What was it about the movie that scared you?",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": 0.3405701518058777
+            },
+            "BlenderBot": {
+                "output": "What movie was it? I've never seen a horror movie in a theater before.",
+                "Empathy": 2,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": -0.03937879204750061
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "What was it about?",
+                "Empathy": 2,
+                "Specificity": 1,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": 0.132782980799675
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a good movie. I'm sure you were scared.",
+                "Empathy": 0,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 4,
+                "reward": 0.0214415043592453
+            }
+        }
+    },
+    {
+        "id": 352,
+        "context": [
+            "When I was younger, my dog died. He was getting up there in age, but he was still on the young side. Later, we heard the pet food we had been feeding him had been recalled because of similiar fatalities.",
+            "Sorry to hear that. Did someone do anything against the company selling the food?",
+            "No, they just had a recall. Apparently they didn't clean out their machines properly when making the food, so it got contaminated. "
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Someone should have sued them.",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.07876038551330566
+            },
+            "GPT3": {
+                "output": "That's terrible. Do you think it would have been different if they had done something differently?",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.0018270015716552734
+            },
+            "BlenderBot": {
+                "output": "That's too bad. I'm glad you were able to find a solution to the problem.",
+                "Empathy": 0,
+                "Specificity": 1,
+                "diff_ER": 4,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.06389652192592621
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's really sad. I'm sure your dog would have been very happy if he had been able to get some fresh food.",
+                "Empathy": 0,
+                "Specificity": 3,
+                "diff_ER": 4,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.23522448539733887
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a shame. I'm sure you're a good person for bringing it up.",
+                "Empathy": 1,
+                "Specificity": 1,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.10454560816287994
+            }
+        }
+    },
+    {
+        "id": 4479,
+        "context": [
+            "My husband and I are going on our very first cruise in December. i can't wait!!!",
+            "I love vacations I hope you and him have a good time.",
+            "I hope so too. I have wanted to go on a cruise for so long. I'm happy were are able to go this year.",
+            "What cruise line are you using did they give you a good discount."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "We are going with a few friends, so they booked it and we got a discount because they are returning customers.",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.08792638778686523
+            },
+            "GPT3": {
+                "output": "Yes, we got a really good deal from Royal Caribbean. We're so excited!",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.14097367227077484
+            },
+            "BlenderBot": {
+                "output": "It is a Royal Caribbean Cruise. We are going to the Bahamas.",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.08676931262016296
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "They are using the Carnival Cruise Line. They have a great deal on their cruises. I'm really excited to go on this cruise.",
+                "Empathy": 2,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.008616805076599121
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "I am using Carnival. I have been wanting to go for a long time. I am so excited to go.",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": 0.05355033278465271
+            }
+        }
+    },
+    {
+        "id": 4391,
+        "context": [
+            "I stayed at a friends house for the weekend a while back, and when I got home my bedroom was destroyed"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Oh no!! That is terrible, do you know what happened? ",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.06137223541736603
+            },
+            "GPT3": {
+                "output": "That's awful! What happened?",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.005785092711448669
+            },
+            "BlenderBot": {
+                "output": "Oh no, that's terrible. Did you call the police? I hope you didn't lose too much.",
+                "Empathy": 0,
+                "Specificity": 1,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.0027510076761245728
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "Oh my gosh, that sounds awful! What happened?",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.12673048675060272
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That is so sad. I'm sorry to hear that. Did you have a good time?",
+                "Empathy": 0,
+                "Specificity": 0,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.07099740207195282
+            }
+        }
+    },
+    {
+        "id": 3390,
+        "context": [
+            "i hate when my neighboors dog poops on my yard and she does nothing, i dont care if he poops if she picks it up"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Maybe put the poop back on your neighbors yard?",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.07954660058021545
+            },
+            "GPT3": {
+                "output": "That must be really annoying. Have you talked to your neighbor about it?",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.053711067885160446
+            },
+            "BlenderBot": {
+                "output": "I hate when that happens too. It's like they don't care about anyone but themselves.",
+                "Empathy": 3,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": -0.13031363487243652
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's really annoying. I'm sure you're not happy about it.",
+                "Empathy": 3,
+                "Specificity": 1,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.05621138960123062
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a good thing to do. It's a good way to get rid of a dog.",
+                "Empathy": 0,
+                "Specificity": 0,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.15073207020759583
+            }
+        }
+    },
+    {
+        "id": 1086,
+        "context": [
+            "Not long ago I realized we are more financially stable than I think we have ever been.",
+            "That's awesome. What are you going to do about it?",
+            "Keep moving forwards with our plans and feel great!"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "I'm envious. Do you have any idea of what those plans are?",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.18387004733085632
+            },
+            "GPT3": {
+                "output": "That's great! What kind of plans do you have in mind?",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.1721506118774414
+            },
+            "BlenderBot": {
+                "output": "I'm glad to hear that. I wish you the best of luck in your future endeavors.",
+                "Empathy": 3,
+                "Specificity": 2,
+                "diff_ER": 4,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.14858633279800415
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "I'm sure you will. You've worked hard and you deserve it.",
+                "Empathy": 2,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.04730561375617981
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's great. I'm sure you will.",
+                "Empathy": 1,
+                "Specificity": 0,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.05205848440527916
+            }
+        }
+    },
+    {
+        "id": 2858,
+        "context": [
+            "I know it's silly, but my friend got something I wanted in a game the other day, bit sad.",
+            "We're all human so having a feeling like that is understandable.",
+            "I guess, little things at times right?"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Yea, I'm always surprised at how much I sweat the little things.",
+                "Empathy": 5,
+                "Specificity": 5,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.15241828560829163
+            },
+            "GPT3": {
+                "output": "Absolutely. It's the little things that can make us feel the most joy or the most sadness.",
+                "Empathy": 5,
+                "Specificity": 5,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": 0.4346638023853302
+            },
+            "BlenderBot": {
+                "output": "Yeah, it's hard to be upset about something like that, but I'm sure you'll get over it.",
+                "Empathy": 2,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": 0.2650632858276367
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "Yeah, we all have our moments.",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": 0.26466405391693115
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "Yes, it's a little bit of a sucks to be a little bit sad.",
+                "Empathy": 0,
+                "Specificity": 0,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": 0.3751521408557892
+            }
+        }
+    },
+    {
+        "id": 1335,
+        "context": [
+            "my friend bought a big house and i'm happy for her but at the same time i'm a little bit jealous",
+            "Big houses are a pain in the neck to keep clean.",
+            "true, but there is so much space for her kid to run and play at and I live in a tiny apartment with my son"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "It does have its benefits.",
+                "Empathy": 2,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.4010542631149292
+            },
+            "GPT3": {
+                "output": "That sounds like it could be really difficult. Is there anything you can do to make your living situation more comfortable for you and your son?",
+                "Empathy": 2,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.15869763493537903
+            },
+            "BlenderBot": {
+                "output": "That's understandable. I'm sure she appreciates you being there for her when she needs it.",
+                "Empathy": 0,
+                "Specificity": 1,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.03104470670223236
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's true. But it's still nice to have a place to call home.",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.004393726587295532
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a good thing. It's a good thing to have a place to live.",
+                "Empathy": 1,
+                "Specificity": 1,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.07497696578502655
+            }
+        }
+    },
+    {
+        "id": 1210,
+        "context": [
+            "Pretty soon I'll be taking over my parents mortgage.  Homeownership is on the horizon.",
+            "That's a big step. I hope it works out for you.",
+            "A huge step. But I'm done with renting and I have a lot of renovating plans in the works."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "I like renovation projects. And yes, renting is a waste of money",
+                "Empathy": 2,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.18329745531082153
+            },
+            "GPT3": {
+                "output": "That sounds exciting! I'm sure it will be a great experience. Good luck with it!",
+                "Empathy": 3,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.13894502818584442
+            },
+            "BlenderBot": {
+                "output": "I'm sure it will be worth it in the end. Do you have any hobbies?",
+                "Empathy": 1,
+                "Specificity": 0,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.1717977523803711
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That sounds like a great plan. I'm sure you'll be able to make it work.",
+                "Empathy": 3,
+                "Specificity": 1,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.10444308817386627
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a great goal. It's always good to have goals.",
+                "Empathy": 1,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.1483427882194519
+            }
+        }
+    },
+    {
+        "id": 3087,
+        "context": [
+            "I had a bad experience out to eat the other day.  I don't do it too often, so it was a bummer.",
+            "That doesn't sound good. What happened that was so bad?",
+            "The food was pretty bad and the service didn't help clear things up.  There were a lot of mistakes on top of everything.  Just general bad eating out things."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "That sounds like an awful experience. I probably wouldn't go back there anytime soon.",
+                "Empathy": 1,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.21845461428165436
+            },
+            "GPT3": {
+                "output": "That sounds really frustrating. I'm sorry you had to go through that. Is there anything you can do to make sure it doesn't happen again?",
+                "Empathy": 1,
+                "Specificity": 1,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.1559130847454071
+            },
+            "BlenderBot": {
+                "output": "Oh no, I'm sorry to hear that. I hope it didn't ruin your meal.",
+                "Empathy": 2,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.20984211564064026
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That sounds like a pretty bad experience. I'm sorry to hear that.",
+                "Empathy": 3,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.21733248233795166
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a shame. I'm sure you'll find a better place next time.",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.22149647772312164
+            }
+        }
+    },
+    {
+        "id": 3324,
+        "context": [
+            "My husband went to a job fair and got a lot of job offers!",
+            "Great, what is his field ?",
+            "He is currently Active Duty Army, but is wanting to go into transportation/logistics. "
+        ],
+        "models": {
+            "GOLD": {
+                "output": "I see. I hope for all the best for you and him.",
+                "Empathy": 2,
+                "Specificity": 1,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.2866721451282501
+            },
+            "GPT3": {
+                "output": "That's great! What kind of job offers did he get?",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.006396114826202393
+            },
+            "BlenderBot": {
+                "output": "That's great. I hope he gets the job. What kind of work does he do?",
+                "Empathy": 1,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.03933505713939667
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's great! What are some of the jobs he's been applying for?",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.2357838749885559
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a great career choice, I'm sure he will be able to find a job soon.",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.047693055123090744
+            }
+        }
+    },
+    {
+        "id": 4075,
+        "context": [
+            "I was a little nervous to eat some cloves of garlic for the first time"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "What made you nervous about it?",
+                "Empathy": 3,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.05484755337238312
+            },
+            "GPT3": {
+                "output": "That's understandable! How did it go? Did you enjoy it?",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.1433902233839035
+            },
+            "BlenderBot": {
+                "output": "Garlic is one of my favorite things to put on anything.  What did you have?",
+                "Empathy": 1,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.041456252336502075
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "Why were you nervous?",
+                "Empathy": 3,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.00997491180896759
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a good thing to do. It's a good way to get used to it.",
+                "Empathy": 0,
+                "Specificity": 0,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.08837845921516418
+            }
+        }
+    },
+    {
+        "id": 3022,
+        "context": [
+            "i'm so proud of my son! He learned a couple of words this week. He now knows how to ay please",
+            "That's wonderful, they say children have a certain gift for picking up languages.",
+            "he actually speaks 2 languages. I teach him english and russian"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Wow! That's impressive and a lasting skill for your child to develop.",
+                "Empathy": 5,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.14224031567573547
+            },
+            "GPT3": {
+                "output": "That's amazing! What a talented little guy. How old is he?",
+                "Empathy": 5,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.05916817486286163
+            },
+            "BlenderBot": {
+                "output": "Wow, that's really impressive. I wish I could speak more than one language. What languages does he speak?",
+                "Empathy": 1,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.077667236328125
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's amazing! I'm sure he's very proud of you.",
+                "Empathy": 1,
+                "Specificity": 0,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.051215168088674545
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's great, I'm sure he will be able to speak both languages.",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.11215151846408844
+            }
+        }
+    },
+    {
+        "id": 3203,
+        "context": [
+            "Playing hookey can be really fun. But sometimes it backfires..."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Ohh what happened?",
+                "Empathy": 4,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.10216642916202545
+            },
+            "GPT3": {
+                "output": "What happened?",
+                "Empathy": 4,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.2487800568342209
+            },
+            "BlenderBot": {
+                "output": "I know what you mean. It can be a lot of fun, but sometimes it can be dangerous.",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.006901666522026062
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "I know what you mean. It's like you're trying to play a game of catch and you just get caught.",
+                "Empathy": 1,
+                "Specificity": 0,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.019479870796203613
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a good way to get a good laugh.",
+                "Empathy": 0,
+                "Specificity": 0,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.038337334990501404
+            }
+        }
+    },
+    {
+        "id": 1279,
+        "context": [
+            "i felt so guilty after lying to my girlfriend",
+            "What did you lie about, and why?",
+            "I kissed a mutual friend of ours. I lied when she checked up on me. It was a one time thing, i did not wanted to hurt her."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Best advice.  Never confess it.",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.10923928022384644
+            },
+            "GPT3": {
+                "output": "I can understand why you would feel guilty. It sounds like you were trying to protect her from getting hurt. Have you told her the truth yet?",
+                "Empathy": 5,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.31040799617767334
+            },
+            "BlenderBot": {
+                "output": "Oh, I see. Well, I'm sure she forgave you. It's not like you did it on purpose.",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.05655209720134735
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's understandable. It's not like you were cheating on her or anything.",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.00608457624912262
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a good thing, you should feel better about it.",
+                "Empathy": 0,
+                "Specificity": 0,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.012522801756858826
+            }
+        }
+    },
+    {
+        "id": 188,
+        "context": [
+            "The hardest time in my life was when my best friend died on Christmas of 2007."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Wow. I'm so sorry to hear that. That would be incredibly hard. What happened?",
+                "Empathy": 4,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.20991085469722748
+            },
+            "GPT3": {
+                "output": "I'm so sorry to hear that. It must have been incredibly difficult. What was it like for you?",
+                "Empathy": 4,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.097291961312294
+            },
+            "BlenderBot": {
+                "output": "I'm so sorry to hear that. How long ago was that, if you don't mind me asking?",
+                "Empathy": 1,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.21582373976707458
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "Oh, I'm so sorry. That must have been really tough for you.",
+                "Empathy": 3,
+                "Specificity": 1,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.15088054537773132
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That is so sad. I am sorry to hear that. I hope you have a good time.",
+                "Empathy": 0,
+                "Specificity": 0,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.35416966676712036
+            }
+        }
+    },
+    {
+        "id": 3716,
+        "context": [
+            "I was on the patio and a giant roach crawled out from underneath."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Those are my nightmares. They are so big where I live in the South.",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.09282676875591278
+            },
+            "GPT3": {
+                "output": "Oh no! That must have been so scary. Did you manage to get rid of it?",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 4,
+                "reward": 0.2275041937828064
+            },
+            "BlenderBot": {
+                "output": "Oh my goodness! I would have screamed like a little girl! Did you kill it?",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.16213014721870422
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "Oh my gosh, that's so scary! What did you do?",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 4,
+                "reward": 0.1849280595779419
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a scary thing to have happen to you.",
+                "Empathy": 2,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": 0.22256797552108765
+            }
+        }
+    },
+    {
+        "id": 3670,
+        "context": [
+            "I am confident that I will win the gaming tournament in Chicago"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "What kind of gaming is it?",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.1831788271665573
+            },
+            "GPT3": {
+                "output": "That's great! What kind of tournament is it? Have you been practicing a lot?",
+                "Empathy": 4,
+                "Specificity": 5,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.02836570143699646
+            },
+            "BlenderBot": {
+                "output": "That's awesome!  What game are you competing in?  I hope you do well!",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.025886565446853638
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's great! I'm sure you'll do great.",
+                "Empathy": 1,
+                "Specificity": 1,
+                "diff_ER": 4,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.17157955467700958
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a great feeling! I hope you do well!",
+                "Empathy": 3,
+                "Specificity": 2,
+                "diff_ER": 4,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.10686573386192322
+            }
+        }
+    },
+    {
+        "id": 4643,
+        "context": [
+            "I went to do karaoke with a guy i'm dating and I discovered he's a really talented singer",
+            "Does he like to sing?",
+            "He's kind of shy about it. He had to get really drunk to perform karaoke"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "I bet he sings in the shower everyday.",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.1597808301448822
+            },
+            "GPT3": {
+                "output": "That's understandable. It can be really intimidating to perform in front of a crowd. Is he interested in pursuing music in any way?",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 4,
+                "reward": 0.21247202157974243
+            },
+            "BlenderBot": {
+                "output": "That's too bad. I'm sure it was a lot of fun though. Did you have a good time?",
+                "Empathy": 1,
+                "Specificity": 1,
+                "diff_ER": 4,
+                "diff_EX": 4,
+                "diff_IP": 4,
+                "reward": -0.011130571365356445
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's weird. I'm sure he's really good at it.",
+                "Empathy": 3,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": -0.13064049184322357
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a good thing. It's a great way to meet people.",
+                "Empathy": 2,
+                "Specificity": 1,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": 0.0595998615026474
+            }
+        }
+    },
+    {
+        "id": 5010,
+        "context": [
+            "I know I broke up with my ex, but I can't help but feel irritated when he talks about going on dates."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "That must be weird to talk to your ex still.",
+                "Empathy": 2,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.08811096847057343
+            },
+            "GPT3": {
+                "output": "It sounds like you're still struggling to come to terms with the breakup. It's natural to feel a bit of jealousy or envy when your ex starts seeing someone else, so don't be too hard on yourself. It might help to focus on the positive aspects of being single and the things you can do to move on from the relationship.",
+                "Empathy": 4,
+                "Specificity": 5,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.4931190311908722
+            },
+            "BlenderBot": {
+                "output": "I know how you feel. It's hard to let go of someone you used to care about.",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": 0.31879520416259766
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "Why do you feel that way?",
+                "Empathy": 3,
+                "Specificity": 1,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.1409565806388855
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a good thing. It's a good thing to break up.",
+                "Empathy": 0,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.3818216919898987
+            }
+        }
+    },
+    {
+        "id": 5110,
+        "context": [
+            "I was the only one wearing pajamas at this party, not my greatest moment"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Oh boy. Did you not get the memo that you were supposed to be wearing a dress?",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.046566009521484375
+            },
+            "GPT3": {
+                "output": "That sounds really embarrassing. Did you feel out of place?",
+                "Empathy": 5,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.056510504335165024
+            },
+            "BlenderBot": {
+                "output": "I'm sorry to hear that. I hope you were able to find someplace else to wear them.",
+                "Empathy": 0,
+                "Specificity": 2,
+                "diff_ER": 4,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.08454738557338715
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "What happened?",
+                "Empathy": 0,
+                "Specificity": 0,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.09413619339466095
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a shame. I'm sure you had a great time.",
+                "Empathy": 2,
+                "Specificity": 1,
+                "diff_ER": 4,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": -0.04935536906123161
+            }
+        }
+    },
+    {
+        "id": 3395,
+        "context": [
+            "This morning, my dog knocked down a while box of cereal and it spilled everywhere.",
+            "Oh wow, that sounds like it was a big mess.",
+            "Yes, and to make it worse, when I tried to clean it, she tried to eat, so she almost knocked me over too. I was not happy.",
+            "I hope she didn't eat too much of it, it might make her sick."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "No, she only ate a little bit. I cleaned it up pretty quickly.",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.117403045296669
+            },
+            "GPT3": {
+                "output": "No, luckily I was able to stop her before she ate too much.",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.09107357263565063
+            },
+            "BlenderBot": {
+                "output": "Oh no, I hope so too! I am so mad at her right now, I don't know what to do.",
+                "Empathy": 2,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.053697485476732254
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "Yeah, I'm worried about that too. I'm just glad she's not a big deal.",
+                "Empathy": 2,
+                "Specificity": 1,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": -0.07264579832553864
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "I hope so, but I am not sure how much she ate.",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": -0.14974664151668549
+            }
+        }
+    },
+    {
+        "id": 2130,
+        "context": [
+            "My friend bought me lunch today",
+            "That was nice. What did you have?",
+            "I had a nice burger and fries",
+            "That sounds good. I bet it was fun to hangout and eat with your friend."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Yes I was appreciative that she wanted to buy me lunch",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.41998976469039917
+            },
+            "GPT3": {
+                "output": "It was great. We had a lot of catching up to do.",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.1582607477903366
+            },
+            "BlenderBot": {
+                "output": "It really was. I was so happy to see him. I hope you have a great day!",
+                "Empathy": 1,
+                "Specificity": 1,
+                "diff_ER": 4,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.3042560815811157
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "Yeah, it was. I'm glad we went out.",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.3996947407722473
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "It was. I was so happy to have a friend",
+                "Empathy": 2,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": -0.3602558374404907
+            }
+        }
+    },
+    {
+        "id": 2687,
+        "context": [
+            "I have a wonderful sister-in-law.  who is always there for me when I need her"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "That must be comforting!  It is good to have people in your life that are supportive.",
+                "Empathy": 5,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.42171069979667664
+            },
+            "GPT3": {
+                "output": "That's so great to hear! It sounds like you have a really special relationship. What do you appreciate most about her?",
+                "Empathy": 4,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.3177488148212433
+            },
+            "BlenderBot": {
+                "output": "That's so nice of her. I wish I had someone like that in my life.",
+                "Empathy": 1,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": 0.01750582456588745
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's great! I'm glad you have someone to rely on.",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.2748275399208069
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's great. I'm glad you have a sister-in-law.",
+                "Empathy": 2,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.10751815140247345
+            }
+        }
+    },
+    {
+        "id": 2316,
+        "context": [
+            "My dad was cleaning out his attic when he found a box of my old stuff from childhood ",
+            "Oh, that's cool. Did you find any good memories in there?",
+            "I did! He found my favorite childhood book of mine and I just sat there thinking about all the memories "
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Nice! It sounds like a really good bonding experience.",
+                "Empathy": 1,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.09845089912414551
+            },
+            "GPT3": {
+                "output": "That's so nice. What kind of book was it?",
+                "Empathy": 4,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.0507836639881134
+            },
+            "BlenderBot": {
+                "output": "That's a great memory to have. I bet it brought back a lot of good memories.",
+                "Empathy": 2,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.05333830788731575
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That sounds like a really great experience. I'm sure you'll be able to use all of your old memories to make new ones.",
+                "Empathy": 5,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.018146663904190063
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's so cool. I'm sure you have a lot of good memories.",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.09793448448181152
+            }
+        }
+    },
+    {
+        "id": 141,
+        "context": [
+            "This mother's day was amazing! I got so much more than expected and it was all so heartfelt",
+            "That is great!!  Sometimes we mom's get a bit forgotten, so to have an entire day where we are just loved is such a great feeling.",
+            "Yes, definitely! I actually cried a few times because of how much thought went into each gift and what was written in the cards "
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Those words are the things we cherish more than any other thing, I love it when my girls do that!",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.4095018804073334
+            },
+            "GPT3": {
+                "output": "That is so beautiful! It's always nice to feel so appreciated and loved. It's moments like this that make motherhood so special.",
+                "Empathy": 5,
+                "Specificity": 4,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": 0.5556056499481201
+            },
+            "BlenderBot": {
+                "output": "That's so sweet.  I bet she was so happy to see you.  What did you get her?",
+                "Empathy": 0,
+                "Specificity": 0,
+                "diff_ER": 1,
+                "diff_EX": 4,
+                "diff_IP": 4,
+                "reward": 0.06929296255111694
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That's so sweet of you to say! It's always nice to see someone appreciate your hard work.",
+                "Empathy": 2,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": 0.497571736574173
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That is so sweet! It is so nice to be appreciated.",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": 0.4330199062824249
+            }
+        }
+    },
+    {
+        "id": 623,
+        "context": [
+            "I was bathing my dog in the backyard this weekend, and she got loose. She then went and rolled in the dirt getting extra filthy.",
+            "That must of been terrible.",
+            "It WAS. Since she was wet, the dirt got stuck inside her fur. She was even harder to clean the second time around."
+        ],
+        "models": {
+            "GOLD": {
+                "output": "Did anyone help you?",
+                "Empathy": 4,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.0069585442543029785
+            },
+            "GPT3": {
+                "output": "I'm sorry to hear that. Is there anything I can do to help?",
+                "Empathy": 1,
+                "Specificity": 0,
+                "diff_ER": 4,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.10655875504016876
+            },
+            "BlenderBot": {
+                "output": "Oh no, I'm sorry to hear that. Did you have to clean it up yourself?",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 4,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.09680552035570145
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "That sounds like a lot of work. Did you have any idea how to clean her up?",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.1945546269416809
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That must of been a pain in the ass.",
+                "Empathy": 4,
+                "Specificity": 2,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 0,
+                "reward": 0.132029727101326
+            }
+        }
+    },
+    {
+        "id": 1689,
+        "context": [
+            "I hate watching movies that are full of gore! I just saw one today and so gross!"
+        ],
+        "models": {
+            "GOLD": {
+                "output": "I don't like them either. It makes me sick.",
+                "Empathy": 3,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": -0.11959280073642731
+            },
+            "GPT3": {
+                "output": "That sounds really unpleasant. Is there something else you'd rather watch?",
+                "Empathy": 4,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 4,
+                "reward": 0.2400209903717041
+            },
+            "BlenderBot": {
+                "output": "I know what you mean.  I don't like gore either.  What movie did you see?",
+                "Empathy": 3,
+                "Specificity": 4,
+                "diff_ER": 0,
+                "diff_EX": 4,
+                "diff_IP": 4,
+                "reward": -0.08194413781166077
+            },
+            "GODEL_SODA_RLHF": {
+                "output": "Yeah, I know what you mean. I've seen a few horror movies and they're all pretty gross.",
+                "Empathy": 2,
+                "Specificity": 3,
+                "diff_ER": 0,
+                "diff_EX": 0,
+                "diff_IP": 0,
+                "reward": 0.24813157320022583
+            },
+            "GODEL_EMPDIAL_RLHF": {
+                "output": "That's a shame. I'm sure you'll find a way to enjoy it.",
+                "Empathy": 0,
+                "Specificity": 2,
+                "diff_ER": 1,
+                "diff_EX": 0,
+                "diff_IP": 4,
+                "reward": -0.05601711943745613
+            }
+        }
+    }
+]

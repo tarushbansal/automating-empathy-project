@@ -4,6 +4,8 @@
 import os
 import json
 import argparse
+import numpy as np
+import pandas as pd
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -15,7 +17,7 @@ def update_rating(rating, actual_score, expected_score, K):
 
 if __name__ == "__main__":    
     parser = argparse.ArgumentParser()
-    parser.add_argument("-K", "--learning_rate", type=float, default=1.0)
+    parser.add_argument("-K", "--learning_rate", type=float, default=0.1)
     cli_args = parser.parse_args()
 
     working_dir = os.path.dirname(os.path.abspath(__file__))
@@ -43,6 +45,7 @@ if __name__ == "__main__":
     response_ratings = {}
 
     # Run ELO rating algorithm on all rated samples
+    samples = [[], [], []]
     for item in results:
         id = item["sample"]["id"]
         if id not in response_ratings:
@@ -57,6 +60,7 @@ if __name__ == "__main__":
         response_ratings[id]["ratings"].append(pairwise_rating)
 
         for i in range(3):
+            samples[i].append(item["ratings"][i])
             # Rate models
             modelA_rating = model_ratings[item["modelA"]][i]
             modelB_rating = model_ratings[item["modelB"]][i]
@@ -77,9 +81,19 @@ if __name__ == "__main__":
                 K=cli_args.learning_rate
             )
     
+    criteria = ["Empathy", "Relevance", "Fluency"]
+    df = pd.DataFrame(
+        np.array(samples).T, 
+        columns=criteria
+    )
+    corr_matrix = df.corr()
+    corr_matrix.to_csv(f"{working_dir}/results/correlation_matrix.csv")
+    print("\nPearson's Correlation Matrix:\n")
+    print(corr_matrix)
+    
     print(f"\n----------------------Model ELO Ratings----------------------------\n")
-    for i, dim in enumerate(["Empathy", "Relevance", "Fluency"]):
-        print(f"-----------{dim}------------")
+    for i, crit in enumerate(criteria):
+        print(f"-----------{crit}------------")
         ratings = []
         for model_table in model_tables:
             id, name, version = (

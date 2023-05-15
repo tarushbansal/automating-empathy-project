@@ -7,6 +7,8 @@ import random
 import argparse
 import numpy as np
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 from typing import List, Dict, Union
 
 # ------------------------- IMPLEMENTATION -----------------------------------
@@ -191,8 +193,35 @@ def main() -> None:
         np.array([diff_ER, diff_EX, diff_IP, reward, empathy, specificity]).T, 
         columns=["diff_ER", "diff_EX", "diff_IP", "reward", "empathy", "specificity"]
     )
-    corr_matrix = df.corr(numeric_only=False)
-    corr_matrix.to_csv(f"{output_dir}/correlation_matrix.csv")
+    corr = df.corr(numeric_only=False)
+    
+    # Generate a mask for the upper triangle; True = do NOT show
+    mask = np.zeros_like(corr, dtype=bool)
+    mask[np.triu_indices_from(mask)] = True
+
+    # Set up the matplotlib figure
+    f, _ = plt.subplots(figsize=(11, 9))
+
+    # Generate a custom diverging colormap
+    cmap = sns.diverging_palette(220, 10, as_cmap=True)
+
+    # Draw the heatmap with the mask and correct aspect ratio
+    # More details at https://seaborn.pydata.org/generated/seaborn.heatmap.html
+    sns.heatmap(
+        corr,          # The data to plot
+        mask=mask,     # Mask some cells
+        cmap=cmap,     # What colors to plot the heatmap as
+        annot=True,    # Should the values be plotted in the cells?
+        vmax=1,       # The maximum value of the legend. All higher vals will be same color
+        vmin=-1,      # The minimum value of the legend. All lower vals will be same color
+        center=0,      # The center value of the legend. With divergent cmap, where white is
+        square=True,   # Force cells to be square
+        linewidths=.5, # Width of lines that divide cells
+        cbar_kws={"shrink": .5}  # Extra kwargs for the legend; in this case, shrink by 50%
+    )
+
+    # You can save this as a png with
+    f.savefig(f"{output_dir}/heatmap_colored_correlation_matrix.png")
 
     print(f"All human evaluation results saved at directory '{output_dir}'\n")
 
@@ -208,7 +237,7 @@ def main() -> None:
         print("")
     
     print("Pearson's Correlation Matrix:\n")
-    print(corr_matrix)
+    print(corr)
 
 
 if __name__ == "__main__":

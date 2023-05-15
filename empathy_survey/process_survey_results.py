@@ -6,8 +6,8 @@ import json
 import argparse
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 import seaborn as sns
+import matplotlib.pyplot as plt
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -89,13 +89,15 @@ if __name__ == "__main__":
         columns=criteria
     )
     corr = df.corr()
+    print("Pearson's Correlation Matrix:\n")
+    print(corr)
 
     # Generate a mask for the upper triangle; True = do NOT show
     mask = np.zeros_like(corr, dtype=bool)
     mask[np.triu_indices_from(mask)] = True
 
     # Set up the matplotlib figure
-    f, ax = plt.subplots(figsize=(11, 9))
+    f, _ = plt.subplots(figsize=(11, 9))
 
     # Generate a custom diverging colormap
     cmap = sns.diverging_palette(220, 10, as_cmap=True)

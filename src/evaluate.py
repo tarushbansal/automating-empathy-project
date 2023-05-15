@@ -200,6 +200,7 @@ def main() -> None:
     mask[np.triu_indices_from(mask)] = True
 
     # Set up the matplotlib figure
+    plt.rcParams.update({'font.size': 15})
     f, _ = plt.subplots(figsize=(11, 9))
 
     # Generate a custom diverging colormap

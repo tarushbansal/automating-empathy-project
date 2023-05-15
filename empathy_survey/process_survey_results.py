@@ -97,6 +97,7 @@ if __name__ == "__main__":
     mask[np.triu_indices_from(mask)] = True
 
     # Set up the matplotlib figure
+    plt.rcParams.update({'font.size': 20})
     f, _ = plt.subplots(figsize=(11, 9))
 
     # Generate a custom diverging colormap
@@ -117,7 +118,7 @@ if __name__ == "__main__":
         cbar_kws={"shrink": .5}  # Extra kwargs for the legend; in this case, shrink by 50%
     )
 
-    # You can save this as a png with
+    # Saving plot as png
     f.savefig(f"{working_dir}/results/heatmap_colored_correlation_matrix.png")
     
     print(f"\n----------------------Model ELO Ratings----------------------------\n")

@@ -58,6 +58,7 @@ class GODELTokenizer(HuggingFaceTokenizerBase):
             f"microsoft/GODEL-v1_1-{version}-seq2seq"
         ))
         self.tokenizer.truncation_side = "left"
+        self.default_instruction = "Given only the information from the dialogue context, you need to respond empathetically."
         self.query_concept_net = query_concept_net
         if self.query_concept_net:
             self.concept_net = QueryConceptNet(
@@ -75,7 +76,9 @@ class GODELTokenizer(HuggingFaceTokenizerBase):
 
         external_knowledge = None
         if type(text) == list:
-            instruction = f"Instruction: {instruction}" if instruction is not None else ""
+            if instruction is None:
+                instruction = self.default_instruction
+            instruction = f"Instruction: {instruction}"
             knowledge = f"[KNOWLEDGE] {knowledge}" if knowledge is not None else ""
             dialogue = f' EOS '.join(text)
             token_ids = self.tokenizer(
@@ -90,10 +93,10 @@ class GODELTokenizer(HuggingFaceTokenizerBase):
                         max_length=self.tokenizer.model_max_length - len(token_ids)
                     )["input_ids"]
                 )
-            if self.query_concept_net:
-                tokens = [token[1:] if token[0] == "▁" else token 
-                          for token in self.tokenizer.convert_ids_to_tokens(token_ids)]
-                external_knowledge = self.concept_net.query(tokens)
+            # if self.query_concept_net:
+            #     tokens = [token[1:] if token[0] == "▁" else token 
+            #               for token in self.tokenizer.convert_ids_to_tokens(token_ids)]
+            #     external_knowledge = self.concept_net.query(tokens)
 
         else:
             token_ids = self.tokenizer(

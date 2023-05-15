@@ -6,6 +6,8 @@ import json
 import argparse
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -17,7 +19,7 @@ def update_rating(rating, actual_score, expected_score, K):
 
 if __name__ == "__main__":    
     parser = argparse.ArgumentParser()
-    parser.add_argument("-K", "--learning_rate", type=float, default=0.1)
+    parser.add_argument("-K", "--learning_rate", type=float, default=32)
     cli_args = parser.parse_args()
 
     working_dir = os.path.dirname(os.path.abspath(__file__))
@@ -41,7 +43,7 @@ if __name__ == "__main__":
                 model_id = model_table["model_id"]
     
     # Assign default ratings to all models
-    model_ratings = {model_table["model_id"]: [0] * 3 for model_table in model_tables}
+    model_ratings = {model_table["model_id"]: [1000] * 3 for model_table in model_tables}
     response_ratings = {}
 
     # Run ELO rating algorithm on all rated samples
@@ -86,10 +88,35 @@ if __name__ == "__main__":
         np.array(samples).T, 
         columns=criteria
     )
-    corr_matrix = df.corr()
-    corr_matrix.to_csv(f"{working_dir}/results/correlation_matrix.csv")
-    print("\nPearson's Correlation Matrix:\n")
-    print(corr_matrix)
+    corr = df.corr()
+
+    # Generate a mask for the upper triangle; True = do NOT show
+    mask = np.zeros_like(corr, dtype=bool)
+    mask[np.triu_indices_from(mask)] = True
+
+    # Set up the matplotlib figure
+    f, ax = plt.subplots(figsize=(11, 9))
+
+    # Generate a custom diverging colormap
+    cmap = sns.diverging_palette(220, 10, as_cmap=True)
+
+    # Draw the heatmap with the mask and correct aspect ratio
+    # More details at https://seaborn.pydata.org/generated/seaborn.heatmap.html
+    sns.heatmap(
+        corr,          # The data to plot
+        mask=mask,     # Mask some cells
+        cmap=cmap,     # What colors to plot the heatmap as
+        annot=True,    # Should the values be plotted in the cells?
+        vmax=1,       # The maximum value of the legend. All higher vals will be same color
+        vmin=-1,      # The minimum value of the legend. All lower vals will be same color
+        center=0,      # The center value of the legend. With divergent cmap, where white is
+        square=True,   # Force cells to be square
+        linewidths=.5, # Width of lines that divide cells
+        cbar_kws={"shrink": .5}  # Extra kwargs for the legend; in this case, shrink by 50%
+    )
+
+    # You can save this as a png with
+    f.savefig(f"{working_dir}/results/heatmap_colored_correlation_matrix.png")
     
     print(f"\n----------------------Model ELO Ratings----------------------------\n")
     for i, crit in enumerate(criteria):

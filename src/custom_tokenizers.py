@@ -58,7 +58,7 @@ class GODELTokenizer(HuggingFaceTokenizerBase):
             f"microsoft/GODEL-v1_1-{version}-seq2seq"
         ))
         self.tokenizer.truncation_side = "left"
-        self.default_instruction = "Given only the information from the dialogue context, you need to respond empathetically."
+        self.default_instruction = "Given the dialog context, you need to respond to respond empathetically."
         self.query_concept_net = query_concept_net
         if self.query_concept_net:
             self.concept_net = QueryConceptNet(

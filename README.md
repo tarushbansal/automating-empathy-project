@@ -10,7 +10,7 @@ To setup the EPITOME, EMO-ACC, and INTENT-ACC models, use the following steps:
 4. Create a sub-directory in ```empathy_metric_models``` called ```emo_classifier```. Unpack ```emotion.tar.gz``` and place all its contents in this sub-directory.
 5. Create a sub-directory in ```empathy_metric_models``` called ```intent_classifier```. Unpack ```empintent.tar.gz``` and place all its contents in this sub-directory.
 
-We provide some example commands for the training and testing framework below. Additional command line arguments can also be included. Simply refer to the available list of arguments in the ```parse_args``` function of the corresponding python script.
+We provide some example commands for the training and testing framework below. Additional command line arguments can also be included. Simply refer to the available list of arguments in the ```parse_args``` function of the corresponding python script. We also have additional scripts such as ```test_gpt3.py```, ```interact.py```, ```evaluate.py```, ```compare.py```, and ```multi-turn.py``` to aide with testing and evaluation as well as interact with models. Please refer to these scripts to learn how to use them.
 
 # Fine-tuning a dialogue model
 Following is an example command:

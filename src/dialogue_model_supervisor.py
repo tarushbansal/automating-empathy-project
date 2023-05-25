@@ -77,8 +77,6 @@ class DialogueModelSupervisor(pl.LightningModule):
         batch: ModelBatch,
     ) -> Tuple[Union[Seq2SeqLMOutput, CausalLMOutput, torch.Tensor]]:
         input_kwargs = {}
-        if self.model.requires_concept_net_data:
-            input_kwargs["concept_net_data"] = batch.concept_net_data
         if self.model.has_encoder:
             input_kwargs["contexts"] = batch.contexts
             input_kwargs["context_mask"] = batch.context_mask
@@ -141,7 +139,7 @@ class DialogueModelSupervisor(pl.LightningModule):
     def on_test_start(self) -> None:
         (self.inputs, self.raw_contexts, self.targets,
          self.outputs, self.enc_targets, self.enc_outputs, 
-         self.concepts, self.lm_loss) = ([] for _ in range(8))
+         self.lm_loss) = ([] for _ in range(7))
 
     def test_step(
         self, 
@@ -165,10 +163,6 @@ class DialogueModelSupervisor(pl.LightningModule):
                                   if token != self.tokenizer.PAD_IDX] 
                                   for output in enc_outputs.tolist()])
         self.outputs.extend(self.tokenizer.decode(enc_outputs))
-    
-        if batch.concept_net_data is not None:
-            self.concepts.extend([self.tokenizer.decode(concepts)
-                                  for concepts in batch.concept_net_data.tolist()])
         
         _, lm_loss = self.forward(batch)
         self.lm_loss.append(lm_loss)
@@ -184,8 +178,6 @@ class DialogueModelSupervisor(pl.LightningModule):
                 "target": self.targets[i].strip(),
                 "output": self.outputs[i].strip()
             }
-            if len(self.concepts) != 0:
-                entry["concepts"] = self.concepts[i]
             test_data.append(entry)
 
         main_metrics, classwise_metrics = compute_test_metrics(

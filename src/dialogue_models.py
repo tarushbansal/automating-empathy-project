@@ -1,7 +1,6 @@
 # ------------------------- IMPORT MODULES -----------------------------------
 
 # System Modules
-from typing import Tuple
 
 import torch
 import torch.nn as nn
@@ -13,8 +12,7 @@ from transformers import (
 from transformers.modeling_outputs import Seq2SeqLMOutput, CausalLMOutput
 
 # User-Defined Modules
-from base_classes import EncoderDecoderModel, DecoderModel, TokenizerBase
-from data_classes import ConceptNetBatchData
+from base_classes import EncoderDecoderModel, DecoderModel
 
 # ------------------------- IMPLEMENTATION ------------------------------------
 
@@ -90,79 +88,6 @@ class GODEL(EncoderDecoderModel):
             decoder_attention_mask=target_mask,
             output_hidden_states=True
         )
-        return out
-
-    def generate(
-            self, 
-            contexts: torch.LongTensor, 
-            context_mask: torch.BoolTensor, 
-            **kwargs
-        ) -> torch.LongTensor:
-        return self.model.generate(
-            input_ids=contexts,
-            attention_mask=context_mask,
-            **kwargs
-        )
-
-
-class KnowledgeBridgedGODEL(EncoderDecoderModel):
-    def __init__(self, vocab_size: int, version: str) -> None:
-        super().__init__(vocab_size)
-        if version not in ["base", "large"]:
-            raise ValueError("Model version must be either 'base' or 'large'!")
-        self.model = AutoModelForSeq2SeqLM.from_pretrained(f"microsoft/GODEL-v1_1-{version}-seq2seq")
-        self.model.resize_token_embeddings(vocab_size)
-        self.model.config.dropout_rate = 0.8
-        self.graph_embeddings = nn.Embedding(2, self.hidden_size)
-        self.attn_loss = nn.MSELoss()
-        self.hidden_size = self.model.config.hidden_size
-        self.requires_concept_net_data = True
-
-    def word_embeddings(self) -> nn.Embedding:
-        return self.model.get_input_embeddings()
-
-    def knowledge_enriched_context(
-        self,
-        context: torch.LongTensor,
-        context_mask: torch.BoolTensor,
-        concepts: torch.LongTensor,
-        concept_mask: torch.BoolTensor
-    ) -> Tuple[torch.Tensor]:
-
-        pad_mask = torch.cat((context_mask, concept_mask), dim=1)
-
-        context_graph_embeds = self.graph_embeddings(
-            torch.zeros(context.size(), dtype=torch.long, device=context.device))
-        context_embeds = self.word_embeddings()(context) + context_graph_embeds
-        concept_graph_embeds = self.graph_embeddings(
-            torch.ones(concepts.size(), dtype=torch.long, device=concepts.device))
-        concept_embeds = self.word_embeddings()(concepts) + concept_graph_embeds
-        embeddings = torch.cat((context_embeds, concept_embeds), dim=1)
-
-        return embeddings, pad_mask
-
-    def forward(
-        self,
-        contexts: torch.LongTensor,
-        context_mask: torch.BoolTensor,
-        targets: torch.LongTensor,
-        target_mask: torch.BoolTensor,
-        concept_net_data: ConceptNetBatchData
-    ) -> Seq2SeqLMOutput:
-
-        context_embeds, pad_mask = self.knowledge_enriched_context(
-            contexts, context_mask, concept_net_data.concepts, concept_net_data.concept_mask)
-        # attention_mask = torch.minimum(pad_mask.unsqueeze(1), concept_net_data.adjacency_mask)
-
-        out = self.model(
-            inputs_embeds=context_embeds,
-            attention_mask=pad_mask,
-            decoder_input_ids=targets,
-            decoder_attention_mask=target_mask,
-            output_attentions=True,
-            output_hidden_states=True
-        )
-
         return out
 
     def generate(

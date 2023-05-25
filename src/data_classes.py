@@ -2,7 +2,7 @@
 
 # System Modules
 import torch
-from typing import List, Optional, Tuple, Dict
+from typing import List, Tuple, Dict
 
 # ------------------------- IMPLEMENTATION ----------------------------------------
 
@@ -21,46 +21,16 @@ class ModelConfig:
         self.tokenizer_kwargs = tokenizer_kwargs
 
 
-class ConceptNetRawData:
-    def __init__(
-        self,
-        concepts: List[int],
-        concept_mask: List[List[bool]],
-        context_emo_intensity: List[float],
-        concept_emo_intensity: List[float]
-    ) -> None:
-        self.concepts = concepts
-        self.concept_mask = concept_mask
-        self.context_emo_intensity = context_emo_intensity
-        self.concept_emo_intensity = concept_emo_intensity
-
-
-class ConceptNetBatchData:
-    def __init__(
-        self,
-        concepts: torch.LongTensor,
-        adjacency_mask: torch.BoolTensor,
-        context_emo_intensity: torch.FloatTensor,
-        concept_emo_intensity: torch.FloatTensor
-    ) -> None:
-        self.concepts = concepts
-        self.adjacency_mask = adjacency_mask
-        self.context_emo_intensity = context_emo_intensity
-        self.concept_emo_intensity = concept_emo_intensity
-
-
 class ModelRawData:
     def __init__(
         self,
         context: List[int],
         target: List[int],
-        raw_context: List[List[str]],
-        concept_net_data: Optional[ConceptNetRawData]
+        raw_context: List[List[str]]
     ) -> None:
         self.context = context
         self.target = target
         self.raw_context = raw_context
-        self.concept_net_data = concept_net_data
 
 
 class RewardModelRawData:
@@ -83,8 +53,7 @@ class ModelBatch:
         context_mask: torch.BoolTensor,
         targets: torch.LongTensor,
         target_mask: torch.BoolTensor,
-        raw_contexts: List[List[str]],
-        concept_net_data: Optional[ConceptNetBatchData]
+        raw_contexts: List[List[str]]
     ) -> None:
 
         self.contexts = contexts
@@ -92,7 +61,6 @@ class ModelBatch:
         self.targets = targets
         self.target_mask = target_mask
         self.raw_contexts = raw_contexts
-        self.concept_net_data = concept_net_data
 
 
 class RewardModelBatch:

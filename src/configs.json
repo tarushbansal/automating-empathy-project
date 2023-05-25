@@ -78,39 +78,5 @@
         "version": "large"
       }
     }
-  },
-  "KnowledgeBridgedGODEL_SMALL": {
-    "model": {
-      "cls": "KnowledgeBridgedGODEL",
-      "kwargs": {
-        "version": "base"
-      }
-    },
-    "tokenizer": {
-      "cls": "GODELTokenizer",
-      "kwargs": {
-        "version": "base",
-        "query_concept_net": true,
-        "num_top_concepts": 5,
-        "max_num_concepts": 10
-      }
-    }
-  },
-  "KnowledgeBridgedGODEL_LARGE": {
-    "model": {
-      "cls": "KnowledgeBridgedGODEL",
-      "kwargs": {
-        "version": "large"
-      }
-    },
-    "tokenizer": {
-      "cls": "GODELTokenizer",
-      "kwargs": {
-        "version": "large",
-        "query_concept_net": true,
-        "num_top_concepts": 5,
-        "max_num_concepts": 10
-      }
-    }
   }
 }

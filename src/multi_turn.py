@@ -120,7 +120,7 @@ def main():
         
         speaker_utterance = input(f"Speaker: ").strip()
         context.append(speaker_utterance)
-        enc_context, concept_net_data = dialogue_model.tokenizer.encode_text(
+        enc_context = dialogue_model.tokenizer.encode_text(
             context,
             instruction
         )
@@ -130,8 +130,7 @@ def main():
                 context=enc_context,
                 raw_context=context,
                 target=[],
-                emotion=None,
-                concept_net_data=concept_net_data
+                emotion=None
             )], 
             dialogue_model.tokenizer, 
             dialogue_model.model.has_encoder

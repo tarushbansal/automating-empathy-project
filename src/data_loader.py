@@ -45,20 +45,19 @@ class Dataset(data.Dataset):
     ) -> ModelRawData:
 
         # Tokenize dialogue context
-        context, concept_net_data = self.tokenizer.encode_text(
+        context = self.tokenizer.encode_text(
             self.contexts[idx], 
             None if self.instructions is None else self.instructions[idx],
             None if self.knowledge is None else self.knowledge[idx]
         )
 
         # Tokenize response utterance
-        target, _ = self.tokenizer.encode_text(self.targets[idx])
+        target = self.tokenizer.encode_text(self.targets[idx])
 
         return ModelRawData(
             context=context,
             target=target,
-            raw_context=self.contexts[idx],
-            concept_net_data=concept_net_data
+            raw_context=self.contexts[idx]
         )
 
 
@@ -148,12 +147,6 @@ class DataModule(pl.LightningDataModule):
             batch.context_mask = batch.context_mask.to(device)
             batch.targets = batch.targets.to(device)
             batch.target_mask = batch.target_mask.to(device)
-            data = batch.concept_net_data
-            if data is not None:
-                data.concepts = data.concepts.to(device)
-                data.adjacency_mask = data.adjacency_mask.to(device)
-                data.context_emo_intensity = data.context_emo_intensity.to(device)
-                data.concept_emo_intensity = data.concept_emo_intensity.to(device)
         else:
             batch = super().transfer_batch_to_device(data, device, dataloader_idx)
         return batch
@@ -201,22 +194,12 @@ def collate_batch(
         pad_token=tokenizer.PAD_IDX
     )
 
-    concept_net_data = None
-    # if batch[0].concept_net_data is not None:
-    #     concept_net_data = process_concept_net_data(
-    #         [item.concept_net_data for item in batch],
-    #         max_len_context_seq,
-    #         tokenizer.PAD_IDX,
-    #         len(getattr(tokenizer, "prefix", []))
-    #     )
-
     return ModelBatch(
         contexts=contexts,
         context_mask=context_mask,
         targets=targets,
         target_mask=target_mask,
-        raw_contexts=raw_contexts,
-        concept_net_data=concept_net_data
+        raw_contexts=raw_contexts
     )
 
 
@@ -237,66 +220,5 @@ def pad_to_tensor(
     mask = (tensor != pad_token)
 
     return tensor, mask
-
-
-# def process_concept_net_data(
-#     data: List[ConceptNetRawData],
-#     max_len_context_seq: int,
-#     pad_token: int,
-#     prefix_len: int = 0
-# ) -> None:
-
-#     concepts = [item.concepts for item in data]
-#     context_emo_intensity = [item.context_emo_intensity for item in data]
-#     concept_emo_intensity = [item.concept_emo_intensity for item in data]
-#     concept_mask = [item.concept_mask for item in data]
-#     max_len_concept_seq = max([len(seq) for seq in concepts])
-
-#     concepts = pad_to_tensor(
-#         concepts, max_len_concept_seq, pad_token=pad_token)
-#     context_emo_intensity = pad_to_tensor(
-#         context_emo_intensity, max_len_context_seq, pad_token=0, dtype=torch.float32)
-#     concept_emo_intensity = pad_to_tensor(
-#         concept_emo_intensity, max_len_concept_seq, pad_token=0, dtype=torch.float32)
-#     adjacency_mask = create_adjacency_mask(
-#         concept_mask, max_len_context_seq, max_len_concept_seq, prefix_len)
-
-#     return ConceptNetBatchData(
-#         concepts=concepts,
-#         adjacency_mask=adjacency_mask,
-#         context_emo_intensity=context_emo_intensity,
-#         concept_emo_intensity=concept_emo_intensity
-#     )
-
-
-# def create_adjacency_mask(
-#     concept_mask: List[List[List[int]]],
-#     max_context_len: int,
-#     max_concept_len: int,
-#     prefix_len: int
-# ) -> torch.BoolTensor:
-
-#     N = len(concept_mask)
-#     # Pad concept_mask
-#     for i in range(N):
-#         concept_mask[i] = [row + [0] * (max_concept_len - len(row))
-#                            for row in concept_mask[i]]
-#         for _ in range(max_context_len - len(concept_mask[i])):
-#             concept_mask[i].append([0] * max_concept_len)
-
-#     # Create adjacency mask A from submask C, identity matrix I and ones / zeros
-#     # A = [[1 C], [[0 1], I]]
-#     concept_mask = torch.BoolTensor(concept_mask)
-#     assert concept_mask.size() == (N, max_context_len, max_concept_len)
-#     upper = torch.cat((
-#         torch.ones(N, max_context_len, max_context_len),
-#         concept_mask), dim=-1)
-#     lower = torch.cat((
-#         torch.zeros(N, max_concept_len, prefix_len),
-#         torch.ones(N, max_concept_len, max_context_len + max_concept_len - prefix_len),
-#     ), dim=-1)
-#     adjacency_mask = torch.cat((upper, lower), dim=1)
-
-#     return adjacency_mask
 
 # -----------------------------------------------------------------------------

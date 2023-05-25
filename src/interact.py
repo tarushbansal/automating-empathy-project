@@ -89,7 +89,7 @@ def main():
             continue
 
         context.append(speaker_utterance)
-        enc_context, concept_net_data = tokenizer.encode_text(
+        enc_context = tokenizer.encode_text(
             context,
             instruction
         )
@@ -98,8 +98,7 @@ def main():
             ModelRawData(
                 context=enc_context,
                 raw_context=context,
-                target=[],
-                concept_net_data=concept_net_data
+                target=[]
             )], 
             tokenizer, 
             model_supervisor.model.has_encoder

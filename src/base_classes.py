@@ -7,13 +7,13 @@ import torch
 import torch.nn as nn
 from abc import ABC, abstractmethod
 
-from typing import Tuple, Optional, Union, List
+from typing import Optional, Union, List
 
 from transformers import AutoTokenizer
 from transformers.modeling_outputs import Seq2SeqLMOutput, CausalLMOutput
 
 # User-Defined Modules
-from data_classes import ConceptNetRawData, CustomSeq2SeqLMOutput, CustomCausalLMOutput
+from data_classes import CustomSeq2SeqLMOutput, CustomCausalLMOutput
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
@@ -91,7 +91,7 @@ class TokenizerBase(ABC):
         text: Union[str, List[str]],
         instruction: Optional[str] = None,
         knowledge: Optional[str] = None
-    ) -> Tuple[Union[List[int], Optional[ConceptNetRawData]]]:
+    ) -> List[int]:
         raise NotImplementedError
 
     @abstractmethod
@@ -131,7 +131,6 @@ class DialogueModelBase(ABC, nn.Module):
         self._has_encoder = None
         self._hidden_size = None
         self._requires_emotion_label = False
-        self._requires_concept_net_data = False
 
     @property
     def has_encoder(self) -> bool:
@@ -160,16 +159,6 @@ class DialogueModelBase(ABC, nn.Module):
     @abstractmethod
     def word_embeddings(self) -> nn.Embedding:
         raise NotImplementedError
-    
-    @property
-    def requires_concept_net_data(self) -> bool:
-        return self._requires_concept_net_data
-    
-    @requires_concept_net_data.setter
-    def requires_concept_net_data(self, value: bool) -> None:
-        if type(value) != bool:
-            raise TypeError("Property must be of type 'bool'!")
-        self._requires_concept_net_data = bool
 
     @abstractmethod
     def generate(

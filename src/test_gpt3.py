@@ -14,8 +14,8 @@ from utils.metrics.full_suite import compute_test_metrics
 
 # ------------------------- IMPLEMENTATION -----------------------------------
 
-openai.organization = "org-d2uKBRnpSfSqcHfeWCRLDIMR"
-openai.api_key = "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"
+openai.organization = ""
+openai.api_key = ""
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser()

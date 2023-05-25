@@ -1,9 +1,9 @@
 # Automating Empathy in Dialogue Systems
 This is the official respository for the *Automating Empathy in Dialogue Systems* project. A complete technical report is available [here](). All our model checkpoints can be found [here](https://drive.google.com/drive/folders/1RQAFP4HGK_JXgzJMtWjrQDbTW_CMkDrq?usp=share_link). In case of any queries, please contact tb662@cam.ac.uk.
 
-Please run ```pip install -r requirements.txt``` to install all libraries required by the framework.
+Please run ```pip install -r requirements.txt``` to install all third-party libraries required by the framework.
 
-To setup the EPITOME, DIFF-EPITOME, EMO-ACC, and INTENT-ACC models, use the following steps:
+To setup the EPITOME, EMO-ACC, and INTENT-ACC models, use the following steps:
 1. Download all files from the [Google Drive](https://drive.google.com/drive/folders/1PXqmv-MZ1uphHvV81htuAhid2uKGGeGd) hosted by Lee et al., 2022. 
 2. Create a directory called ```empathy_metric_models``` in your root folder. 
 3. Create a sub-directory in ```empathy_metric_models``` called ```epitome_models``` and place the ```fine_tuned_ER.pth```, ```fine_tuned_EX.pth```, and ```fine_tuned_IP.pth``` files in this sub-directory.

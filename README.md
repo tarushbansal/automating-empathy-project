@@ -1,5 +1,5 @@
 # Automating Empathy in Dialogue Systems
-This is the official respository for the *Automating Empathy in Dialogue Systems* project. A complete technical report is available [here](). All our model checkpoints can be found [here](https://drive.google.com/drive/folders/1RQAFP4HGK_JXgzJMtWjrQDbTW_CMkDrq?usp=share_link). In case of any queries, please contact tb662@cam.ac.uk.
+This is the official respository for the *Automating Empathy in Dialogue Systems* project. A complete technical report is available [here](https://drive.google.com/file/d/1E0sJukF7hk1dREcViZewqAFSLX3010IS/view?usp=sharing). All our model checkpoints can be found [here](https://drive.google.com/drive/folders/1RQAFP4HGK_JXgzJMtWjrQDbTW_CMkDrq?usp=share_link). In case of any queries, please contact tb662@cam.ac.uk.
 
 Please run ```pip install -r requirements.txt``` to install all third-party libraries required by the framework.
 
